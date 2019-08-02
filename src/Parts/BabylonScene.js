@@ -28,14 +28,14 @@ export const BabylonScene = ({
   const canvasRef = useRef(null)
   useEffect(() => {
     if (canvasRef.current) {
+      const canvas = canvasRef.current
       const engine = new Engine(
-        canvasRef.current,
+        canvas,
         true,
         engineOptions,
         adaptToDeviceRatio
       )
       const scene = new Scene(engine)
-
       engine.runRenderLoop(() => {
         if (canvasRef.current) {
           const targetWidth = canvasRef.current.clientWidth * getDPR()
@@ -47,9 +47,8 @@ export const BabylonScene = ({
           }
         }
       })
-
       if (typeof onBoot === 'function') {
-        onBoot({ engine, scene, canvas: canvasRef.current })
+        onBoot({ engine, scene, canvas })
       }
     }
   }, [])

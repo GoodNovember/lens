@@ -1,10 +1,12 @@
 import React from 'react'
-import { RootLayout } from './Layouts/RootLayout.js'
+import { BabylonLayout } from './Layouts/BabylonLayout'
+import { RootLayout } from './Layouts/RootLayout'
+import { PixiLayout } from './Layouts/PixiLayout'
 
 export const AppRoot = () => {
   return (
     <div>
-      <RootLayout />
+      <PixiLayout />
     </div>
   )
 }

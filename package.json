@@ -15,6 +15,7 @@
     "babylonjs": "^4.0.3",
     "babylonjs-gui": "^4.0.3",
     "electron-is-dev": "^1.1.0",
+    "pixi.js": "^5.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "styled-components": "^4.3.2"

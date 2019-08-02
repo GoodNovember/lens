@@ -20,9 +20,12 @@ export const boot = ({ App, view }) => {
   })
   dragMoved.add({
     dragMoved (data) {
-      const { currentX, currentY } = data
-      regularSprite.x = currentX
-      regularSprite.y = currentY
+      const {
+        dragX,
+        dragY
+      } = data
+      regularSprite.x = dragX
+      regularSprite.y = dragY
     }
   })
   dragEnded.add({

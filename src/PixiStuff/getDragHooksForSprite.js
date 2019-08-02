@@ -1,21 +1,30 @@
 import { Runner } from 'pixi.js'
 export const getDragHooksForSprite = sprite => {
   let isDragging = false
+  let startClickPoint = null
+  let spriteStart = null
 
   const dragStarted = new Runner('dragStarted')
   const dragEnded = new Runner('dragEnded')
   const dragMoved = new Runner('dragMoved')
 
-  console.log(sprite)
+  const fullStop = () => {
+    isDragging = false
+    startClickPoint = null
+    spriteStart = null
+    dragEnded.emit()
+  }
+
   sprite.interactive = true
   sprite
     .on('pointerdown', event => {
       isDragging = true
+      startClickPoint = event.data.getLocalPosition(sprite.parent)
+      spriteStart = {
+        x: sprite.x,
+        y: sprite.y
+      }
       dragStarted.emit()
-    })
-    .on('pointerup', event => {
-      isDragging = false
-      dragEnded.emit()
     })
     .on('pointermove', event => {
       if (isDragging) {
@@ -23,16 +32,22 @@ export const getDragHooksForSprite = sprite => {
           x: currentX,
           y: currentY
         } = event.data.getLocalPosition(sprite.parent)
+        const dragX = currentX + (spriteStart.x - startClickPoint.x)
+        const dragY = currentY + (spriteStart.y - startClickPoint.y)
         dragMoved.emit({
           currentX,
-          currentY
+          currentY,
+          dragX,
+          dragY,
+          startClickX: startClickPoint.x,
+          startClickY: startClickPoint.y,
+          spriteStartX: spriteStart.x,
+          spriteStartY: spriteStart.y
         })
       }
     })
-    .on('pointerupoutside', event => {
-      isDragging = false
-      dragEnded.emit()
-    })
+    .on('pointerup', fullStop)
+    .on('pointerupoutside', fullStop)
 
   return {
     dragStarted,

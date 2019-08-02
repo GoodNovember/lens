@@ -7,8 +7,6 @@ import { ScrollContainer } from '../Parts/ScrollContainer'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 
-const getDPR = () => window.devicePixelRatio || 1.0
-
 const {
   UniversalCamera,
   Vector3,
@@ -35,11 +33,10 @@ export const RootLayout = ({ children, className }) => {
 
     const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI')
     const button = GUI.Button.CreateSimpleButton('but', 'Click Me')
-    button.width = '80px'
+    button.width = '100px'
     button.height = '40px'
     button.color = 'white'
     button.background = 'green'
-    button.y = 0.2
     button.onPointerDownObservable.add(() => {
       setButtonState('DOWN')
     })
@@ -48,18 +45,12 @@ export const RootLayout = ({ children, className }) => {
     })
     button.onPointerMoveObservable.add((coordinates) => {
       const relative = button.getLocalCoordinates(coordinates)
-      setButtonState(`${relative.x} ${relative.y}`)
+      setButtonState(`${relative.x} ${relative.y} \n${coordinates.x} ${coordinates.y}`)
     })
+
     advancedTexture.addControl(button)
 
     engine.runRenderLoop(() => {
-      const targetWidth = canvas.clientWidth * getDPR()
-      const targetHeight = canvas.clientHeight * getDPR()
-      if (
-        (canvas.width !== targetWidth) || (canvas.height !== targetHeight)
-      ) {
-        engine.setSize(targetWidth, targetHeight)
-      }
       if (scene) {
         scene.render()
       }
@@ -68,7 +59,9 @@ export const RootLayout = ({ children, className }) => {
   return (
     <FullContainer className='root-layout'>
       <ScrollContainer>
-        { buttonState }
+        <pre>
+          { buttonState }
+        </pre>
       </ScrollContainer>
       <Container>
         <BabylonScene onBoot={onBootHandler} />

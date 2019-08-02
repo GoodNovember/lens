@@ -6,6 +6,8 @@ import React, {
 import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 
+const getDPR = () => window.devicePixelRatio || 1.0
+
 const {
   Scene,
   Engine
@@ -33,6 +35,19 @@ export const BabylonScene = ({
         adaptToDeviceRatio
       )
       const scene = new Scene(engine)
+
+      engine.runRenderLoop(() => {
+        if (canvasRef.current) {
+          const targetWidth = canvasRef.current.clientWidth * getDPR()
+          const targetHeight = canvasRef.current.clientHeight * getDPR()
+          if (
+            (canvasRef.current.width !== targetWidth) || (canvasRef.current.height !== targetHeight)
+          ) {
+            engine.setSize(targetWidth, targetHeight)
+          }
+        }
+      })
+
       if (typeof onBoot === 'function') {
         onBoot({ engine, scene, canvas: canvasRef.current })
       }

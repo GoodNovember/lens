@@ -1,41 +1,17 @@
 // import * as PIXI from 'pixi.js'
-import { makeSimpleSprite } from './makeSimpleSprite'
-import { getDragHooksForSprite } from './getDragHooksForSprite'
+import { createSizer } from './createSizer.js'
+import { Container } from "pixi.js"
 
 export const boot = ({ App }) => {
-  const regularSprite = makeSimpleSprite()
+  const { stage } = App
 
-  regularSprite.width = 100
-  regularSprite.height = 100
+  const myFancyContainer = new Container()
 
-  App.stage.addChild(regularSprite)
-
-  const {
-    dragStarted,
-    dragEnded,
-    dragMoved
-  } = getDragHooksForSprite(regularSprite)
-
-  dragStarted.add({
-    dragStarted () {
-      regularSprite.alpha = 0.5
-    }
+  const sizer = createSizer({
+    width: 200,
+    height: 200,
+    innerContainer: myFancyContainer
   })
 
-  dragMoved.add({
-    dragMoved (data) {
-      const {
-        dragX,
-        dragY
-      } = data
-      regularSprite.x = dragX
-      regularSprite.y = dragY
-    }
-  })
-
-  dragEnded.add({
-    dragEnded () {
-      regularSprite.alpha = 1.0
-    }
-  })
+  stage.addChild(sizer.container)
 }

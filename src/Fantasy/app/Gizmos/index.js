@@ -1,4 +1,4 @@
-import { ButtonGizmo } from "./ButtonGizmo.js"
+import { ButtonGizmo } from './ButtonGizmo.js'
 export {
-	ButtonGizmo
+  ButtonGizmo
 }

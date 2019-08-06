@@ -1,7 +1,7 @@
-import { Toolbox } from "./Toolbox"
-import { Universe } from "./Universe"
+import { Toolbox } from './Toolbox'
+import { Universe } from './Universe'
 
 export {
-	Toolbox,
-	Universe
+  Toolbox,
+  Universe
 }

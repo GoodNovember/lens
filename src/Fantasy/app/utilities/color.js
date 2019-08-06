@@ -1,0 +1,1 @@
+const rgbColor = ({r,g,b}) => (parseInt(`${r}${g}${b}`).toString(16))

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import * as PIXI from 'pixi.js'
 import styled from 'styled-components'
+import "pixi-layers"
 
 const getDPR = () => window.devicePixelRatio || 1.0
 
@@ -16,7 +17,43 @@ const { Application } = PIXI
 export const PixiScene = ({ onBoot, appOptions }) => {
   const canvasRef = useRef(null)
 
+  const toggleFullscreen = () => {
+    if (canvasRef.current) {
+      if (!document.fullscreenElement) {
+        console.log('Entering Fullscreen')
+        canvasRef.current.requestFullscreen()
+      } else if (document.exitFullscreen) {
+        console.log('Exiting Fullscreen')
+        document.exitFullscreen()
+      }
+    }
+  }
+
   useEffect(() => {
+    document.addEventListener("keypress", function (e) {
+      const { charCode } = e
+      switch (charCode) {
+        case 13: {
+          toggleFullscreen()
+          break
+        }
+        case 0: {
+          toggleFullScreen()
+          break
+        }
+        case 32: {
+          console.log("Refresh")
+          location.reload()
+          break
+        }
+        default: {
+          console.log(`charCode:${charCode}`)
+          console.log(e)
+        }
+      }
+    
+    }, false)
+
     if (canvasRef.current) {
       const { current: view } = canvasRef
       const App = new Application({ view, ...appOptions })
@@ -33,6 +70,7 @@ export const PixiScene = ({ onBoot, appOptions }) => {
         onBoot({ App, view })
       }
     }
+
   }, [])
 
   return (

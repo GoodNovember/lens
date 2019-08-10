@@ -5078,6 +5078,11 @@ pinkie@^2.0.0:
   resolved "https://registry.yarnpkg.com/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
   integrity sha1-clVrgM+g1IqXToDnckjoDtT3+HA=
 
+pixi-layers@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/pixi-layers/-/pixi-layers-0.2.1.tgz#7a3f7cdc7707086980a49c004a6cb1646d1138a9"
+  integrity sha512-slDWDXv8gz2/0jK4kOllORHNU7IuWwRQOUok4CuJSlZTMRhAl45gwW6d0IE/V624IsPhT1UhrjQcxGvKHJ+W9Q==
+
 pixi.js@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-5.1.0.tgz#ab63fecca6c74d65d298945d305b9ea75085ea9e"

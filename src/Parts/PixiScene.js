@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react'
-import * as PIXI from 'pixi.js'
 import styled from 'styled-components'
-import "pixi-layers"
+
+import * as PIXI from 'pixi.js'
+global.PIXI = PIXI
+require('pixi-layers')
 
 const getDPR = () => window.devicePixelRatio || 1.0
 
@@ -57,6 +59,8 @@ export const PixiScene = ({ onBoot, appOptions }) => {
     if (canvasRef.current) {
       const { current: view } = canvasRef
       const App = new Application({ view, ...appOptions })
+      App.stage = new PIXI.display.Stage()
+      App.stage.sortableChildren = true
       App.ticker.add(() => {
         if (canvasRef.current) {
           const targetWidth = view.clientWidth * getDPR()

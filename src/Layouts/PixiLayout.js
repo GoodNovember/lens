@@ -2,6 +2,7 @@ import React from 'react'
 import { FullContainer } from '../Parts/FullContainer'
 import { PixiScene } from '../Parts/PixiScene'
 import { boot } from '../PixiStuff/boot'
+
 export const PixiLayout = () => {
   const options = {
     sharedTicker:true,

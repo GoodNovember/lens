@@ -1,16 +1,23 @@
-
 import { Sprite, Texture } from 'pixi.js'
 
 const { WHITE } = Texture
 
-export const makeRect = ({ x, y, w, h, tint, interactive, cursor }) => {
+export const makeRect = ({
+  x,
+  y,
+  tint,
+  width,
+  height,
+  cursor,
+  interactive
+}) => {
   const rect = new Sprite(WHITE)
-  rect.width = w
-  rect.height = h
   rect.x = x
   rect.y = y
   rect.tint = (tint) || (0xFFFFFF)
-  rect.interactive = !!(interactive)
+  rect.width = width
+  rect.height = height
   rect.cursor = (cursor) || (rect.cursor)
+  rect.interactive = !!(interactive)
   return rect
 }

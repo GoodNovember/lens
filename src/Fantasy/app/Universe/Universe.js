@@ -18,6 +18,7 @@ const {
   Graphics,
   TilingSprite
 } = PIXI
+
 const { Layer, Stage } = display
 
 const GRID_SIZE = 100
@@ -123,6 +124,7 @@ export class Universe {
     })
 
     self.container.on('layout', ({ parent, w, h }) => {
+      console.log('LAYOUT Changed!')
       gridTexture.width = w
       gridTexture.height = h
       gridTexture.x = w / 2
@@ -145,11 +147,13 @@ export class Universe {
     })
   }
   layout () {
+    console.log('Universe Layout!')
     const parent = this
     const w = this.container.width
     const h = this.container.height
 
     this.toolboxLayer.container.map((child) => {
+      console.log('ParentLayout!')
       child.emit('parent_layout', { w, h, parent })
     })
     this.redrawLayout(w, h)

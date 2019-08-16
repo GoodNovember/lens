@@ -5,8 +5,8 @@ import { boot } from '../PixiStuff/boot'
 
 export const PixiLayout = () => {
   const options = {
-    sharedTicker:true,
-    sharedLoader:true,
+    sharedTicker: true,
+    sharedLoader: true
   }
   return (
     <FullContainer className='pixi-layout'>

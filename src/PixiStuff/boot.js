@@ -1,30 +1,24 @@
-// import { createSizer } from './createSizer.js'
-// import * as PIXI from 'pixi.js'
-// import 'pixi-layers'
+import { makeRootUniverse } from '../Garden/makeRootUniverse.js'
+import { makeToolbox } from '../Garden/makeToolbox.js'
 
-import { Universe } from '../Fantasy/app'
-
-const U = new Universe({
-  children: [
-    {
-      kind: 'Toolbox',
-      x: 100,
-      y: 100,
-      w: 500,
-      h: 300,
-      children: [
-        {
-          kind: 'Universe',
-          x: 100,
-          y: 100
-        }
-      ]
-    }
-  ]
+const RootUniverse = makeRootUniverse({
+  color: 'white'
 })
 
-export const boot = ({ App }) => {
+const funnyToolbox = makeToolbox({
+  width: 300,
+  height: 200,
+  x: 25,
+  y: 30
+})
+
+export const boot = ({ App, subscribeToResize }) => {
   const { stage } = App
   stage.group.enableSort = true
-  stage.addChild(U.container)
+  stage.addChild(RootUniverse.container)
+  subscribeToResize(({ width, height }) => {
+    RootUniverse.setSize({ width, height })
+  })
+
+  RootUniverse.addChild(funnyToolbox.container)
 }

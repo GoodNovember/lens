@@ -1,7 +1,9 @@
+/* globals location */
 import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 import * as PIXI from 'pixi.js'
+// import { app } from 'electron'
 global.PIXI = PIXI
 require('pixi-layers')
 
@@ -16,8 +18,9 @@ const StylishCanvas = styled.canvas`
 
 const { Application } = PIXI
 
-export const PixiScene = ({ onBoot, appOptions }) => {
+export const PixiScene = ({ onBoot, appOptions, onResize }) => {
   const canvasRef = useRef(null)
+  const resizeListeners = new Set()
 
   const toggleFullscreen = () => {
     if (canvasRef.current) {
@@ -32,7 +35,7 @@ export const PixiScene = ({ onBoot, appOptions }) => {
   }
 
   useEffect(() => {
-    document.addEventListener("keypress", function (e) {
+    document.addEventListener('keypress', function (e) {
       const { charCode } = e
       switch (charCode) {
         case 13: {
@@ -40,11 +43,11 @@ export const PixiScene = ({ onBoot, appOptions }) => {
           break
         }
         case 0: {
-          toggleFullScreen()
+          toggleFullscreen()
           break
         }
         case 32: {
-          console.log("Refresh")
+          console.log('Refresh')
           location.reload()
           break
         }
@@ -53,8 +56,18 @@ export const PixiScene = ({ onBoot, appOptions }) => {
           console.log(e)
         }
       }
-    
     }, false)
+
+    const subscribeToResize = callback => {
+      if (resizeListeners.has(callback) === false) {
+        resizeListeners.add(callback)
+      }
+      return () => {
+        if (resizeListeners.has(callback)) {
+          resizeListeners.delete(callback)
+        }
+      }
+    }
 
     if (canvasRef.current) {
       const { current: view } = canvasRef
@@ -67,14 +80,14 @@ export const PixiScene = ({ onBoot, appOptions }) => {
           const targetHeight = view.clientHeight * getDPR()
           if ((view.width !== targetWidth) || (view.height !== targetHeight)) {
             App.renderer.resize(targetWidth, targetHeight)
+            resizeListeners.forEach(listener => listener({ width: targetWidth, height: targetHeight }))
           }
         }
       })
       if (typeof onBoot === 'function') {
-        onBoot({ App, view })
+        onBoot({ App, view, subscribeToResize })
       }
     }
-
   }, [])
 
   return (

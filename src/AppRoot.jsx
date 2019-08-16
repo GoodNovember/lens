@@ -6,8 +6,8 @@ import { ThreeLayout } from './Layouts/ThreeLayout'
 export const AppRoot = () => {
   return (
     <div>
-      {/* <PixiLayout /> */}
-      <ThreeLayout />
+      <PixiLayout />
+      {/* <ThreeLayout /> */}
     </div>
   )
 }

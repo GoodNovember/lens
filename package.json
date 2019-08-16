@@ -9,7 +9,8 @@
     "react-build": "parcel build index.html --out-dir build --public-url ./",
     "electron-build": "electron-builder -mwl",
     "clean-build": "rm -rf build/ .cache dist/",
-    "build": "yarn clean-build && yarn react-build && yarn electron-build"
+    "build": "yarn clean-build && yarn react-build && yarn electron-build",
+    "fairy": "parcel ./fairy/index.html --out-dir ./fairy/build"
   },
   "dependencies": {
     "babylonjs": "^4.0.3",

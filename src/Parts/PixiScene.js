@@ -18,9 +18,8 @@ const StylishCanvas = styled.canvas`
 
 const { Application } = PIXI
 
-export const PixiScene = ({ onBoot, appOptions, onResize }) => {
+export const PixiScene = ({ onBoot, appOptions }) => {
   const canvasRef = useRef(null)
-  const resizeListeners = new Set()
 
   const toggleFullscreen = () => {
     if (canvasRef.current) {
@@ -35,6 +34,7 @@ export const PixiScene = ({ onBoot, appOptions, onResize }) => {
   }
 
   useEffect(() => {
+    const resizeListeners = new Set()
     document.addEventListener('keypress', function (e) {
       const { charCode } = e
       switch (charCode) {
@@ -88,6 +88,11 @@ export const PixiScene = ({ onBoot, appOptions, onResize }) => {
         onBoot({ App, view, subscribeToResize })
       }
     }
+
+    return () => {
+      resizeListeners.clear()
+    }
+
   }, [])
 
   return (

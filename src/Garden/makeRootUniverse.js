@@ -1,5 +1,6 @@
 /* globals screen */
 import { enableDragEvents } from './enableDragEvents.js'
+import { makeEventForwarder } from './makeEventForwarder.js'
 import * as PIXI from 'pixi.js'
 global.PIXI = PIXI
 require('pixi-layers')
@@ -12,7 +13,7 @@ const {
 
 const { Layer, Stage } = display
 
-const GRID_SIZE = 200
+const GRID_SIZE = 50
 
 export const makeRootUniverse = ({ color = 'blue' }) => {
   const container = new Stage()
@@ -38,56 +39,73 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
   backgroundLayer.addChild(gridTexture)
   container.addChild(backgroundLayer)
 
-  const toolboxLayer = new Layer()
-  container.addChild(toolboxLayer)
+  const internalContainer = new Layer()
+  container.addChild(internalContainer)
+
+  const tellTheKids = makeEventForwarder(internalContainer)
 
   const setSize = ({ width, height }) => {
     gridTexture.width = width
     gridTexture.height = height
+    tellTheKids('parent resize')({width, height})
   }
 
   gridTexture.on('dragging', (dragEvent) => {
+    let changeOccured = false
     const { reference } = dragEvent
     const { x, y } = reference
     if (mode === 'BOTH') {
-      if (toolboxLayer.position.x !== x) {
-        toolboxLayer.position.x = x
+      if (internalContainer.position.x !== x) {
+        internalContainer.position.x = x
         gridTexture.tileTransform.position.x = x
+        changeOccured = true
       }
-      if (toolboxLayer.position.y !== y) {
-        toolboxLayer.position.y = y
+      if (internalContainer.position.y !== y) {
+        internalContainer.position.y = y
         gridTexture.tileTransform.position.y = y
+        changeOccured = true
       }
     } else if (mode === 'X-ONLY') {
-      if (toolboxLayer.position.x !== x) {
-        toolboxLayer.position.x = x
+      if (internalContainer.position.x !== x) {
+        internalContainer.position.x = x
         gridTexture.tileTransform.position.x = x
+        changeOccured = true
       }
     } else if (mode === 'Y-ONLY') {
-      if (toolboxLayer.position.y !== y) {
-        toolboxLayer.position.y = y
+      if (internalContainer.position.y !== y) {
+        internalContainer.position.y = y
         gridTexture.tileTransform.position.y = y
+        changeOccured = true
       }
+    }
+    if (changeOccured) {
+      tellTheKids('parent moved')({x, y})
     }
   })
 
-  const drawMask = ({ width, height, x, y }) => {
-    const mask = new Graphics()
-    mask.beginFill()
-    mask.drawRect(x, y, width, height)
-    mask.endFill()
-    container.mask = mask
+  const addChild = (...props) => {
+    internalContainer.addChild(...props)
+  }
+  
+  const removeChild = (...props) => {
+    internalContainer.removeChild(...props)
   }
 
-  const addChild = child => {
-    toolboxLayer.addChild(child)
+  const emit = (eventName, payload) => {
+    tellTheKids(eventName)(payload)
+  }
+
+  const on = (eventName, callback) => {
+    container.on(eventName, callback)
   }
 
   return {
-    toolboxLayer,
+    internalContainer,
     container,
     setSize,
-    drawMask,
-    addChild
+    addChild,
+    removeChild,
+    emit,
+    on,
   }
 }

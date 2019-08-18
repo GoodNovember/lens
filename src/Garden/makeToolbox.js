@@ -2,6 +2,7 @@ import { enableDragEvents } from './enableDragEvents.js'
 import { makeRect } from './makeRect'
 import * as cursors from './cursors.js'
 import * as PIXI from 'pixi.js'
+import {makeEventForwarder} from './makeEventForwarder.js'
 
 global.PIXI = PIXI
 require('pixi-layers')
@@ -38,11 +39,15 @@ const makeDragRect = makeRectOptions => enableDragEvents(makeRect(makeRectOption
 export const makeToolbox = ({ width, height }) => {
   const container = new Stage()
 
+  const resizeListeners = new Set()
+
   const chromeLayer = new Layer()
   container.addChild(chromeLayer)
 
   const internalPartsLayer = new Layer()
   container.addChild(internalPartsLayer)
+
+  const tellTheKids = makeEventForwarder(internalPartsLayer)
 
   internalPartsLayer.x = INNER_MARGIN + MARGIN_SIZE
   internalPartsLayer.y = INNER_MARGIN + MARGIN_SIZE
@@ -241,6 +246,8 @@ export const makeToolbox = ({ width, height }) => {
   }
 
   const bounds = {
+    get innerMargin (){ return INNER_MARGIN },
+    get marginSize (){ return MARGIN_SIZE },
     get globalTop () {
       return chromeTopSizer.getGlobalPosition().y + chromeTopSizer.height
     },
@@ -273,31 +280,14 @@ export const makeToolbox = ({ width, height }) => {
       const { right, left } = this
       return right - left
     },
-    get maskBounds () {
-      const { top, left, right, bottom } = this
-      const topLeftPoint = {
-        x: left,
-        y: top
-      }
-      const topRightPoint = {
-        x: right,
-        y: top
-      }
-      const bottomLeftPoint = {
-        x: left,
-        y: bottom
-      }
-      const bottomRightPoint = {
-        x: right,
-        y: bottom
-      }
-      return {
-        topLeftPoint,
-        topRightPoint,
-        bottomLeftPoint,
-        bottomRightPoint
-      }
-    }
+    get mask() {
+      const { globalTop, globalLeft, globalRight, globalBottom } = this
+      const x = globalLeft + INNER_MARGIN
+      const y = globalTop + INNER_MARGIN
+      const height = (globalBottom - globalTop) - (INNER_MARGIN * 2)
+      const width = (globalRight - globalLeft) - (INNER_MARGIN * 2)
+      return { height, width, x, y }
+    },
   }
 
   const chromePartsArray = [
@@ -416,26 +406,46 @@ export const makeToolbox = ({ width, height }) => {
     chromeRightSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
   }
 
+  const drawMask = () => {
+    const { x, y, width, height } = bounds.mask
+    const mask = new Graphics()
+    mask.beginFill()
+    mask.drawRect(x, y, width, height)
+    mask.endFill()
+    internalPartsLayer.mask = mask
+  }
+
+  const notifyResizeListeners = () => {
+    const { width, height } = bounds
+    resizeListeners.forEach(listener => listener({width, height, ...bounds}))
+    drawMask()
+  }
+
   makeBatchEventHandler('dragging')
     (({ pointerState: { current: { y } } }) => {
       moveTopEdgeTo(y)
+      notifyResizeListeners()
     })([chromeTopSizer])
   makeBatchEventHandler('dragging')
     (({ pointerState: { current: { x } } }) => {
       moveLeftEdgeTo(x)
+      notifyResizeListeners()
     })([chromeLeftSizer])
   makeBatchEventHandler('dragging')
     (({ pointerState: { current: { x } } }) => {
       moveRightEdgeTo(x)
+      notifyResizeListeners()
     })([chromeRightSizer])
   makeBatchEventHandler('dragging')
     (({ pointerState: { current: { y } } }) => {
       moveBottomEdgeTo(y)
+      notifyResizeListeners()
     })([chromeBottomSizer])
   makeBatchEventHandler('dragging')
     (({ pointerState: { current: { x, y } } }) => {
       moveTopEdgeTo(y)
       moveLeftEdgeTo(x)
+      notifyResizeListeners()
     })([
       chromeTopLeftCornerTop,
       chromeTopLeftCornerLeft,
@@ -445,6 +455,7 @@ export const makeToolbox = ({ width, height }) => {
     (({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveTopEdgeTo(y)
+      notifyResizeListeners()
     })([
       chromeTopRightCornerTop,
       chromeTopRightCornerRight,
@@ -454,6 +465,7 @@ export const makeToolbox = ({ width, height }) => {
     (({ pointerState: { current: { x, y } } }) => {
       moveLeftEdgeTo(x)
       moveBottomEdgeTo(y)
+      notifyResizeListeners()
     }) ([
       chromeBottomLeftCornerLeft,
       chromeBottomLeftCornerBottom,
@@ -463,6 +475,7 @@ export const makeToolbox = ({ width, height }) => {
     (({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveBottomEdgeTo(y)
+      notifyResizeListeners()
     }) ([
       chromeBottomRightCornerRight,
       chromeBottomRightCornerBottom,
@@ -470,7 +483,8 @@ export const makeToolbox = ({ width, height }) => {
     ])
   makeBatchEventHandler('dragging')
     (({ pointerState: { startDelta: { x, y } } }) => {
-      moveBy(x,y)
+      moveBy(x, y)
+      notifyResizeListeners()
     })([chromeMover])
   
   chromeMover
@@ -480,6 +494,15 @@ export const makeToolbox = ({ width, height }) => {
     .on('dragend', () => {
       container.alpha = 1
     })
+
+  container.on('parent moved', (payload) => {
+    tellTheKids('parent moved', payload)
+    drawMask()
+  })
+  container.on('parent resized', (payload) => {
+    tellTheKids('parent resized')(payload)
+    drawMask()
+  })
 
   const reorderZIndexes = () => {
     if (container.parent) {
@@ -503,12 +526,46 @@ export const makeToolbox = ({ width, height }) => {
     reorderZIndexes()
   }
 
+  const addChild = (...args) => {
+    internalPartsLayer.addChild(...args)
+  }
+
+  const removeChild = (...args) => {
+    internalPartsLayer.removeChild(...args)
+  }
+
+  const subscribeToResize = callback => {
+    if (resizeListeners.has(callback) === false) {
+      resizeListeners.add(callback)
+    }
+    return () => {
+      if (resizeListeners.has(callback)) {
+        resizeListeners.delete(callback)
+      }
+    }
+  }
+
+  const emit = (eventName, payload) => {
+    tellTheKids(eventName)(payload)
+  }
+
+  const on = (eventName, callback) => {
+    container.on(eventName, callback)
+  }
+
+  drawMask()
+
   return {
     moveTo,
     moveBy,
     container,
     sendToBack,
     bringToFront,
-    internalPartsLayer
+    internalPartsLayer,
+    addChild,
+    removeChild,
+    subscribeToResize,
+    on,
+    emit
   }
 }

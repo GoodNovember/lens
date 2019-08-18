@@ -2,7 +2,6 @@ import { enableDragEvents } from './enableDragEvents.js'
 import { makeRect } from './makeRect'
 import * as cursors from './cursors.js'
 import * as PIXI from 'pixi.js'
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants'
 
 global.PIXI = PIXI
 require('pixi-layers')
@@ -32,6 +31,8 @@ const BG_COLOR = 0xbbbbbb // 0x999999
 
 const DRAGGING_ALPHA = 0.75
 
+const makeBatchEventHandler = eventName => callback => itemArray => itemArray.map(item=>item.on(eventName, callback))
+
 const makeDragRect = makeRectOptions => enableDragEvents(makeRect(makeRectOptions))
 
 export const makeToolbox = ({ width, height }) => {
@@ -39,6 +40,12 @@ export const makeToolbox = ({ width, height }) => {
 
   const chromeLayer = new Layer()
   container.addChild(chromeLayer)
+
+  const internalPartsLayer = new Layer()
+  container.addChild(internalPartsLayer)
+
+  internalPartsLayer.x = INNER_MARGIN + MARGIN_SIZE
+  internalPartsLayer.y = INNER_MARGIN + MARGIN_SIZE
 
   // Mover
 
@@ -48,7 +55,6 @@ export const makeToolbox = ({ width, height }) => {
     width: width - (MARGIN_SIZE * 2),
     height: height - (MARGIN_SIZE * 2),
     tint: BG_COLOR,
-    interactive: true,
     cursors: cursors.MOVE
   })
 
@@ -62,7 +68,6 @@ export const makeToolbox = ({ width, height }) => {
     cursor: cursors.NS_RESIZE,
     tint: EDGE_COLOR
   })
-
   const chromeLeftSizer = makeDragRect({
     x: 0,
     y: CORNER_SIZE,
@@ -71,7 +76,6 @@ export const makeToolbox = ({ width, height }) => {
     cursor: cursors.EW_RESIZE,
     tint: EDGE_COLOR
   })
-
   const chromeRightSizer = makeDragRect({
     x: width - (MARGIN_SIZE * 1),
     y: CORNER_SIZE,
@@ -80,7 +84,6 @@ export const makeToolbox = ({ width, height }) => {
     cursor: cursors.EW_RESIZE,
     tint: EDGE_COLOR
   })
-
   const chromeBottomSizer = makeDragRect({
     x: CORNER_SIZE,
     y: height - (MARGIN_SIZE * 1),
@@ -100,7 +103,6 @@ export const makeToolbox = ({ width, height }) => {
     tint: CORNER_COLOR,
     cursor: cursors.NWSE_RESIZE
   })
-
   const chromeTopLeftCornerLeft = makeDragRect({
     x: 0,
     y: MARGIN_SIZE,
@@ -109,7 +111,6 @@ export const makeToolbox = ({ width, height }) => {
     tint: CORNER_COLOR,
     cursor: cursors.NWSE_RESIZE
   })
-
   const chromeTopLeftCornerTopLeft = makeDragRect({
     x: 0,
     y: 0,
@@ -129,7 +130,6 @@ export const makeToolbox = ({ width, height }) => {
     tint: CORNER_COLOR,
     cursor: cursors.NESW_RESIZE
   })
-
   const chromeTopRightCornerRight = makeDragRect({
     x: width - (MARGIN_SIZE * 1),
     y: MARGIN_SIZE,
@@ -138,7 +138,6 @@ export const makeToolbox = ({ width, height }) => {
     tint: CORNER_COLOR,
     cursor: cursors.NESW_RESIZE
   })
-
   const chromeTopRightCornerTopRight = makeDragRect({
     x: width - (MARGIN_SIZE * 1),
     y: 0,
@@ -148,24 +147,86 @@ export const makeToolbox = ({ width, height }) => {
     cursor: cursors.NESW_RESIZE
   })
 
+  // Bottom Left Corner
+
+  const chromeBottomLeftCornerLeft = makeDragRect({
+    x: 0,
+    y: height - CORNER_SIZE,
+    width: MARGIN_SIZE,
+    height: (CORNER_SIZE - MARGIN_SIZE),
+    tint: CORNER_COLOR,
+    cursor: cursors.NESW_RESIZE
+  })
+  const chromeBottomLeftCornerBottom = makeDragRect({
+    x: MARGIN_SIZE,
+    y: height - MARGIN_SIZE,
+    width: (CORNER_SIZE - MARGIN_SIZE),
+    height: MARGIN_SIZE,
+    tint: CORNER_COLOR,
+    cursor: cursors.NESW_RESIZE
+  })
+  const chromeBottomLeftCornerBottomLeft = makeDragRect({
+    x: 0,
+    y: height - MARGIN_SIZE,
+    width: MARGIN_SIZE,
+    height: MARGIN_SIZE,
+    tint: CORNER_COLOR,
+    cursor: cursors.NESW_RESIZE
+  })
+
+  // Bottom Right Corner
+
+  const chromeBottomRightCornerRight = makeDragRect({
+    x: width - MARGIN_SIZE,
+    y: height - CORNER_SIZE,
+    width: MARGIN_SIZE,
+    height: CORNER_SIZE - MARGIN_SIZE,
+    tint: CORNER_COLOR,
+    cursor: cursors.NWSE_RESIZE
+  })
+  const chromeBottomRightCornerBottom = makeDragRect({
+    x: width - CORNER_SIZE,
+    y: height - MARGIN_SIZE,
+    width: CORNER_SIZE - MARGIN_SIZE,
+    height: MARGIN_SIZE,
+    tint: CORNER_COLOR,
+    cursor: cursors.NWSE_RESIZE
+  })
+  const chromeBottomRightCornerBottomRight = makeDragRect({
+    x: width - MARGIN_SIZE,
+    y: height - MARGIN_SIZE,
+    width: MARGIN_SIZE,
+    height: MARGIN_SIZE,
+    tint: CORNER_COLOR,
+    cursor: cursors.NWSE_RESIZE
+  })
+
   const parts = {
     get leftParts () {
       return [
         chromeLeftSizer,
         chromeTopLeftCornerLeft,
-        chromeTopLeftCornerTopLeft
+        chromeTopLeftCornerTopLeft,
+        chromeBottomLeftCornerLeft,
+        chromeBottomLeftCornerBottomLeft
       ]
     },
     get rightParts () {
       return [
         chromeRightSizer,
         chromeTopRightCornerRight,
-        chromeTopRightCornerTopRight
+        chromeTopRightCornerTopRight,
+        chromeBottomRightCornerRight,
+        chromeBottomRightCornerBottomRight,
       ]
     },
     get bottomParts () {
       return [
-        chromeBottomSizer
+        chromeBottomSizer,
+        chromeBottomLeftCornerBottom,
+        chromeBottomRightCornerBottom,
+        chromeBottomLeftCornerBottomLeft,
+        chromeBottomRightCornerBottomRight
       ]
     },
     get topParts () {
@@ -239,33 +300,36 @@ export const makeToolbox = ({ width, height }) => {
     }
   }
 
-  const chromeParts = [
+  const chromePartsArray = [
     chromeMover,
     chromeTopSizer,
     chromeLeftSizer,
     chromeRightSizer,
     chromeBottomSizer,
-
     chromeTopLeftCornerTop,
     chromeTopLeftCornerLeft,
     chromeTopLeftCornerTopLeft,
-
     chromeTopRightCornerTop,
     chromeTopRightCornerRight,
-    chromeTopRightCornerTopRight
-
+    chromeTopRightCornerTopRight,
+    chromeBottomLeftCornerLeft,
+    chromeBottomLeftCornerBottom,
+    chromeBottomLeftCornerBottomLeft,
+    chromeBottomRightCornerRight,
+    chromeBottomRightCornerBottom,
+    chromeBottomRightCornerBottomRight
   ]
+
+  chromePartsArray.forEach(part => chromeLayer.addChild(part))
 
   const moveTo = (x, y) => {
     container.x = x
     container.y = y
   }
-
   const moveBy = (dx, dy) => {
     container.x += dx
     container.y += dy
   }
-
   const moveTopEdgeTo = y => {
     const { bottom } = bounds
     const moveValue = y - HALF_MARGIN_SIZE
@@ -288,55 +352,163 @@ export const makeToolbox = ({ width, height }) => {
     chromeLeftSizer.height = height - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
     chromeRightSizer.height = height - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
   }
-
   const moveLeftEdgeTo = x => {
+    const { right } = bounds
+    const moveValue = x - HALF_MARGIN_SIZE
+    const fixedValue = right - TOOLBOX_MIN_WIDTH + MARGIN_SIZE
+    const newX = Math.min(moveValue, fixedValue)
+    
+    parts.leftParts.map(part => { part.x = newX })
+    chromeTopLeftCornerTop.x = newX + MARGIN_SIZE
+    chromeBottomLeftCornerBottom.x = newX + MARGIN_SIZE
 
+    const { width, left } = bounds
+
+    chromeMover.x = left
+    chromeTopSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
+    chromeBottomSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
+
+    chromeMover.width = width
+    chromeTopSizer.width = width - CORNER_SIZE
+    chromeBottomSizer.width = width - CORNER_SIZE
   }
-
   const moveRightEdgeTo = x => {
+    const { left } = bounds
 
+    const moveValue = x - HALF_MARGIN_SIZE
+    const fixedValue = left + TOOLBOX_MIN_WIDTH - (MARGIN_SIZE * 2)
+    
+    const newX = Math.max(moveValue, fixedValue)
+    
+    parts.rightParts.map(part => { part.x = newX })
+    chromeTopRightCornerTop.x = newX - (CORNER_SIZE - MARGIN_SIZE)
+    chromeBottomRightCornerBottom.x = newX - (CORNER_SIZE - MARGIN_SIZE)
+
+    const { width } = bounds
+
+    chromeMover.x = left
+    chromeTopSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
+    chromeBottomSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
+
+    chromeMover.width = width
+    chromeTopSizer.width = width - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
+    chromeBottomSizer.width = width - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
+  }
+  const moveBottomEdgeTo = y => {
+    const { top } = bounds
+    const moveValue = y - HALF_MARGIN_SIZE
+    const fixedValue = top + (TOOLBOX_MIN_HEIGHT - (MARGIN_SIZE * 2))
+    
+    const newY = Math.max(moveValue, fixedValue)
+    
+    parts.bottomParts.map(part => { part.y = newY })
+    chromeBottomLeftCornerLeft.y = newY - (CORNER_SIZE - MARGIN_SIZE)
+    chromeBottomRightCornerRight.y = newY - (CORNER_SIZE - MARGIN_SIZE)
+
+    const { height } = bounds
+
+    chromeMover.height = height
+    chromeLeftSizer.height = height
+    chromeRightSizer.height = height
+
+    chromeMover.y = top
+    chromeLeftSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
+    chromeRightSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
   }
 
-  const moveBottomEdgeTo = x => {
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { y } } }) => {
+      moveTopEdgeTo(y)
+    })([chromeTopSizer])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { x } } }) => {
+      moveLeftEdgeTo(x)
+    })([chromeLeftSizer])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { x } } }) => {
+      moveRightEdgeTo(x)
+    })([chromeRightSizer])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { y } } }) => {
+      moveBottomEdgeTo(y)
+    })([chromeBottomSizer])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { x, y } } }) => {
+      moveTopEdgeTo(y)
+      moveLeftEdgeTo(x)
+    })([
+      chromeTopLeftCornerTop,
+      chromeTopLeftCornerLeft,
+      chromeTopLeftCornerTopLeft
+    ])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { x, y } } }) => {
+      moveRightEdgeTo(x)
+      moveTopEdgeTo(y)
+    })([
+      chromeTopRightCornerTop,
+      chromeTopRightCornerRight,
+      chromeTopRightCornerTopRight
+    ])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { x, y } } }) => {
+      moveLeftEdgeTo(x)
+      moveBottomEdgeTo(y)
+    }) ([
+      chromeBottomLeftCornerLeft,
+      chromeBottomLeftCornerBottom,
+      chromeBottomLeftCornerBottomLeft
+    ])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { current: { x, y } } }) => {
+      moveRightEdgeTo(x)
+      moveBottomEdgeTo(y)
+    }) ([
+      chromeBottomRightCornerRight,
+      chromeBottomRightCornerBottom,
+      chromeBottomRightCornerBottomRight
+    ])
+  makeBatchEventHandler('dragging')
+    (({ pointerState: { startDelta: { x, y } } }) => {
+      moveBy(x,y)
+    })([chromeMover])
+  
+  chromeMover
+    .on('dragstart', () => {
+      container.alpha = DRAGGING_ALPHA
+    })
+    .on('dragend', () => {
+      container.alpha = 1
+    })
 
+  const reorderZIndexes = () => {
+    if (container.parent) {
+      container.parent.children
+        .sort((a, b) => (a.zIndex - b.zIndex))
+        .map((child, index) => (
+          child.zIndex = (child.zIndex !== index) ? (index) : (child.zIndex)
+        ))
+    }
+  }
+  
+  const bringToFront = () => {
+    if (container.parent) {
+      container.zIndex = container.parent.children.length
+      reorderZIndexes()
+    }
   }
 
-  const moveTopLeftHandler = ({ pointerState: { current: { x, y } } }) => {
-    moveTopEdgeTo(y)
-    moveLeftEdgeTo(x)
+  const sendToBack = () => {
+    container.zIndex = -1
+    reorderZIndexes()
   }
-
-  chromeTopLeftCornerTop.on('dragging', moveTopLeftHandler)
-  chromeTopLeftCornerLeft.on('dragging', moveTopLeftHandler)
-  chromeTopLeftCornerTopLeft.on('dragging', moveTopLeftHandler)
-
-  chromeParts.forEach(part => chromeLayer.addChild(part))
-
-  chromeMover.on('dragging', ({ pointerState: { startDelta: { x, y } } }) => {
-    moveBy(x, y)
-  }).on('dragstart', () => {
-    container.alpha = DRAGGING_ALPHA
-  }).on('dragend', () => {
-    container.alpha = 1
-  })
-
-  chromeTopSizer.on('dragging', ({ pointerState: { current: { y } } }) => {
-    moveTopEdgeTo(y)
-  })
-
-  chromeLeftSizer.on('dragging', ({ pointerState: { current: { x } } }) => {
-    moveLeftEdgeTo(x)
-  })
-
-  chromeRightSizer.on('dragging', ({ pointerState: { current: { x } } }) => {
-    moveRightEdgeTo(x)
-  })
-
-  chromeBottomSizer.on('dragging', ({ pointerState: { current: { y } } }) => {
-    moveBottomEdgeTo(y)
-  })
 
   return {
-    container
+    moveTo,
+    moveBy,
+    container,
+    sendToBack,
+    bringToFront,
+    internalPartsLayer
   }
 }

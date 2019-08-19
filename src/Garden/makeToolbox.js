@@ -26,8 +26,8 @@ const CORNER_SIZE = 16
 
 const HALF_MARGIN_SIZE = MARGIN_SIZE / 2
 
-const CORNER_COLOR = 0x999999 // 0xaaaaaa
-const EDGE_COLOR = 0xEEEEEE // 0x999999 // 0xeeeeee
+const CORNER_COLOR = 0x009999 // 0xaaaaaa
+const EDGE_COLOR = 0x999999 // 0xeeeeee
 const BG_COLOR = 0xbbbbbb // 0x999999
 
 const DRAGGING_ALPHA = 0.75
@@ -44,13 +44,21 @@ export const makeToolbox = ({ width, height }) => {
   const chromeLayer = new Layer()
   container.addChild(chromeLayer)
 
-  const internalPartsLayer = new Layer()
-  container.addChild(internalPartsLayer)
+  const internalContainer = new Layer()
+  container.addChild(internalContainer)
 
-  const tellTheKids = makeEventForwarder(internalPartsLayer)
+  const tellTheKids = makeEventForwarder(internalContainer)
 
-  internalPartsLayer.x = INNER_MARGIN + MARGIN_SIZE
-  internalPartsLayer.y = INNER_MARGIN + MARGIN_SIZE
+  const emit = (eventName, payload) => {
+    tellTheKids(eventName, payload)
+  }
+
+  const on = (eventName, callback) => {
+    container.on(eventName, callback)
+  }
+
+  internalContainer.x = INNER_MARGIN + MARGIN_SIZE
+  internalContainer.y = INNER_MARGIN + MARGIN_SIZE
 
   // Mover
 
@@ -412,7 +420,7 @@ export const makeToolbox = ({ width, height }) => {
     mask.beginFill()
     mask.drawRect(x, y, width, height)
     mask.endFill()
-    internalPartsLayer.mask = mask
+    internalContainer.mask = mask
   }
 
   const notifyResizeListeners = () => {
@@ -496,11 +504,11 @@ export const makeToolbox = ({ width, height }) => {
     })
 
   container.on('parent moved', (payload) => {
-    tellTheKids('parent moved', payload)
+    emit('parent moved', payload)
     drawMask()
   })
   container.on('parent resized', (payload) => {
-    tellTheKids('parent resized')(payload)
+    emit('parent resized', payload)
     drawMask()
   })
 
@@ -527,11 +535,11 @@ export const makeToolbox = ({ width, height }) => {
   }
 
   const addChild = (...args) => {
-    internalPartsLayer.addChild(...args)
+    internalContainer.addChild(...args)
   }
 
   const removeChild = (...args) => {
-    internalPartsLayer.removeChild(...args)
+    internalContainer.removeChild(...args)
   }
 
   const subscribeToResize = callback => {
@@ -545,14 +553,6 @@ export const makeToolbox = ({ width, height }) => {
     }
   }
 
-  const emit = (eventName, payload) => {
-    tellTheKids(eventName)(payload)
-  }
-
-  const on = (eventName, callback) => {
-    container.on(eventName, callback)
-  }
-
   drawMask()
 
   return {
@@ -561,7 +561,7 @@ export const makeToolbox = ({ width, height }) => {
     container,
     sendToBack,
     bringToFront,
-    internalPartsLayer,
+    internalPartsLayer: internalContainer,
     addChild,
     removeChild,
     subscribeToResize,

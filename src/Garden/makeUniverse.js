@@ -12,7 +12,7 @@ const {
 
 const { Layer, Stage } = display
 
-const GRID_SIZE = 25
+const GRID_SIZE = 32
 
 export const makeUniverse = ({ }) => {
 	const container = new Stage()
@@ -25,7 +25,6 @@ export const makeUniverse = ({ }) => {
 	cvs.width = GRID_SIZE
 	cvs.height = GRID_SIZE
 	ctx.beginPath()
-	ctx.strokeStyle = 'magenta'
 	ctx.lineWidth = 1
 	ctx.moveTo(0, 0)
 	ctx.lineTo(GRID_SIZE, 0)
@@ -37,7 +36,6 @@ export const makeUniverse = ({ }) => {
 	container.addChild(backroundLayer)
 
 	const gridTexture = enableDragEvents(TilingSprite.from(cvs, 250, 250))
-	// gridTexture.anchor.set(0.5, 0.5)
 	backroundLayer.addChild(gridTexture)
 
 	const internalContainer = new Layer()
@@ -46,10 +44,18 @@ export const makeUniverse = ({ }) => {
 	
 	const tellTheKids = makeEventForwarder(internalContainer)
 
+	const emit = (eventName, payload) => {
+		tellTheKids(eventName, payload)
+	}
+
+	const on = (eventName, callback) => {
+		container.on(eventName, callback)
+	}
+
 	const setSize = (width, height) => {
 		gridTexture.width = width
 		gridTexture.height = height
-		tellTheKids('parent resize')({width, height})
+		emit('parent resize', {width, height})
 	}
 
 	const addChild = (...args) => {
@@ -57,11 +63,11 @@ export const makeUniverse = ({ }) => {
 	}
 
 	container.on('parent resized', (...props) => {
-		tellTheKids('parent resized')(...props)
+		emit('parent resized',...props)
 	})
 
 	container.on('parent moved', (...props) => {
-		tellTheKids('parent moved')(...props)
+		emit('parent moved',...props)
 	})
 
 	gridTexture.on('dragging', ({ reference: { x, y } }) => {
@@ -95,17 +101,9 @@ export const makeUniverse = ({ }) => {
 			}
 		}
 		if (changeOccured === true) {
-			tellTheKids('parent moved')({ x, y })
+			emit('parent moved', { x, y })
 		}
 	})
-
-	const emit = (eventName, payload) => {
-		tellTheKids(eventName)(payload)
-	}
-
-	const on = (eventName, callback) => {
-		container.on(eventName, callback)
-	}
 
 	return {
 		container,

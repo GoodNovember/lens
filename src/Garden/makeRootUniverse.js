@@ -13,7 +13,7 @@ const {
 
 const { Layer, Stage } = display
 
-const GRID_SIZE = 50
+const GRID_SIZE = 64
 
 export const makeRootUniverse = ({ color = 'blue' }) => {
   const container = new Stage()
@@ -44,10 +44,18 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
 
   const tellTheKids = makeEventForwarder(internalContainer)
 
+  const emit = (eventName, payload) => {
+    tellTheKids(eventName, payload)
+  }
+
+  const on = (eventName, callback) => {
+    container.on(eventName, callback)
+  }
+
   const setSize = ({ width, height }) => {
     gridTexture.width = width
     gridTexture.height = height
-    tellTheKids('parent resize')({width, height})
+    emit('parent resize', { width, height })
   }
 
   gridTexture.on('dragging', (dragEvent) => {
@@ -79,7 +87,7 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
       }
     }
     if (changeOccured) {
-      tellTheKids('parent moved')({x, y})
+      emit('parent moved', { x, y })
     }
   })
 
@@ -89,14 +97,6 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
   
   const removeChild = (...props) => {
     internalContainer.removeChild(...props)
-  }
-
-  const emit = (eventName, payload) => {
-    tellTheKids(eventName)(payload)
-  }
-
-  const on = (eventName, callback) => {
-    container.on(eventName, callback)
   }
 
   return {

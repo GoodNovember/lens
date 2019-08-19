@@ -1,4 +1,3 @@
-/* globals screen */
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
 import * as PIXI from 'pixi.js'
@@ -7,7 +6,6 @@ require('pixi-layers')
 
 const {
   display,
-  Graphics,
   TilingSprite
 } = PIXI
 
@@ -15,10 +13,14 @@ const { Layer, Stage } = display
 
 const GRID_SIZE = 64
 
-export const makeRootUniverse = ({ color = 'blue' }) => {
+export const makeRootUniverse = ({
+  color = 'blue',
+  height = 250,
+  width = 250
+}) => {
   const container = new Stage()
   const backgroundLayer = new Layer()
-  const GRID_TEXTURE_SIZE = Math.max(screen.width, screen.height, 1000)
+  const GRID_TEXTURE_SIZE = Math.max(width, height, 1000)
   const cvs = document.createElement('canvas')
   const ctx = cvs.getContext('2d')
   const mode = 'BOTH'
@@ -94,7 +96,7 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
   const addChild = (...props) => {
     internalContainer.addChild(...props)
   }
-  
+
   const removeChild = (...props) => {
     internalContainer.removeChild(...props)
   }
@@ -106,6 +108,6 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
     addChild,
     removeChild,
     emit,
-    on,
+    on
   }
 }

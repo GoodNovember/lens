@@ -6,7 +6,6 @@ require('pixi-layers')
 
 const {
   display,
-  Graphics,
   TilingSprite
 } = PIXI
 
@@ -14,102 +13,105 @@ const { Layer, Stage } = display
 
 const GRID_SIZE = 32
 
-export const makeUniverse = ({ }) => {
-	const container = new Stage()
+export const makeUniverse = ({
+  width = 250,
+  height = 250
+}) => {
+  const container = new Stage()
 
-	const cvs = document.createElement('canvas')
-	const ctx = cvs.getContext('2d')
+  const cvs = document.createElement('canvas')
+  const ctx = cvs.getContext('2d')
 
-	const mode = 'BOTH'
+  const mode = 'BOTH'
 
-	cvs.width = GRID_SIZE
-	cvs.height = GRID_SIZE
-	ctx.beginPath()
-	ctx.lineWidth = 1
-	ctx.moveTo(0, 0)
-	ctx.lineTo(GRID_SIZE, 0)
-	ctx.moveTo(0, 0)
-	ctx.lineTo(0, GRID_SIZE)
-	ctx.stroke()
+  cvs.width = GRID_SIZE
+  cvs.height = GRID_SIZE
+  ctx.beginPath()
+  ctx.lineWidth = 1
+  ctx.moveTo(0, 0)
+  ctx.lineTo(GRID_SIZE, 0)
+  ctx.moveTo(0, 0)
+  ctx.lineTo(0, GRID_SIZE)
+  ctx.stroke()
 
-	const backroundLayer = new Layer()
-	container.addChild(backroundLayer)
+  const backroundLayer = new Layer()
+  container.addChild(backroundLayer)
 
-	const gridTexture = enableDragEvents(TilingSprite.from(cvs, 250, 250))
-	backroundLayer.addChild(gridTexture)
+  const gridTexture = enableDragEvents(TilingSprite.from(cvs, width, height))
+  backroundLayer.addChild(gridTexture)
 
-	const internalContainer = new Layer()
-	internalContainer.group.enableSort = true
-	container.addChild(internalContainer)
-	
-	const tellTheKids = makeEventForwarder(internalContainer)
+  const internalContainer = new Layer()
+  internalContainer.group.enableSort = true
+  container.addChild(internalContainer)
 
-	const emit = (eventName, payload) => {
-		tellTheKids(eventName, payload)
-	}
+  const tellTheKids = makeEventForwarder(internalContainer)
 
-	const on = (eventName, callback) => {
-		container.on(eventName, callback)
-	}
+  const emit = (eventName, payload) => {
+    tellTheKids(eventName, payload)
+  }
 
-	const setSize = (width, height) => {
-		gridTexture.width = width
-		gridTexture.height = height
-		emit('parent resize', {width, height})
-	}
+  const on = (eventName, callback) => {
+    container.on(eventName, callback)
+  }
 
-	const addChild = (...args) => {
-		internalContainer.addChild(...args)
-	}
+  const setSize = (width, height) => {
+    gridTexture.width = width
+    gridTexture.height = height
+    emit('parent resize', { width, height })
+  }
 
-	container.on('parent resized', (...props) => {
-		emit('parent resized',...props)
-	})
+  const addChild = (...args) => {
+    internalContainer.addChild(...args)
+  }
 
-	container.on('parent moved', (...props) => {
-		emit('parent moved',...props)
-	})
+  container.on('parent resized', (...props) => {
+    emit('parent resized', ...props)
+  })
 
-	gridTexture.on('dragging', ({ reference: { x, y } }) => {
-		let changeOccured = false
-		const setX = x => {
-			internalContainer.position.x = x
-			gridTexture.tileTransform.position.x = x
-		}
-		const setY = y => {
-			internalContainer.position.y = y
-			gridTexture.tileTransform.position.y = y
-		}
-		if (mode === 'BOTH') {
-			if (internalContainer.position.x !== x) {
-				setX(x)
-				changeOccured = true
-			}
-			if (internalContainer.position.y !== y) {
-				setY(y)
-				changeOccured = true
-			}
-		} else if (mode === 'X_ONLY') {
-			if (internalContainer.position.x !== x) {
-				setX(x)
-				changeOccured = true
-			}
-		} else if (mode === 'Y_ONLY') {
-			if (internalContainer.position.y !== y) {
-				setY(y)
-				changeOccured = true
-			}
-		}
-		if (changeOccured === true) {
-			emit('parent moved', { x, y })
-		}
-	})
+  container.on('parent moved', (...props) => {
+    emit('parent moved', ...props)
+  })
 
-	return {
-		container,
-		addChild,
-		setSize,
-		emit,
-		on
-	}
+  gridTexture.on('dragging', ({ reference: { x, y } }) => {
+    let changeOccured = false
+    const setX = x => {
+      internalContainer.position.x = x
+      gridTexture.tileTransform.position.x = x
+    }
+    const setY = y => {
+      internalContainer.position.y = y
+      gridTexture.tileTransform.position.y = y
+    }
+    if (mode === 'BOTH') {
+      if (internalContainer.position.x !== x) {
+        setX(x)
+        changeOccured = true
+      }
+      if (internalContainer.position.y !== y) {
+        setY(y)
+        changeOccured = true
+      }
+    } else if (mode === 'X_ONLY') {
+      if (internalContainer.position.x !== x) {
+        setX(x)
+        changeOccured = true
+      }
+    } else if (mode === 'Y_ONLY') {
+      if (internalContainer.position.y !== y) {
+        setY(y)
+        changeOccured = true
+      }
+    }
+    if (changeOccured === true) {
+      emit('parent moved', { x, y })
+    }
+  })
+
+  return {
+    container,
+    addChild,
+    setSize,
+    emit,
+    on
+  }
 }

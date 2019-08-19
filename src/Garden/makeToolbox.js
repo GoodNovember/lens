@@ -2,7 +2,7 @@ import { enableDragEvents } from './enableDragEvents.js'
 import { makeRect } from './makeRect'
 import * as cursors from './cursors.js'
 import * as PIXI from 'pixi.js'
-import {makeEventForwarder} from './makeEventForwarder.js'
+import { makeEventForwarder } from './makeEventForwarder.js'
 
 global.PIXI = PIXI
 require('pixi-layers')
@@ -32,7 +32,7 @@ const BG_COLOR = 0xbbbbbb // 0x999999
 
 const DRAGGING_ALPHA = 0.75
 
-const makeBatchEventHandler = eventName => callback => itemArray => itemArray.map(item=>item.on(eventName, callback))
+const makeBatchEventHandler = eventName => callback => itemArray => itemArray.map(item => item.on(eventName, callback))
 
 const makeDragRect = makeRectOptions => enableDragEvents(makeRect(makeRectOptions))
 
@@ -230,7 +230,7 @@ export const makeToolbox = ({ width, height }) => {
         chromeTopRightCornerRight,
         chromeTopRightCornerTopRight,
         chromeBottomRightCornerRight,
-        chromeBottomRightCornerBottomRight,
+        chromeBottomRightCornerBottomRight
       ]
     },
     get bottomParts () {
@@ -254,8 +254,8 @@ export const makeToolbox = ({ width, height }) => {
   }
 
   const bounds = {
-    get innerMargin (){ return INNER_MARGIN },
-    get marginSize (){ return MARGIN_SIZE },
+    get innerMargin () { return INNER_MARGIN },
+    get marginSize () { return MARGIN_SIZE },
     get globalTop () {
       return chromeTopSizer.getGlobalPosition().y + chromeTopSizer.height
     },
@@ -288,14 +288,14 @@ export const makeToolbox = ({ width, height }) => {
       const { right, left } = this
       return right - left
     },
-    get mask() {
+    get mask () {
       const { globalTop, globalLeft, globalRight, globalBottom } = this
       const x = globalLeft + INNER_MARGIN
       const y = globalTop + INNER_MARGIN
       const height = (globalBottom - globalTop) - (INNER_MARGIN * 2)
       const width = (globalRight - globalLeft) - (INNER_MARGIN * 2)
       return { height, width, x, y }
-    },
+    }
   }
 
   const chromePartsArray = [
@@ -355,7 +355,7 @@ export const makeToolbox = ({ width, height }) => {
     const moveValue = x - HALF_MARGIN_SIZE
     const fixedValue = right - TOOLBOX_MIN_WIDTH + MARGIN_SIZE
     const newX = Math.min(moveValue, fixedValue)
-    
+
     parts.leftParts.map(part => { part.x = newX })
     chromeTopLeftCornerTop.x = newX + MARGIN_SIZE
     chromeBottomLeftCornerBottom.x = newX + MARGIN_SIZE
@@ -375,9 +375,9 @@ export const makeToolbox = ({ width, height }) => {
 
     const moveValue = x - HALF_MARGIN_SIZE
     const fixedValue = left + TOOLBOX_MIN_WIDTH - (MARGIN_SIZE * 2)
-    
+
     const newX = Math.max(moveValue, fixedValue)
-    
+
     parts.rightParts.map(part => { part.x = newX })
     chromeTopRightCornerTop.x = newX - (CORNER_SIZE - MARGIN_SIZE)
     chromeBottomRightCornerBottom.x = newX - (CORNER_SIZE - MARGIN_SIZE)
@@ -396,9 +396,9 @@ export const makeToolbox = ({ width, height }) => {
     const { top } = bounds
     const moveValue = y - HALF_MARGIN_SIZE
     const fixedValue = top + (TOOLBOX_MIN_HEIGHT - (MARGIN_SIZE * 2))
-    
+
     const newY = Math.max(moveValue, fixedValue)
-    
+
     parts.bottomParts.map(part => { part.y = newY })
     chromeBottomLeftCornerLeft.y = newY - (CORNER_SIZE - MARGIN_SIZE)
     chromeBottomRightCornerRight.y = newY - (CORNER_SIZE - MARGIN_SIZE)
@@ -425,76 +425,80 @@ export const makeToolbox = ({ width, height }) => {
 
   const notifyResizeListeners = () => {
     const { width, height } = bounds
-    resizeListeners.forEach(listener => listener({width, height, ...bounds}))
+    resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
     drawMask()
   }
 
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { y } } }) => {
       moveTopEdgeTo(y)
       notifyResizeListeners()
     })([chromeTopSizer])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { x } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { x } } }) => {
       moveLeftEdgeTo(x)
       notifyResizeListeners()
     })([chromeLeftSizer])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { x } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { x } } }) => {
       moveRightEdgeTo(x)
       notifyResizeListeners()
     })([chromeRightSizer])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { y } } }) => {
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })([chromeBottomSizer])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { x, y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { x, y } } }) => {
       moveTopEdgeTo(y)
       moveLeftEdgeTo(x)
       notifyResizeListeners()
-    })([
+    })(
+    [
       chromeTopLeftCornerTop,
       chromeTopLeftCornerLeft,
       chromeTopLeftCornerTopLeft
     ])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { x, y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveTopEdgeTo(y)
       notifyResizeListeners()
-    })([
+    })(
+    [
       chromeTopRightCornerTop,
       chromeTopRightCornerRight,
       chromeTopRightCornerTopRight
     ])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { x, y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { x, y } } }) => {
       moveLeftEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
-    }) ([
+    })(
+    [
       chromeBottomLeftCornerLeft,
       chromeBottomLeftCornerBottom,
       chromeBottomLeftCornerBottomLeft
     ])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { current: { x, y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
-    }) ([
+    })(
+    [
       chromeBottomRightCornerRight,
       chromeBottomRightCornerBottom,
       chromeBottomRightCornerBottomRight
     ])
-  makeBatchEventHandler('dragging')
-    (({ pointerState: { startDelta: { x, y } } }) => {
+  makeBatchEventHandler('dragging')(
+    ({ pointerState: { startDelta: { x, y } } }) => {
       moveBy(x, y)
       notifyResizeListeners()
     })([chromeMover])
-  
+
   chromeMover
     .on('dragstart', () => {
       container.alpha = DRAGGING_ALPHA
@@ -521,7 +525,7 @@ export const makeToolbox = ({ width, height }) => {
         ))
     }
   }
-  
+
   const bringToFront = () => {
     if (container.parent) {
       container.zIndex = container.parent.children.length
@@ -561,7 +565,7 @@ export const makeToolbox = ({ width, height }) => {
     container,
     sendToBack,
     bringToFront,
-    internalPartsLayer: internalContainer,
+    internalContainer,
     addChild,
     removeChild,
     subscribeToResize,

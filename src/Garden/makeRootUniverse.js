@@ -42,11 +42,7 @@ export const makeRootUniverse = ({ color = 'blue' }) => {
   const internalContainer = new Layer()
   container.addChild(internalContainer)
 
-  const tellTheKids = makeEventForwarder(internalContainer)
-
-  const emit = (eventName, payload) => {
-    tellTheKids(eventName, payload)
-  }
+  const emit = makeEventForwarder(internalContainer)
 
   const on = (eventName, callback) => {
     container.on(eventName, callback)

@@ -41,12 +41,8 @@ export const makeUniverse = ({ }) => {
 	const internalContainer = new Layer()
 	internalContainer.group.enableSort = true
 	container.addChild(internalContainer)
-	
-	const tellTheKids = makeEventForwarder(internalContainer)
 
-	const emit = (eventName, payload) => {
-		tellTheKids(eventName, payload)
-	}
+	const emit = makeEventForwarder(internalContainer)
 
 	const on = (eventName, callback) => {
 		container.on(eventName, callback)

@@ -11,6 +11,7 @@ const {
   display,
   Graphics
 } = PIXI
+
 const {
   Layer,
   Stage
@@ -19,14 +20,14 @@ const {
 const TOOLBOX_MIN_WIDTH = 32
 const TOOLBOX_MIN_HEIGHT = 32
 
-const INNER_MARGIN = 32
+const INNER_MARGIN = 16
 
 const MARGIN_SIZE = 8
 const CORNER_SIZE = 16
 
 const HALF_MARGIN_SIZE = MARGIN_SIZE / 2
 
-const CORNER_COLOR = 0x009999 // 0xaaaaaa
+const CORNER_COLOR = 0x999999 // 0xaaaaaa
 const EDGE_COLOR = 0x999999 // 0xeeeeee
 const BG_COLOR = 0xbbbbbb // 0x999999
 
@@ -49,13 +50,8 @@ export const makeToolbox = ({ width, height }) => {
 
   const tellTheKids = makeEventForwarder(internalContainer)
 
-  const emit = (eventName, payload) => {
-    tellTheKids(eventName, payload)
-  }
-
-  const on = (eventName, callback) => {
-    container.on(eventName, callback)
-  }
+  const emit = (eventName, payload) => { tellTheKids(eventName, payload) }
+  const on = (eventName, callback) => { container.on(eventName, callback) }
 
   internalContainer.x = INNER_MARGIN + MARGIN_SIZE
   internalContainer.y = INNER_MARGIN + MARGIN_SIZE
@@ -406,14 +402,13 @@ export const makeToolbox = ({ width, height }) => {
     const { height } = bounds
 
     chromeMover.height = height
-    chromeLeftSizer.height = height
-    chromeRightSizer.height = height
+    chromeLeftSizer.height = height - CORNER_SIZE
+    chromeRightSizer.height = height - CORNER_SIZE
 
     chromeMover.y = top
     chromeLeftSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
     chromeRightSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
   }
-
   const drawMask = () => {
     const { x, y, width, height } = bounds.mask
     const mask = new Graphics()
@@ -422,7 +417,6 @@ export const makeToolbox = ({ width, height }) => {
     mask.endFill()
     internalContainer.mask = mask
   }
-
   const notifyResizeListeners = () => {
     const { width, height } = bounds
     resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
@@ -549,6 +543,8 @@ export const makeToolbox = ({ width, height }) => {
   const subscribeToResize = callback => {
     if (resizeListeners.has(callback) === false) {
       resizeListeners.add(callback)
+      callback(bounds)
+      drawMask()
     }
     return () => {
       if (resizeListeners.has(callback)) {

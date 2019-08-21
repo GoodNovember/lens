@@ -12,4 +12,4 @@ const extend = (defaults) => (anotherObject) => {
   }
 }
 
-export const ensureDefaults = (ingredients, defaults) => ((isObj(ingredients)) ? (extend(defaults)(ingredients)):(defaults))
+export const ensureDefaults = (ingredients, defaults) => ((isObj(ingredients)) ? (extend(defaults)(ingredients)) : (defaults))

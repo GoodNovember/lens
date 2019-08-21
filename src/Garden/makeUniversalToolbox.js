@@ -6,7 +6,7 @@ export const makeUniversalToolbox = ({
 }) => {
   const internalToolbox = makeToolbox({ ...toolboxParams })
   const internalUniverse = makeUniverse({})
-  
+
   const on = (eventName, callback) => internalToolbox.on(eventName, callback)
   const emit = (eventName, payload) => internalUniverse.emit(eventName, payload)
 

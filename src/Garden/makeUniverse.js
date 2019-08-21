@@ -6,7 +6,6 @@ require('pixi-layers')
 
 const {
   display,
-  Graphics,
   TilingSprite
 } = PIXI
 

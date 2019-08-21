@@ -1,7 +1,8 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeRect } from './makeRect'
 import * as cursors from './cursors.js'
-import * as PIXI from 'pixi.js'
+// import * as PIXI from 'pixi.js'
+import * as PIXI from 'pixi.js-legacy'
 import { makeEventForwarder } from './makeEventForwarder.js'
 
 global.PIXI = PIXI
@@ -37,8 +38,11 @@ const makeBatchEventHandler = eventName => callback => itemArray => itemArray.ma
 
 const makeDragRect = makeRectOptions => enableDragEvents(makeRect(makeRectOptions))
 
-export const makeToolbox = ({ width, height }) => {
+export const makeToolbox = ({ width, height, x, y }) => {
   const container = new Stage()
+
+  container.x = x || container.x
+  container.y = y || container.y
 
   const resizeListeners = new Set()
 
@@ -315,7 +319,34 @@ export const makeToolbox = ({ width, height }) => {
     chromeBottomRightCornerBottomRight
   ]
 
-  chromePartsArray.forEach(part => chromeLayer.addChild(part))
+  chromePartsArray.forEach(part => {
+    chromeLayer.addChild(part)
+    part.on('pointerdown', () => {
+      bringToFront()
+    })
+  })
+
+  const reorderZIndexes = () => {
+    if (container.parent) {
+      container.parent.children
+        .sort((a, b) => (a.zIndex - b.zIndex))
+        .map((child, index) => (
+          child.zIndex = (child.zIndex !== index) ? (index) : (child.zIndex)
+        ))
+    }
+  }
+
+  const bringToFront = () => {
+    if (container.parent) {
+      container.zIndex = container.parent.children.length
+      reorderZIndexes()
+    }
+  }
+
+  const sendToBack = () => {
+    container.zIndex = -1
+    reorderZIndexes()
+  }
 
   const moveTo = (x, y) => {
     container.x = x
@@ -493,7 +524,7 @@ export const makeToolbox = ({ width, height }) => {
       moveBy(x, y)
       notifyResizeListeners()
     })([chromeMover])
-
+  
   chromeMover
     .on('dragstart', () => {
       container.alpha = DRAGGING_ALPHA
@@ -510,28 +541,6 @@ export const makeToolbox = ({ width, height }) => {
     emit('parent resized', payload)
     drawMask()
   })
-
-  const reorderZIndexes = () => {
-    if (container.parent) {
-      container.parent.children
-        .sort((a, b) => (a.zIndex - b.zIndex))
-        .map((child, index) => (
-          child.zIndex = (child.zIndex !== index) ? (index) : (child.zIndex)
-        ))
-    }
-  }
-
-  const bringToFront = () => {
-    if (container.parent) {
-      container.zIndex = container.parent.children.length
-      reorderZIndexes()
-    }
-  }
-
-  const sendToBack = () => {
-    container.zIndex = -1
-    reorderZIndexes()
-  }
 
   const addChild = (...args) => {
     internalContainer.addChild(...args)

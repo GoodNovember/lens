@@ -1,6 +1,7 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
-import * as PIXI from 'pixi.js'
+// import * as PIXI from 'pixi.js'
+import * as PIXI from 'pixi.js-legacy'
 global.PIXI = PIXI
 require('pixi-layers')
 
@@ -98,6 +99,8 @@ export const makeUniverse = ({ }) => {
 		if (changeOccured === true) {
 			emit('parent moved', { x, y })
 		}
+	}).on('pointerdown', stuff => {
+		container.emit('pointerdown', stuff)
 	})
 
 	return {

@@ -21,6 +21,10 @@ export const makeUniversalToolbox = ({
   const addChild = (...props) => internalUniverse.addChild(...props)
   const removeChild = (...props) => internalUniverse.removeChild(...props)
 
+  internalUniverse.on('pointerdown', () => {
+    internalToolbox.bringToFront()
+  })
+
   return {
     ...internalToolbox,
     addChild, // overwrites toolbox,

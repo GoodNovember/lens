@@ -1,5 +1,5 @@
-import { Sprite, Texture } from 'pixi.js'
-
+// import { Sprite, Texture } from 'pixi.js'
+import { Sprite, Texture } from 'pixi.js-legacy'
 const { WHITE } = Texture
 
 export const makeRect = ({

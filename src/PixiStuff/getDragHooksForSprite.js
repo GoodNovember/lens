@@ -1,4 +1,5 @@
-import { Runner } from 'pixi.js'
+// import { Runner } from 'pixi.js'
+import { Runner } from 'pixi.js-legacy'
 export const getDragHooksForSprite = sprite => {
   let isDragging = false
   let startClickPoint = null

@@ -19,6 +19,13 @@ const uni = makeUniversalToolbox({
   height: 333
 })
 
+const uni2 = makeUniversalToolbox({
+  width: 300,
+  height: 400,
+  x: 100,
+  y: 100
+})
+
 export const boot = ({ App, subscribeToResize }) => {
   const { stage } = App
   stage.group.enableSort = true
@@ -27,5 +34,6 @@ export const boot = ({ App, subscribeToResize }) => {
     RootUniverse.setSize({ width, height })
   })
   RootUniverse.addChild(uni.container)
+  RootUniverse.addChild(uni2.container)
   uni.addChild(sternToolbox.container)
 }

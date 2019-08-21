@@ -1,6 +1,7 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
-import * as PIXI from 'pixi.js'
+// import * as PIXI from 'pixi.js'
+import * as PIXI from 'pixi.js-legacy'
 global.PIXI = PIXI
 require('pixi-layers')
 

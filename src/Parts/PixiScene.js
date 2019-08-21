@@ -2,7 +2,8 @@
 import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
-import * as PIXI from 'pixi.js'
+// import * as PIXI from 'pixi.js' // No support for older systems (and electron)
+import * as PIXI from 'pixi.js-legacy' // added canvas 2d support.
 // import { app } from 'electron'
 global.PIXI = PIXI
 require('pixi-layers')

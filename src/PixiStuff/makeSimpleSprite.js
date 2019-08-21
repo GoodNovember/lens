@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+// import * as PIXI from 'pixi.js'
+import * as PIXI from 'pixi.js-legacy'
 const { Sprite, Texture } = PIXI
 const { WHITE } = Texture
 

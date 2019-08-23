@@ -11,9 +11,12 @@ export const wireRootElement = () => {
   const setSize = ({ width, height }) => RootUniverse.setSize({ width, height })
 
   RootUniverse.addChild(TEST_BED.container)
-
+  const moveTo = (x, y) => {
+    RootUniverse.moveTo(x, y)
+  }
   return {
     container,
-    setSize
+    setSize,
+    moveTo
   }
 }

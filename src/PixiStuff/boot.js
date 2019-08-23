@@ -12,12 +12,15 @@
 
 import { wireRootElement } from './wireRootElement.js'
 
-export const boot = ({ App, subscribeToResize }) => {
+export const boot = ({ App, subscribeToResize, subscribeToImpetus }) => {
   const rootElement = wireRootElement()
   const { stage } = App
   stage.group.enableSort = true
   stage.addChild(rootElement.container)
   subscribeToResize(({ width, height }) => {
     rootElement.setSize({ width, height })
+  })
+  subscribeToImpetus(({ x, y }) => {
+    rootElement.moveTo(x, y)
   })
 }

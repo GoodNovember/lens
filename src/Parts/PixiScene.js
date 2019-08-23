@@ -1,7 +1,7 @@
 /* globals location */
 import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
-
+import Impetus from '../Foreign/Impetus.js'
 // import * as PIXI from 'pixi.js' // No support for older systems (and electron)
 import * as PIXI from 'pixi.js-legacy' // added canvas 2d support.
 // import { app } from 'electron'
@@ -36,6 +36,7 @@ export const PixiScene = ({ onBoot, appOptions }) => {
 
   useEffect(() => {
     const resizeListeners = new Set()
+    const impetusListeners = new Set()
     document.addEventListener('keypress', function (e) {
       const { charCode } = e
       switch (charCode) {
@@ -70,7 +71,27 @@ export const PixiScene = ({ onBoot, appOptions }) => {
       }
     }
 
+    const subscribeToImpetus = callback => {
+      if (impetusListeners.has(callback) === false) {
+        impetusListeners.add(callback)
+      }
+      return () => {
+        if (impetusInstance.has(callback)) {
+          impetusListeners.delete(callback)
+        }
+      }
+    }
+
+    let impetusInstance = null
+
     if (canvasRef.current) {
+      impetusInstance = new Impetus({
+        sounce: canvasRef.current,
+        friction: 0.94,
+        update: (x, y) => {
+          impetusListeners.forEach(listener => listener({ x, y }))
+        }
+      })
       const { current: view } = canvasRef
       const App = new Application({ view, ...appOptions })
       App.stage = new PIXI.display.Stage()
@@ -86,14 +107,22 @@ export const PixiScene = ({ onBoot, appOptions }) => {
         }
       })
       if (typeof onBoot === 'function') {
-        onBoot({ App, view, subscribeToResize })
+        onBoot({
+          App,
+          view,
+          subscribeToResize,
+          subscribeToImpetus
+        })
       }
     }
 
     return () => {
+      if (impetusInstance) {
+        impetusInstance.destroy()
+      }
+      impetusListeners.clear()
       resizeListeners.clear()
     }
-
   }, [])
 
   return (

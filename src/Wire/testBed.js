@@ -5,20 +5,20 @@ global.PIXI = PIXI
 require('pixi-layers')
 
 const {
-  display,
-  Graphics
+  display
+  // Graphics
 } = PIXI
 
 const {
-  Layer,
-  Stage
+  Layer
+  // Stage
 } = display
 
 export const testBed = () => {
   const container = new Layer()
 
   // const { container: directoryContainer } = parseDirectory('/Users/victor/Desktop')
-  const { container: directoryContainer } = parseDirectory('~/Desktop/')
+  const { container: directoryContainer } = parseDirectory('~/Downloads')
 
   container.addChild(directoryContainer)
 

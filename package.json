@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "ignite": "node ignite.js",
-    "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
+    "start":"node ignite.js",
     "boot-electron": "electron .",
     "react-start": "parcel -p 3000 index.html --out-dir build",
     "react-build": "parcel build index.html --out-dir build --public-url ./",

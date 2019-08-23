@@ -8,8 +8,13 @@ let mainWindow = null
 const width = 900
 const height = 680
 
+const webPreferences = {
+  webSecurity: false,
+  nodeIntegration: true
+}
+
 const createWindow = () => {
-  mainWindow = new BrowserWindow({ width, height })
+  mainWindow = new BrowserWindow({ width, height, webPreferences })
   mainWindow.on('closed', () => { mainWindow = null })
   mainWindow.loadURL(
     isDev

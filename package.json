@@ -4,7 +4,9 @@
   "main": "src/electron.js",
   "license": "MIT",
   "scripts": {
+    "ignite": "node ignite.js",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\"",
+    "boot-electron": "electron .",
     "react-start": "parcel -p 3000 index.html --out-dir build",
     "react-build": "parcel build index.html --out-dir build --public-url ./",
     "electron-build": "electron-builder -mwl",
@@ -15,14 +17,18 @@
   "dependencies": {
     "babylonjs": "^4.0.3",
     "babylonjs-gui": "^4.0.3",
+    "electron-fs-extra": "^1.0.0",
     "electron-is-dev": "^1.1.0",
+    "express": "^4.17.1",
+    "ext-name": "^5.0.0",
     "pixi-layers": "^0.2.1",
     "pixi.js": "^5.1.0",
     "pixi.js-legacy": "^5.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "styled-components": "^4.3.2",
-    "three": "^0.107.0"
+    "three": "^0.107.0",
+    "untildify": "^4.0.0"
   },
   "devDependencies": {
     "concurrently": "^4.1.1",

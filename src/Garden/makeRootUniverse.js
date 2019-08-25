@@ -1,5 +1,6 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
+import { removeAllChildrenFromContainer } from './utilities.js'
 // import * as PIXI from 'pixi.js'
 import * as PIXI from 'pixi.js-legacy'
 global.PIXI = PIXI
@@ -88,11 +89,11 @@ export const makeRootUniverse = ({
     }
   }
 
-  // gridTexture.on('dragging', (dragEvent) => {
-  //   const { reference } = dragEvent
-  //   const { x, y } = reference
-  //   // moveTo(x, y)
-  // })
+  gridTexture.on('dragging', (dragEvent) => {
+    const { reference } = dragEvent
+    const { x, y } = reference
+    moveTo(x, y)
+  })
 
   const addChild = (...props) => {
     internalContainer.addChild(...props)
@@ -102,12 +103,17 @@ export const makeRootUniverse = ({
     internalContainer.removeChild(...props)
   }
 
+  const clearChildren = () => {
+    removeAllChildrenFromContainer(internalContainer)
+  }
+
   return {
     internalContainer,
     container,
     setSize,
     addChild,
     removeChild,
+    clearChildren,
     emit,
     moveTo,
     on

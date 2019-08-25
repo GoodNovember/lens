@@ -1,5 +1,6 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
+import { removeAllChildrenFromContainer } from './utilities.js'
 // import * as PIXI from 'pixi.js'
 import * as PIXI from 'pixi.js-legacy'
 global.PIXI = PIXI
@@ -14,7 +15,7 @@ const { Layer, Stage } = display
 
 const GRID_SIZE = 32
 
-export const makeUniverse = () => {
+export const makeUniverse = ({ color = 'black' }) => {
   const container = new Stage()
 
   const cvs = document.createElement('canvas')
@@ -26,6 +27,7 @@ export const makeUniverse = () => {
   cvs.height = GRID_SIZE
   ctx.beginPath()
   ctx.lineWidth = 1
+  ctx.strokeStyle = color
   ctx.moveTo(0, 0)
   ctx.lineTo(GRID_SIZE, 0)
   ctx.moveTo(0, 0)
@@ -56,6 +58,14 @@ export const makeUniverse = () => {
 
   const addChild = (...args) => {
     internalContainer.addChild(...args)
+  }
+
+  const removeChild = (...args) => {
+    internalContainer.removeChild(...args)
+  }
+
+  const clearChildren = () => {
+    removeAllChildrenFromContainer(internalContainer)
   }
 
   container.on('parent resized', (...props) => {
@@ -111,6 +121,8 @@ export const makeUniverse = () => {
     moveTo,
     container,
     addChild,
+    removeChild,
+    clearChildren,
     setSize,
     emit,
     on

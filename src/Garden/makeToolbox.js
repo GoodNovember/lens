@@ -4,6 +4,8 @@ import * as cursors from './cursors.js'
 // import * as PIXI from 'pixi.js'
 import * as PIXI from 'pixi.js-legacy'
 import { makeEventForwarder } from './makeEventForwarder.js'
+import { removeAllChildrenFromContainer } from './utilities.js'
+import { list } from 'postcss';
 
 global.PIXI = PIXI
 require('pixi-layers')
@@ -45,6 +47,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
   container.y = y || container.y
 
   const resizeListeners = new Set()
+  const moveListeners = new Set()
 
   const chromeLayer = new Layer()
   container.addChild(chromeLayer)
@@ -348,13 +351,35 @@ export const makeToolbox = ({ width, height, x, y }) => {
     reorderZIndexes()
   }
 
+  const notifyMoveListeners = () => {
+    moveListeners.forEach(listener => listener({ ...bounds }))
+    drawMask()
+  }
+
+  const drawMask = () => {
+    const { x, y, width, height } = bounds.mask
+    const mask = new Graphics()
+    mask.beginFill()
+    mask.drawRect(x, y, width, height)
+    mask.endFill()
+    internalContainer.mask = mask
+  }
+
+  const notifyResizeListeners = () => {
+    const { width, height } = bounds
+    resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
+    drawMask()
+  }
+
   const moveTo = (x, y) => {
     container.x = x
     container.y = y
+    notifyMoveListeners()
   }
   const moveBy = (dx, dy) => {
     container.x += dx
     container.y += dy
+    notifyMoveListeners()
   }
   const moveTopEdgeTo = y => {
     const { bottom } = bounds
@@ -440,19 +465,6 @@ export const makeToolbox = ({ width, height, x, y }) => {
     chromeMover.y = top
     chromeLeftSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
     chromeRightSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
-  }
-  const drawMask = () => {
-    const { x, y, width, height } = bounds.mask
-    const mask = new Graphics()
-    mask.beginFill()
-    mask.drawRect(x, y, width, height)
-    mask.endFill()
-    internalContainer.mask = mask
-  }
-  const notifyResizeListeners = () => {
-    const { width, height } = bounds
-    resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
-    drawMask()
   }
 
   makeBatchEventHandler('dragging')(
@@ -550,6 +562,10 @@ export const makeToolbox = ({ width, height, x, y }) => {
     internalContainer.removeChild(...args)
   }
 
+  const clearChildren = () => {
+    removeAllChildrenFromContainer(internalContainer)
+  }
+
   const subscribeToResize = callback => {
     if (resizeListeners.has(callback) === false) {
       resizeListeners.add(callback)
@@ -559,6 +575,19 @@ export const makeToolbox = ({ width, height, x, y }) => {
     return () => {
       if (resizeListeners.has(callback)) {
         resizeListeners.delete(callback)
+      }
+    }
+  }
+
+  const subscribeToMove = callback => {
+    if (moveListeners.has(callback) === false) {
+      moveListeners.add(callback)
+      callback(bounds)
+      drawMask()
+    }
+    return () => {
+      if (moveListeners.has(callback)) {
+        moveListeners.delete(callback)
       }
     }
   }
@@ -574,7 +603,9 @@ export const makeToolbox = ({ width, height, x, y }) => {
     internalContainer,
     addChild,
     removeChild,
+    clearChildren,
     subscribeToResize,
+    subscribeToMove,
     on,
     emit
   }

@@ -20,7 +20,7 @@ export const boot = ({ App, subscribeToResize, subscribeToImpetus }) => {
   subscribeToResize(({ width, height }) => {
     rootElement.setSize({ width, height })
   })
-  subscribeToImpetus(({ x, y }) => {
-    rootElement.moveTo(x, y)
-  })
+  // subscribeToImpetus(({ x, y }) => {
+  //   rootElement.moveTo(x, y)
+  // })
 }

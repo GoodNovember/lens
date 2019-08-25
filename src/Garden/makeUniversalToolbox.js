@@ -1,11 +1,15 @@
 import { makeToolbox } from './makeToolbox.js'
 import { makeUniverse } from './makeUniverse.js'
+import { removeAllChildrenFromContainer } from './utilities.js'
 
 export const makeUniversalToolbox = ({
+  color: strokeStyle = '#eeeeee',
   ...toolboxParams
 }) => {
   const internalToolbox = makeToolbox({ ...toolboxParams })
-  const internalUniverse = makeUniverse({})
+  const internalUniverse = makeUniverse({
+    color: strokeStyle
+  })
 
   const on = (eventName, callback) => internalToolbox.on(eventName, callback)
   const emit = (eventName, payload) => internalUniverse.emit(eventName, payload)
@@ -20,6 +24,7 @@ export const makeUniversalToolbox = ({
 
   const addChild = (...props) => internalUniverse.addChild(...props)
   const removeChild = (...props) => internalUniverse.removeChild(...props)
+  const clearChildren = () => internalUniverse.clearChildren()
 
   internalUniverse.on('pointerdown', () => {
     internalToolbox.bringToFront()
@@ -29,6 +34,7 @@ export const makeUniversalToolbox = ({
     ...internalToolbox,
     addChild, // overwrites toolbox,
     removeChild, // overwrites toolbox,
+    clearChildren, // overwrites toolbox
     emit, // override toolbox,
     on // override toolbox
   }

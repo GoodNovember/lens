@@ -37,28 +37,28 @@ export const PixiScene = ({ onBoot, appOptions }) => {
   useEffect(() => {
     const resizeListeners = new Set()
     const impetusListeners = new Set()
-    document.addEventListener('keypress', function (e) {
-      const { charCode } = e
-      switch (charCode) {
-        case 13: {
-          toggleFullscreen()
-          break
-        }
-        case 0: {
-          toggleFullscreen()
-          break
-        }
-        case 32: {
-          console.log('Refresh')
-          location.reload()
-          break
-        }
-        default: {
-          console.log(`charCode:${charCode}`)
-          console.log(e)
-        }
-      }
-    }, false)
+    // document.addEventListener('keypress', function (e) {
+    //   const { charCode } = e
+    //   // switch (charCode) {
+    //   //   case 13: {
+    //   //     toggleFullscreen()
+    //   //     break
+    //   //   }
+    //   //   case 0: {
+    //   //     toggleFullscreen()
+    //   //     break
+    //   //   }
+    //   //   case 32: {
+    //   //     // console.log('Refresh')
+    //   //     location.reload()
+    //   //     break
+    //   //   }
+    //     // default: {
+    //       // console.log(`charCode:${charCode}`)
+    //       // console.log(e)
+    //     // }
+    //   // }
+    // }, false)
 
     const subscribeToResize = callback => {
       if (resizeListeners.has(callback) === false) {

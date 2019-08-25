@@ -13,14 +13,64 @@ require('pixi-layers')
 
 const {
   display,
-  Text
+  Text,
+  TextStyle
 } = PIXI
 
 const {
   Layer
 } = display
 
-const textStyle = { fill: 0xFFFFFF, fontSize: 12, fontFamily: 'fira code' }
+const makeStyle = inputObj => new TextStyle(inputObj)
+
+const makeTextWithStyle = ({ regularStyle, hoverStyle, activeStyle }) => string => {
+  const textElement = new Text(string, regularStyle)
+  textElement.interactive = true
+  textElement.on('pointerdown', () => {
+    if (activeStyle) {
+      textElement.style = activeStyle
+    }
+  })
+  textElement.on('pointerover', () => {
+    if (hoverStyle) {
+      textElement.style = hoverStyle
+    }
+  })
+  textElement.on('pointerup', () => {
+    textElement.style = regularStyle
+  })
+  textElement.on('pointerout', () => {
+    if (regularStyle) {
+      textElement.style = regularStyle
+    }
+  })
+  return textElement
+}
+
+const fontFamily = `fira code`
+const fontSize = 12
+
+const BLACK = 0x000000
+const RED = 0xff0000
+const GREEN = 0x00ff00
+const BLUE = 0x0000ff
+const DARK_GREEN = 0x003300
+
+const normalText = makeTextWithStyle({
+  regularStyle: makeStyle({ fill: BLACK, fontFamily, fontSize })
+})
+
+const fileText = makeTextWithStyle({
+  regularStyle: makeStyle({ fill: BLUE, fontFamily, fontSize }),
+  hoverStyle: makeStyle({ fill: RED, fontFamily, fontSize }),
+  activeStyle: makeStyle({ fill: GREEN, fontFamily, fontSize })
+})
+
+const directoryText = makeTextWithStyle({
+  regularStyle: makeStyle({ fill: DARK_GREEN, fontFamily, fontSize }),
+  hoverStyle: makeStyle({ fill: RED, fontFamily, fontSize }),
+  activeStyle: makeStyle({ fill: GREEN, fontFamily, fontSize })
+})
 
 const getFileStat = filePath => new Promise((resolve, reject) => {
   fs.stat(filePath, (error, stats) => {
@@ -103,10 +153,19 @@ const representDirectoryItem = fileData => {
   } else if (isSymbolicLink) {
     addedLabel = `symbolic-link`
   }
-  const label = new Text(`[ ] ${addedLabel}\t-->\t${baseName}`, textStyle)
+  const labelText = `${baseName}`
+  let label = normalText(labelText)
+  if (isFile) {
+    label = fileText(labelText)
+  }
+  if (isDirectory) {
+    label = directoryText(labelText)
+  }
   container.addChild(label)
   return {
-    container
+    container,
+    get height() { return label.height },
+    get width(){ return label.width }
   }
 }
 
@@ -130,21 +189,22 @@ const groupFilesAndDirectories = inputArray => {
   return [directories, outputFiles, other].flat()
 }
 
+const UL_OFFSET = 50
+
 export const parseDirectory = directoryPath => {
   const container = new Layer()
   const normalizedPath = path.normalize(untildify(directoryPath))
-
-  const label = new Text(`*** Folder contents for directory: ${directoryPath} ***`, textStyle)
+  const label = normalText(`*** Folder contents for directory: ${directoryPath} ***`)
   container.addChild(label)
-  label.x = 25
-  label.y = 6
+  label.x = UL_OFFSET
+  label.y = (UL_OFFSET - label.height) / 2
   getFilesInDirectory(normalizedPath).then(rawItems => {
     const sortedItems = groupFilesAndDirectories(rawItems)
     sortedItems.map((fileData, index) => {
       const fileRep = representDirectoryItem(fileData)
       container.addChild(fileRep.container)
-      fileRep.container.x = 25
-      fileRep.container.y += (index * 12) + 25
+      fileRep.container.x = UL_OFFSET
+      fileRep.container.y += (index * fileRep.height) + UL_OFFSET
     })
   })
 

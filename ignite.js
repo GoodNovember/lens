@@ -10,6 +10,7 @@ const options = {
   port: PORT,
   target: 'electron',
   outDir: './build',
+  useMaps: false,
   watch: true,
   // detailedReport: true,
   autoInstall: false

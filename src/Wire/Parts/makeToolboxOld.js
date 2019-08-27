@@ -1,23 +1,14 @@
-import { enableDragEvents } from './enableDragEvents.js'
-import { makeRect } from './makeRect'
+import { enableDragEvents } from '../Utilities/enableDragEvents.js'
+import { makeRect } from '../Utilities/makeRect.js'
 import * as cursors from './cursors.js'
-// import * as PIXI from 'pixi.js'
-import * as PIXI from 'pixi.js-legacy'
-import { makeEventForwarder } from './makeEventForwarder.js'
-import { removeAllChildrenFromContainer } from './utilities.js'
-
-global.PIXI = PIXI
-require('pixi-layers')
+import { PIXI } from '../Utilities/localPixi.js'
+import { makeEventForwarder } from '../Utilities/makeEventForwarder.js'
+import { emptyTargetContainer } from '../Utilities/emptyTargetContainer.js'
 
 const {
-  display,
+  display: { Layer, Stage },
   Graphics
 } = PIXI
-
-const {
-  Layer,
-  Stage
-} = display
 
 const TOOLBOX_MIN_WIDTH = 32
 const TOOLBOX_MIN_HEIGHT = 32
@@ -39,7 +30,7 @@ const makeBatchEventHandler = eventName => callback => itemArray => itemArray.ma
 
 const makeDragRect = makeRectOptions => enableDragEvents(makeRect(makeRectOptions))
 
-export const makeToolbox = ({ width, height, x, y }) => {
+export const makeToolboxOld = ({ width, height, x, y }) => {
   const container = new Stage()
 
   container.x = x || container.x
@@ -562,7 +553,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
   }
 
   const clearChildren = () => {
-    removeAllChildrenFromContainer(internalContainer)
+    emptyTargetContainer(internalContainer)
   }
 
   const subscribeToResize = callback => {

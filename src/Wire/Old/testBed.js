@@ -1,6 +1,6 @@
-import { parseDirectory } from './parseDirectory.js'
-import { directoryLens } from './directoryLens.js'
-import { makeStringPrimitive } from './makeStringPrimitive.js'
+import { parseDirectory } from './Old/parseDirectory.js/index.js'
+import { directoryLens } from './Old/directoryLens.js/index.js'
+import { makeStringPrimitive } from './Old/makeStringPrimitive.js/index.js'
 import * as PIXI from 'pixi.js-legacy'
 
 global.PIXI = PIXI
@@ -23,7 +23,7 @@ export const testBed = () => {
   // const { container: directoryContainer } = parseDirectory('~/Downloads')
 
   const stringPrimitive = makeStringPrimitive({ value: '~/Downloads', x: 10, y: 10 })
-  
+
   let activeLens = null
 
   stringPrimitive.subscribeToValueChange(newValue => {

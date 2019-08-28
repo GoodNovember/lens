@@ -1,7 +1,9 @@
 export const makeBigSignal = () => {
   const listeners = new Set()
   const emit = payload => {
-    listeners.forEach(listener => listener(payload))
+    for (const listener of listeners) {
+      listener(payload)
+    }
   }
   const subscribe = callback => {
     if (listeners.has(callback) === false) {

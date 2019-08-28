@@ -1,6 +1,6 @@
 import { PIXI } from '../Utilities/localPixi.js'
 
-const { display: { Stage } } = PIXI
+const { display: { Stage, Layer } } = PIXI
 
 export const makeGenericItem = (name) => {
   let activeParent = null

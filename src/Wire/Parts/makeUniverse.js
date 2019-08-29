@@ -1,9 +1,6 @@
-import { enableDragEvents } from './enableDragEvents.js'
-import { makeEventForwarder } from './makeEventForwarder.js'
-import { removeAllChildrenFromContainer } from './utilities.js'
-import * as PIXI from 'pixi.js-legacy'
-global.PIXI = PIXI
-require('pixi-layers')
+import { enableDragEvents } from '../Utilities/enableDragEvents.js'
+import { makeEventForwarder } from '../Utilities/makeEventForwarder.js'
+import { PIXI } from '../Utilities/localPIXI.js'
 
 const {
   display,
@@ -70,16 +67,16 @@ export const makeUniverse = ({
   }
 
   const clearChildren = () => {
-    removeAllChildrenFromContainer(internalContainer)
+    internalContainer.children.forEach(child => internalContainer.removeChild(child))
     emit('redraw mask')
   }
 
-  container.on('parent resized', (...props) => {
-    emit('parent resized', ...props)
+  container.on('parent resize', (...props) => {
+    emit('parent resize', ...props)
   })
 
-  container.on('parent moved', (...props) => {
-    emit('parent moved', ...props)
+  container.on('parent move', (...props) => {
+    emit('parent move', ...props)
   })
 
   const moveTo = (x, y) => {
@@ -113,7 +110,7 @@ export const makeUniverse = ({
       }
     }
     if (changeOccured === true) {
-      emit('parent moved', { x, y })
+      emit('parent move', { x, y })
       gridTexture.emit('set drag reference', { x, y })
     }
   }
@@ -124,10 +121,7 @@ export const makeUniverse = ({
     container.emit('pointerdown', stuff)
   })
 
-  const resetPosition = () => {
-    moveTo(0, 0)
-    // gridTexture.emit('reset drag')
-  }
+  const resetPosition = () => moveTo(0, 0)
 
   return {
     moveTo,

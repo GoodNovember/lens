@@ -1,25 +1,16 @@
-import * as PIXI from 'pixi.js-legacy'
 import fs from 'fs'
 import path from 'path'
-// import { remote } from 'electron'
 import untildify from 'untildify'
 import naturalOrder from 'natural-order'
 import mime from 'mime'
 
-// const { shell } = remote
-
-global.PIXI = PIXI
-require('pixi-layers')
+import { PIXI } from '../Utilities/localPIXI.js'
 
 const {
-  display,
+  display: { Layer },
   Text,
   TextStyle
 } = PIXI
-
-const {
-  Layer
-} = display
 
 const makeStyle = inputObj => new TextStyle(inputObj)
 
@@ -122,50 +113,12 @@ const getFilesInDirectory = directoryPath => getDirectoryFiles(directoryPath).th
 
 const representDirectoryItem = fileData => {
   const container = new Layer()
-  const {
-    isDirectory,
-    isFile,
-    isCharacterDevice,
-    isBlockDevice,
-    isFIFO,
-    isSocket,
-    isSymbolicLink,
-    baseName,
-    mime
-  } = fileData
-  let addedLabel = `other`
-  let fileDetail = ' ~ unknown ~ '
-  if (isDirectory) {
-    addedLabel = `directory`
-  } else if (isFile) {
-    if (mime) {
-      fileDetail = ` ${mime} `
-    }
-    addedLabel = `file [${fileDetail}]`
-  } else if (isCharacterDevice) {
-    addedLabel = `character-device`
-  } else if (isBlockDevice) {
-    addedLabel = `block-device`
-  } else if (isFIFO) {
-    addedLabel = `fifo`
-  } else if (isSocket) {
-    addedLabel = `socket`
-  } else if (isSymbolicLink) {
-    addedLabel = `symbolic-link`
-  }
-  const labelText = `${baseName}`
-  let label = normalText(labelText)
-  if (isFile) {
-    label = fileText(labelText)
-  }
-  if (isDirectory) {
-    label = directoryText(labelText)
-  }
+  const label = normalText(JSON.stringify(fileData))
   container.addChild(label)
   return {
     container,
-    get height() { return label.height },
-    get width(){ return label.width }
+    get height () { return label.height },
+    get width () { return label.width }
   }
 }
 
@@ -189,22 +142,18 @@ const groupFilesAndDirectories = inputArray => {
   return [directories, outputFiles, other].flat()
 }
 
-const UL_OFFSET = 50
+const COMFORT_MARGIN = 8
 
 export const parseDirectory = directoryPath => {
   const container = new Layer()
   const normalizedPath = path.normalize(untildify(directoryPath))
-  const label = normalText(`*** Folder contents for directory: ${directoryPath} ***`)
-  container.addChild(label)
-  label.x = UL_OFFSET
-  label.y = (UL_OFFSET - label.height) / 2
   getFilesInDirectory(normalizedPath).then(rawItems => {
     const sortedItems = groupFilesAndDirectories(rawItems)
     sortedItems.map((fileData, index) => {
       const fileRep = representDirectoryItem(fileData)
       container.addChild(fileRep.container)
-      fileRep.container.x = UL_OFFSET
-      fileRep.container.y += (index * fileRep.height) + UL_OFFSET
+      fileRep.container.x = COMFORT_MARGIN
+      fileRep.container.y += (index * fileRep.height) + COMFORT_MARGIN
     })
   })
 

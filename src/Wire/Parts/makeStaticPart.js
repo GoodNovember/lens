@@ -1,14 +1,8 @@
-import { enableDragEvents } from './enableDragEvents.js'
-import { makeRect } from './makeRect'
-import * as cursors from './cursors.js'
-// import * as PIXI from 'pixi.js'
-import * as PIXI from 'pixi.js-legacy'
-import { makeEventForwarder } from './makeEventForwarder.js'
-import { removeAllChildrenFromContainer } from './utilities.js'
-import { list } from 'postcss'
-
-global.PIXI = PIXI
-require('pixi-layers')
+import { makeEventForwarder } from '../Utilities/makeEventForwarder.js'
+import { enableDragEvents } from '../Utilities/enableDragEvents.js'
+import { makeRect } from '../Utilities/makeRect.js'
+import { PIXI } from '../Utilities/localPIXI.js'
+import * as cursors from '../Misc/cursors.js'
 
 const {
   display,
@@ -19,6 +13,26 @@ const {
   Layer,
   Stage
 } = display
+
+export const makeStaticPart = ({ x, y }) => {
+  const container = new Layer()
+  container.x = x
+  container.y = y
+  function addChild (...args) {
+    container.addChild(...args)
+    return () => {
+      removeChild(...args)
+    }
+  }
+  function removeChild (...args) {
+    container.removeChild(...args)
+  }
+  return {
+    container,
+    addChild,
+    removeChild
+  }
+}
 
 const TOOLBOX_MIN_WIDTH = 32
 const TOOLBOX_MIN_HEIGHT = 32
@@ -373,7 +387,7 @@ export const makeToolbox = ({
   }
 
   function drawMask () {
-    const { marginSize, innerMargin } = bounds
+    const { innerMargin, top, left } = bounds
     const { x, y, width, height } = bounds.mask
     const mask = new Graphics()
     mask.beginFill()
@@ -386,7 +400,7 @@ export const makeToolbox = ({
       chromeBoxGraphics.clear()
       if (boxHeight > 0 && boxWidth > 0) {
         chromeBoxGraphics.lineStyle(1, BOX_COLOR, 1.0, 1, true)
-        chromeBoxGraphics.drawRect(innerMargin + marginSize, innerMargin + marginSize, Math.max(width, 0), Math.max(height, 0))
+        chromeBoxGraphics.drawRect(left + innerMargin, top + innerMargin, Math.max(width, 0), Math.max(height, 0))
       }
     }
   }
@@ -598,7 +612,7 @@ export const makeToolbox = ({
   }
 
   const clearChildren = () => {
-    removeAllChildrenFromContainer(internalContainer)
+    internalContainer.children.forEach(child => internalContainer.removeChild(child))
   }
 
   const subscribeToResize = callback => {

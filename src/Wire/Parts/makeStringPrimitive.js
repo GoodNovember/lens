@@ -1,9 +1,5 @@
-import { makeToolbox } from '../Garden/makeToolbox.js'
-
-import * as PIXI from 'pixi.js-legacy'
-
-global.PIXI = PIXI
-require('pixi-layers')
+import { makeToolbox } from './makeToolbox.js'
+import { PIXI } from '../Utilities/localPIXI.js'
 
 const {
   display,
@@ -30,7 +26,13 @@ export const makeStringPrimitive = ({
   const changeListeners = new Set()
 
   let internalValue = value
-  const toolbox = makeToolbox({ width, height, ...props })
+  const toolbox = makeToolbox({
+    width,
+    height,
+    hideBox: true,
+    mode: 'X-ONLY',
+    ...props
+  })
   const container = toolbox.container
 
   // const textElement = new Text(value, regularText)
@@ -72,8 +74,7 @@ export const makeStringPrimitive = ({
   const getValue = () => { return internalValue }
   const setValue = newValue => {
     internalValue = newValue
-    // textElement.text = newValue
-    textAreaElm.innerText = newValue
+    textAreaElm.value = newValue
     changeListeners.forEach(listener => listener(newValue))
   }
 

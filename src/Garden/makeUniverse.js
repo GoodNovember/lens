@@ -1,7 +1,6 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
 import { removeAllChildrenFromContainer } from './utilities.js'
-// import * as PIXI from 'pixi.js'
 import * as PIXI from 'pixi.js-legacy'
 global.PIXI = PIXI
 require('pixi-layers')
@@ -15,13 +14,11 @@ const { Layer, Stage } = display
 
 const GRID_SIZE = 32
 
-export const makeUniverse = ({ color = 'black' }) => {
+export const makeUniverse = ({ color = 'black', mode = 'BOTH' }) => {
   const container = new Stage()
 
   const cvs = document.createElement('canvas')
   const ctx = cvs.getContext('2d')
-
-  const mode = 'BOTH'
 
   cvs.width = GRID_SIZE
   cvs.height = GRID_SIZE
@@ -56,16 +53,20 @@ export const makeUniverse = ({ color = 'black' }) => {
     emit('parent resize', { width, height })
   }
 
-  const addChild = (...args) => {
+  function addChild (...args) {
     internalContainer.addChild(...args)
+    return () => {
+      removeChild(...args)
+    }
   }
 
-  const removeChild = (...args) => {
+  function removeChild (...args) {
     internalContainer.removeChild(...args)
   }
 
   const clearChildren = () => {
     removeAllChildrenFromContainer(internalContainer)
+    emit('redraw mask')
   }
 
   container.on('parent resized', (...props) => {
@@ -95,12 +96,12 @@ export const makeUniverse = ({ color = 'black' }) => {
         setY(y)
         changeOccured = true
       }
-    } else if (mode === 'X_ONLY') {
+    } else if (mode === 'X-ONLY') {
       if (internalContainer.position.x !== x) {
         setX(x)
         changeOccured = true
       }
-    } else if (mode === 'Y_ONLY') {
+    } else if (mode === 'Y-ONLY') {
       if (internalContainer.position.y !== y) {
         setY(y)
         changeOccured = true
@@ -117,12 +118,15 @@ export const makeUniverse = ({ color = 'black' }) => {
     container.emit('pointerdown', stuff)
   })
 
+  const resetPosition = () => moveTo(0, 0)
+
   return {
     moveTo,
     container,
     addChild,
     removeChild,
     clearChildren,
+    resetPosition,
     setSize,
     emit,
     on

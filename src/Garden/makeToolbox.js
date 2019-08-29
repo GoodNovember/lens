@@ -5,7 +5,7 @@ import * as cursors from './cursors.js'
 import * as PIXI from 'pixi.js-legacy'
 import { makeEventForwarder } from './makeEventForwarder.js'
 import { removeAllChildrenFromContainer } from './utilities.js'
-import { list } from 'postcss';
+import { list } from 'postcss'
 
 global.PIXI = PIXI
 require('pixi-layers')
@@ -60,6 +60,14 @@ export const makeToolbox = ({ width, height, x, y }) => {
   const on = (eventName, callback) => {
     container.on(eventName, callback)
   }
+
+  on('parent resize', () => {
+    drawMask()
+  })
+
+  on('parent move', () => {
+    drawMask()
+  })
 
   internalContainer.x = INNER_MARGIN + MARGIN_SIZE
   internalContainer.y = INNER_MARGIN + MARGIN_SIZE
@@ -351,12 +359,12 @@ export const makeToolbox = ({ width, height, x, y }) => {
     reorderZIndexes()
   }
 
-  const notifyMoveListeners = () => {
+  function notifyMoveListeners () {
     moveListeners.forEach(listener => listener({ ...bounds }))
     drawMask()
   }
 
-  const drawMask = () => {
+  function drawMask () {
     const { x, y, width, height } = bounds.mask
     const mask = new Graphics()
     mask.beginFill()
@@ -365,7 +373,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
     internalContainer.mask = mask
   }
 
-  const notifyResizeListeners = () => {
+  function notifyResizeListeners () {
     const { width, height } = bounds
     resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
     drawMask()
@@ -536,7 +544,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
       moveBy(x, y)
       notifyResizeListeners()
     })([chromeMover])
-  
+
   chromeMover
     .on('dragstart', () => {
       container.alpha = DRAGGING_ALPHA
@@ -545,20 +553,29 @@ export const makeToolbox = ({ width, height, x, y }) => {
       container.alpha = 1
     })
 
-  container.on('parent moved', (payload) => {
-    emit('parent moved', payload)
-    drawMask()
-  })
-  container.on('parent resized', (payload) => {
-    emit('parent resized', payload)
+  container.on('redraw mask', () => {
     drawMask()
   })
 
-  const addChild = (...args) => {
+  container.on('parent move', (payload) => {
+    emit('parent move', payload)
+    notifyMoveListeners()
+    drawMask()
+  })
+  container.on('parent resize', (payload) => {
+    emit('parent resize', payload)
+    notifyResizeListeners()
+    drawMask()
+  })
+
+  function addChild (...args) {
     internalContainer.addChild(...args)
+    return () => {
+      removeChild(...args)
+    }
   }
 
-  const removeChild = (...args) => {
+  function removeChild (...args) {
     internalContainer.removeChild(...args)
   }
 
@@ -570,7 +587,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
     if (resizeListeners.has(callback) === false) {
       resizeListeners.add(callback)
       callback(bounds)
-      drawMask()
+      // drawMask()
     }
     return () => {
       if (resizeListeners.has(callback)) {
@@ -583,7 +600,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
     if (moveListeners.has(callback) === false) {
       moveListeners.add(callback)
       callback(bounds)
-      drawMask()
+      // drawMask()
     }
     return () => {
       if (moveListeners.has(callback)) {
@@ -607,6 +624,7 @@ export const makeToolbox = ({ width, height, x, y }) => {
     subscribeToResize,
     subscribeToMove,
     on,
-    emit
+    emit,
+    drawMask
   }
 }

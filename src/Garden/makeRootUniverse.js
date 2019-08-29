@@ -85,15 +85,11 @@ export const makeRootUniverse = ({
       }
     }
     if (changeOccured) {
-      emit('parent moved', { x, y })
+      emit('parent move', { x, y })
     }
   }
 
-  gridTexture.on('dragging', (dragEvent) => {
-    const { reference } = dragEvent
-    const { x, y } = reference
-    moveTo(x, y)
-  })
+  gridTexture.on('dragging', ({ reference: { x, y } }) => moveTo(x, y))
 
   const addChild = (...props) => {
     internalContainer.addChild(...props)

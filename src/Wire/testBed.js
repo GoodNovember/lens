@@ -23,17 +23,16 @@ export const testBed = () => {
   // const { container: directoryContainer } = parseDirectory('~/Downloads')
 
   const stringPrimitive = makeStringPrimitive({ value: '~/Downloads', x: 10, y: 10 })
-  
+
   let activeLens = null
+
+  const dLens = directoryLens({ directory: `~/Downloads` })
+
+  container.addChild(dLens.container)
 
   stringPrimitive.subscribeToValueChange(newValue => {
     console.log(`Value: ${newValue}`)
-    const newLens = directoryLens({ directory: newValue })
-    if (activeLens) {
-      container.removeChild(activeLens)
-    }
-    activeLens = newLens.container
-    container.addChild(newLens.container)
+    dLens.directory = newValue
   })
 
   container.addChild(stringPrimitive.container)

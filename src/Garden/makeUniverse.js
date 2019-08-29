@@ -109,6 +109,7 @@ export const makeUniverse = ({ color = 'black', mode = 'BOTH' }) => {
     }
     if (changeOccured === true) {
       emit('parent moved', { x, y })
+      gridTexture.emit('set drag reference', { x, y })
     }
   }
 
@@ -118,7 +119,10 @@ export const makeUniverse = ({ color = 'black', mode = 'BOTH' }) => {
     container.emit('pointerdown', stuff)
   })
 
-  const resetPosition = () => moveTo(0, 0)
+  const resetPosition = () => {
+    moveTo(0, 0)
+    // gridTexture.emit('reset drag')
+  }
 
   return {
     moveTo,

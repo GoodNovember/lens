@@ -37,6 +37,16 @@ export const testBed = () => {
 
   container.addChild(stringPrimitive.container)
 
+  container.on('parent move', payload => {
+    dLens.container.emit('parent move', payload)
+    stringPrimitive.container.emit('parent move', payload)
+  })
+
+  container.on('parent resize', payload => {
+    dLens.container.emit('parent resize', payload)
+    stringPrimitive.container.emit('parent resize', payload)
+  })
+
   return {
     container
   }

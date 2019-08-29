@@ -1,6 +1,5 @@
 import { makeToolbox } from './makeToolbox.js'
 import { makeUniverse } from './makeUniverse.js'
-import { removeAllChildrenFromContainer } from './utilities.js'
 
 export const makeUniversalToolbox = ({
   color: strokeStyle = '#eeeeee',

@@ -1,4 +1,5 @@
 import { ensureDefaults } from './ensureDefaults.js'
+import { some } from 'bluebird-lst'
 
 export const enableDragEvents = (something, options) => {
   let isDragging = false
@@ -14,6 +15,14 @@ export const enableDragEvents = (something, options) => {
   const args = ensureDefaults(options, defaults)
 
   let reference = args.reference
+
+  something.on('reset drag', () => {
+    reference = { x: 0, y: 0 }
+  })
+
+  something.on('set drag reference', ({ x, y }) => {
+    reference = { x, y }
+  })
 
   const internalDragStart = (event) => {
     const { data } = event

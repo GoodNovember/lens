@@ -19,15 +19,24 @@ const categorizeFilePaths = filePathArray => new Promise((resolve, reject) => {
       }
       return [directories, files, other]
     }, [[], [], []])
-    resolve([directories, files, other].flat().map(({ path, stats }) => {
+
+    const sortedDirectories = directories.sort()
+    const sortedFiles = files.sort()
+
+    resolve([sortedDirectories, other, sortedFiles].flat().map(({ path, stats }) => {
       if (stats.isDirectory()) {
         return {
           label: `+ ${Path.basename(path)}`,
           value: tildify(path)
         }
-      } else {
+      } else if (stats.isFile()) {
         return {
           label: `  ${Path.basename(path)}`,
+          value: tildify(path)
+        }
+      } else {
+        return {
+          label: `@ ${Path.basename(path)}`,
           value: tildify(path)
         }
       }
@@ -38,10 +47,15 @@ const categorizeFilePaths = filePathArray => new Promise((resolve, reject) => {
 const getAllItemsFromDirectory = directoryPath => new Promise((resolve, reject) => {
   const normalzedPath = untildify(directoryPath)
   const parentPath = Path.dirname(normalzedPath)
+  console.log({ parentPath })
   getDirectoryFiles(normalzedPath)
     .then(rawFiles => {
       categorizeFilePaths(rawFiles).then(compiledFiles => {
-        resolve([ { label: '..(parent directory)', value: Path.normalize(tildify(parentPath)) }, ...compiledFiles ])
+        if (parentPath === '/' && normalzedPath === '/') {
+          resolve([...compiledFiles])
+        } else {
+          resolve([ { label: '..(parent directory)', value: Path.normalize(tildify(parentPath)) }, ...compiledFiles ])
+        }
       }).catch(reject)
     })
     .catch(reject)

@@ -1,15 +1,15 @@
-import { isObj } from './assertions.js'
+import { isObject } from './assertions.js'
 
 const extend = (defaults) => (anotherObject) => {
-  if (isObj(defaults) && isObj(anotherObject)) {
+  if (isObject(defaults) && isObject(anotherObject)) {
     return Object.assign({}, defaults, anotherObject)
   } else {
-    if (isObj(defaults) === false) {
+    if (isObject(defaults) === false) {
       console.error('Default object is not an object.', defaults)
-    } else if (isObj(anotherObject) === false) {
+    } else if (isObject(anotherObject) === false) {
       console.error('Other object is not an object', anotherObject)
     }
   }
 }
 
-export const ensureDefaults = (ingredients, defaults) => ((isObj(ingredients)) ? (extend(defaults)(ingredients)) : (defaults))
+export const ensureDefaults = (ingredients, defaults) => ((isObject(ingredients)) ? (extend(defaults)(ingredients)) : (defaults))

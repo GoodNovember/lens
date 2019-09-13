@@ -1,8 +1,8 @@
-import { makeDirectoryLens } from './Parts/makeDirectoryLens.js'
-const INITIAL_DIRECTORY = `~/Desktop`
+import path from 'path'
+import { makeDiagram } from './Diagram/makeDiagram.js'
+
+const directoryPath = path.resolve('src/Wire/Diagram/targetDirectory/')
+
 export const testBed = () => {
-  const directoryLens = makeDirectoryLens({ directory: INITIAL_DIRECTORY })
-  return {
-    ...directoryLens
-  }
+  return makeDiagram({ directoryPath })
 }

@@ -35,11 +35,12 @@ export const makeStringPrimitive = ({
   })
   const container = toolbox.container
 
-  // const textElement = new Text(value, regularText)
+  const pixiTextElement = new Text(getValue(), regularText)
+
+  container.addChild(pixiTextElement)
 
   const textAreaElm = document.createElement('input')
   textAreaElm.type = 'text'
-  // textAreaElm.style.resize = 'none'
   textAreaElm.style.display = 'block'
   textAreaElm.style.position = 'fixed'
   textAreaElm.style.backgroundColor = 'white'
@@ -54,31 +55,37 @@ export const makeStringPrimitive = ({
   textAreaElm.value = internalValue
   document.body.appendChild(textAreaElm)
 
-  // toolbox.addChild(textElement)
-
-  function moveTextAreaItem (bounds) {
-    textAreaElm.style.top = `${bounds.globalTop + bounds.innerMargin}px`
-    textAreaElm.style.left = `${bounds.globalLeft + bounds.innerMargin}px`
+  function updateTextArea (bounds) {
     textAreaElm.style.height = `${bounds.height - (bounds.innerMargin * 2)}px`
     textAreaElm.style.width = `${bounds.width - (bounds.innerMargin * 2)}px`
+    textAreaElm.style.top = `${bounds.globalTop + bounds.innerMargin}px`
+    textAreaElm.style.left = `${bounds.globalLeft + bounds.innerMargin}px`
   }
 
-  toolbox.subscribeToMove(bounds => {
-    moveTextAreaItem(bounds)
+  toolbox.container.on('parent move', bounds => {
+    updateTextArea(toolbox.bounds)
   })
 
-  toolbox.subscribeToResize(bounds => {
-    moveTextAreaItem(bounds)
+  toolbox.container.on('parent resize', bounds => {
+    updateTextArea(toolbox.bounds)
   })
 
-  const getValue = () => { return internalValue }
-  const setValue = newValue => {
+  // toolbox.subscribeToMove(bounds => {
+  //   updateTextArea(bounds)
+  // })
+
+  // toolbox.subscribeToResize(bounds => {
+  //   updateTextArea(bounds)
+  // })
+
+  function getValue () { return internalValue }
+  function setValue (newValue) {
     internalValue = newValue
     textAreaElm.value = newValue
     changeListeners.forEach(listener => listener(newValue))
   }
 
-  const clearListeners = () => {
+  function clearListeners () {
     changeListeners.clear()
   }
 
@@ -102,6 +109,7 @@ export const makeStringPrimitive = ({
 
   return {
     container,
+    toolbox,
     subscribeToValueChange,
     clearListeners,
     get value () { return getValue() },

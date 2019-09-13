@@ -110,8 +110,8 @@ export const makeUniverse = ({
       }
     }
     if (changeOccured === true) {
-      emit('parent move', { x, y })
       gridTexture.emit('set drag reference', { x, y })
+      emit('redraw mask')
     }
   }
 

@@ -69,22 +69,29 @@ export const makeDirectoryLens = ({
     height: 550
   })
   const stringPrimitive = makeStringPrimitive({
-    x: 8,
-    y: 8,
+    x: 0,
+    y: 0,
     width: 300,
     height: 64
   })
   const listBox = makeListBox({
-    x: 8,
-    y: 80,
+    x: 0,
+    y: 60,
     width: 700,
     height: 416,
     mode: 'Y-ONLY',
     hideGrid: true
   })
 
-  stringPrimitive.container.on('parent resize', ({ width, height }) => {
+  stringPrimitive.container.on('parent resize', bounds => {
+    const { toolbox } = universalToolbox
     // console.log('Resize', { width, height })
+    // console.log('String Primative Parent Resized!', bounds)
+    const newWidth = (toolbox.bounds.width) - ((toolbox.bounds.innerMargin * 2.3))
+    const newHeight = (toolbox.bounds.height) - 95
+    stringPrimitive.toolbox.width = newWidth
+    listBox.toolbox.width = newWidth
+    listBox.toolbox.height = newHeight
   })
 
   stringPrimitive.value = directory

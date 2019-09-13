@@ -301,6 +301,10 @@ export const makeToolbox = ({
       const { right, left } = this
       return right - left
     },
+    get innerWidth () {
+      const { width } = this
+      return width
+    },
     get mask () {
       const { globalTop, globalLeft, globalRight, globalBottom } = this
       const x = globalLeft + INNER_MARGIN
@@ -363,6 +367,7 @@ export const makeToolbox = ({
 
   function notifyMoveListeners () {
     moveListeners.forEach(listener => listener({ ...bounds }))
+    emit('parent move', bounds)
     drawMask()
   }
 
@@ -388,7 +393,7 @@ export const makeToolbox = ({
   function notifyResizeListeners () {
     const { width, height } = bounds
     resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
-    emit('parent resize', { width, height })
+    // emit('parent resize', bounds)
     drawMask()
   }
 
@@ -570,13 +575,13 @@ export const makeToolbox = ({
     drawMask()
   })
 
-  container.on('parent move', (payload) => {
-    emit('parent move', payload)
+  container.on('parent move', bounds => {
+    emit('parent move', bounds)
     notifyMoveListeners()
     drawMask()
   })
-  container.on('parent resize', (payload) => {
-    emit('parent resize', payload)
+  container.on('parent resize', bounds => {
+    emit('parent resize', bounds)
     notifyResizeListeners()
     drawMask()
   })
@@ -625,9 +630,14 @@ export const makeToolbox = ({
   drawMask()
 
   return {
+    get bounds () { return bounds },
     get width () { return bounds.width },
     set width (newWidth) {
-      console.log(newWidth)
+      moveRightEdgeTo(newWidth)
+    },
+    get height () { return bounds.height },
+    set height (newHeight) {
+      moveBottomEdgeTo(newHeight)
     },
     moveTo,
     moveBy,

@@ -1,3 +1,0 @@
-justice: {
-  console.log('Wowzers')
-}

@@ -7,18 +7,38 @@ const acorn = require('acorn')
 const astring = require('astring')
 
 const readFileAsString = filePath => read({ filePath, options: { encoding: 'utf-8' } })
-const writeAndParseFile = (filePath, rawStringData) => new Promise((resolve, reject) => {
-  standard.lintText(rawStringData, {
-    fix: true
-  }, (error, results) => {
+const lintCodeString = stringData => new Promise((resolve, reject) => {
+  standard.lintText(stringData, { fix: true }, (error, results) => {
     if (error) {
       reject(error)
     } else {
-      const parsed = results.results[0].output
-      resolve(write({ filePath, data: parsed }))
+      resolve(results)
     }
   })
 })
+const convertFileStringToAst = fileString => acorn.parse(fileString, { sourceType: 'module' })
+
+const lintAndWriteFile = (filePath, rawStringData) => lintCodeString(rawStringData)
+  .then(({
+    results,
+    errorCount,
+    fixableErrorCount,
+    fixableWarningCount,
+    usedDepreciatedRules,
+    warningCount
+  }) => {
+    const { output } = results[0]
+    if (output) {
+      return write({ filePath, data: output }).then(() => {
+        return output
+      })
+    } else {
+      console.error(results)
+      return Promise.reject(new Error('No File Written, No Output from Linter.'))
+    }
+  })
+
+const compileJavascriptFromAST = ast => astring.generate(ast)
 
 export const makeDiagram = ({ directoryPath }) => {
   const universalToolbox = makeUniversalToolbox({
@@ -26,7 +46,7 @@ export const makeDiagram = ({ directoryPath }) => {
     height: 550
   })
 
-  watchDirectory({ directoryPath, options: { glob: '**/*.js' } })
+  watchDirectory({ directoryPath, options: { glob: '**/*.target.js' } })
     .then(({ watcher, files }) => {
       files.forEach((file) => {
         helloFile(file)
@@ -54,27 +74,30 @@ export const makeDiagram = ({ directoryPath }) => {
   }
 
   function updateFile (filePath) {
-    console.log(`What's New?`, filePath)
+    console.log('What\'s New?', filePath)
     thinkAboutFile(filePath)
   }
 
   function thinkAboutFile (filePath) {
     readFileAsString(filePath).then(fileAsString => {
-      const parsed = acorn.parse(fileAsString)
-      const rawOutput = astring.generate(parsed)
+      const parsedAST = convertFileStringToAst(fileAsString)
       const { name, dir } = path.parse(filePath)
-      const outputPath = path.join(dir, `${name}_parsed.hug`)
-      visualize(filePath, parsed)
-      // writeAndParseFile(outputPath, rawOutput).then(() => {
-      //   console.log(`File Written:`, outputPath)
-      // }).catch(error => {
-      //   console.error(error)
-      // })
+      const rawGeneratedJavascriptString = compileJavascriptFromAST(parsedAST)
+      const outputPath = path.join(dir, `${name}_parsed.js`)
+      visualize(filePath, parsedAST)
+      lintAndWriteFile(outputPath, rawGeneratedJavascriptString)
+        .then(writtenData => {
+          console.log(`File Written: ${outputPath}`)
+          console.log(writtenData)
+        })
+        .catch(error => {
+          console.error(error)
+        })
     })
   }
 
   function visualize (filePath, parsed) {
-    // console.log(`Would Visualize: ${filePath} ${parsed}`)
+    console.log(`Would Visualize: ${filePath} ${parsed}`)
     console.clear()
     console.log(JSON.stringify(parsed, null, '  '))
   }

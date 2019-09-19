@@ -19,8 +19,6 @@ These are connectors that hold onto statements.
 ```js
 {
   type: "ExpressionStatement",
-  start: Number,
-  end: Number,
   expression:{}
 }
 ```
@@ -64,6 +62,19 @@ Hey, want to talk about something specific on an object? use one of these.
   type: "Literal",
   value: // The value that the computer sees,
   raw: // the value as it was written
+}
+```
+
+## Literal (regex)
+```js
+{
+  type: "Literal",
+  value:{} // The value that the computer sees,
+  raw: String //the entire regex as written
+  regex:{ // only included with regex stuff
+    pattern: String, // the internal part of the regex
+    flags: String // after the last slash
+  }
 }
 ```
 
@@ -175,6 +186,7 @@ Quasis means the strings that interleave each of the expressions. If you use exp
   tail: Boolean // only the last element in the array is true.
 }
 ```
+
 ## Block Statement
 ```js
 {
@@ -344,4 +356,185 @@ Lets build an object together!
     // identifier
   }
 }
+```
+
+## Array Expression
+```js
+{
+  type:"ArrayExpression",
+  elements:[
+    // Literals
+  ]
+}
+```
+
+## Throw Statement
+```js
+{
+  type:"ThrowStatement",
+  argument:{
+    // expression
+  }
+}
+```
+
+## For In Statement
+```js
+{
+  type:"ForInStatement",
+  left:{
+    // Variable declaration
+  },
+  right:{
+    // identifier
+  },
+  body:{
+    // block statement
+  }
+}
+```
+
+## For Of Statement
+```js
+{
+  type:"ForOfStatement",
+  await: Boolean, // yep, see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of
+  left:{
+    // Variable declaration
+  },
+  right:{
+    // identifier
+  },
+  body:{
+    // block statement
+  }
+}
+```
+
+## Empty Statement
+```js
+{
+  type:"EmptyStatement"
+}
+```
+
+## Class Declaration
+```js
+{
+  type:"ClassDeclaration",
+  id:{
+    // identifier
+  },
+  superClass: null || Identifier
+  body:{
+    type: "ClassBody",
+    body:[]
+  }
+}
+```
+
+## Class With Constructor
+```js
+{
+  type:"ClassDeclaration",
+  id:{
+    // identifier
+  },
+  superClass: null || Identifier
+  body:{
+    type: "ClassBody",
+    body:[
+      {
+        type: "MethodDefinition",
+        kind: "constructor"
+        static: Boolean,
+        computed: Boolean,
+        key: {
+          // identifier
+        },
+        value:{
+          // function expression
+        }
+      }
+    ]
+  }
+}
+```
+
+## Import Declaration
+```js
+{
+  type:"ImportDeclaration",
+  specifiers:[
+    {
+      type: "ImportSpecifier",
+      imported: {
+        // identifier
+      },
+      local:{
+        // identifer // may be the same as above.
+      }
+    }
+  ],
+  source:{
+    // string literal
+  }
+}
+```
+
+## Export Named Declaration
+```js
+{
+  type: "ExportNamedDeclaration",
+  declaration:{
+    //"VariableDeclaration"
+  },
+  specifiers:[],
+  source: null,
+}
+```
+
+
+```js
+{
+  type: "ExportSpecifier",
+  local: {
+    // identifier
+  },
+  exported: {
+    // identifier
+  }
+}
+```
+
+## RestElement
+```js
+{
+  type:"RestElement",
+  argument:{
+    // identifier
+  }
+}
+```
+
+## Arrow Function Expression
+```js
+{
+  type: 'ArrowFunctionExpression',
+  id :null || Identifier,
+  expression: Boolean,
+  generator: Boolean,
+  async: Boolean,
+  params:[
+    //stuff
+  ],
+  body:{
+    // block Statement or Call Statement.
+  }
+}
+```
+
+```js
+const log = (...stuff) => { console.log(...stuff) } // uses a block statement for the body.
+const log2 = (...stuff) => console.log(...stuff) // uses a call statement for the body.
 ```

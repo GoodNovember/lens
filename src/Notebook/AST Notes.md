@@ -5,7 +5,7 @@ From Acorn, we get this:
 ```js
 {
   type: "Program",
-  sourceType: "Script"
+  sourceType: "script" || "module"
   body:[]
 }
 ```

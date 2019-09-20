@@ -3,6 +3,8 @@ import { watchDirectory, read, write } from '../Utilities/file.js'
 import path from 'path'
 import standard from 'standard'
 
+import { TexasRanger } from './texas-ranger.js'
+
 const acorn = require('acorn')
 const astring = require('astring')
 
@@ -87,8 +89,11 @@ export const makeDiagram = ({ directoryPath }) => {
       visualize(filePath, parsedAST)
       lintAndWriteFile(outputPath, rawGeneratedJavascriptString)
         .then(writtenData => {
+          const groupLabel = '--- File Written ---'
+          console.groupCollapsed(groupLabel)
           console.log(`File Written: ${outputPath}`)
           console.log(writtenData)
+          console.groupEnd(groupLabel)
         })
         .catch(error => {
           console.error(error)
@@ -96,10 +101,13 @@ export const makeDiagram = ({ directoryPath }) => {
     })
   }
 
-  function visualize (filePath, parsed) {
-    console.log(`Would Visualize: ${filePath} ${parsed}`)
-    console.clear()
-    console.log(JSON.stringify(parsed, null, '  '))
+  function visualize (filePath, ast) {
+    const groupLabel = '--- Raw AST ---'
+    console.groupCollapsed(groupLabel)
+    console.log(JSON.stringify(ast, null, '  '))
+    console.groupEnd(groupLabel)
+    const ranger = TexasRanger(ast)
+    console.log(ranger)
   }
 
   return {

@@ -46,6 +46,18 @@ export const Program = body => ({
   body
 })
 
+export const Module = body => ({
+  type: 'Program',
+  sourceType: 'module',
+  body
+})
+
+export const Script = body => ({
+  type: 'Program',
+  sourceType: 'script',
+  body
+})
+
 export const ExpressionStatement = expression => ({
   type: 'ExpressionStatement',
   expression

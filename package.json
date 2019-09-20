@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "acorn": "^7.0.0",
+    "acorn-walk": "^7.0.0",
     "astring": "^1.4.1",
     "babylonjs": "^4.0.3",
     "babylonjs-gui": "^4.0.3",

@@ -23,6 +23,7 @@
     "electron-fs-extra": "^1.0.0",
     "electron-is-dev": "^1.1.0",
     "esprima": "^4.0.1",
+    "estree-walker": "^0.8.1",
     "express": "^4.17.1",
     "micromatch": "^4.0.2",
     "mime": "^2.4.4",

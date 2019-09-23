@@ -106,8 +106,11 @@ export const makeDiagram = ({ directoryPath }) => {
     console.groupCollapsed(groupLabel)
     console.log(JSON.stringify(ast, null, '  '))
     console.groupEnd(groupLabel)
-    const ranger = TexasRanger(ast)
-    console.log(ranger)
+    const nodes = TexasRanger(ast)
+    universalToolbox.clearChildren()
+    nodes.forEach(({ node, ancestry }, index) => {
+      console.count('item')
+    })
   }
 
   return {

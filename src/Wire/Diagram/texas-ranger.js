@@ -3,53 +3,55 @@
 
 const { walk } = require('estree-walker')
 
-// one must now learn how they are being used.
-
-const subPositionsByType = {
-  MemberExpression: {
-    objects: ['object', 'property'],
-    arrays: []
+const padMaker = padValue => count => {
+  let output = ''
+  for (let x = 0; x < count; x++) {
+    output = `${output}${padValue}`
   }
-}
-
-export const TexasRanger = ast => {
-  const output = []
-  let counter = 0
-  walk(ast, {
-    enter: function (node, parentNode, parentKey, parentIndex) {
-      const isPartOfArray = typeof parentIndex === 'number'
-      if (isPartOfArray) {
-        if (parentNode) {
-          console.log(`${counter} enter A ${parentNode.type}.${parentKey}[${parentIndex}] = ${node.type}`)
-        } else {
-          console.log(`${counter} enter - ${node.type}`)
-        }
-      } else {
-        if (parentNode) {
-          console.log(`${counter} enter O ${parentNode.type}.${parentKey} = ${node.type}`)
-        } else {
-          console.log(`${counter} enter P ${node.type}`)
-        }
-      }
-      counter++
-    },
-    leave: function (node, parentNode, parentKey, parentIndex) {
-      const isPartOfArray = typeof parentIndex === 'number'
-      if (isPartOfArray) {
-        if (parentNode) {
-          console.log(`${counter} leave A ${parentNode.type}.${parentKey}[${parentIndex}] = ${node.type}`)
-        } else {
-          console.log(`${counter} leave - ${node.type}`)
-        }
-      } else {
-        if (parentNode) {
-          console.log(`${counter} leave O ${parentNode.type}.${parentKey} = ${node.type}`)
-        } else {
-          console.log(`${counter} leave P ${node.type}`)
-        }
-      }
-      counter++
-    }
-  })
   return output
 }
+
+const tabPad = padMaker('  ')
+
+export const TexasRanger = ast => new Promise((resolve, reject) => {
+  let contextDepth = 0
+  let currentAction = ''
+  let previousNode = null
+  let deepestDepth = 0
+
+  const ejections = []
+
+  function enter (node, parentNode, parentKey, parentIndex) {
+    if (currentAction !== 'enter') {
+      currentAction = 'enter'
+      console.log(`Enter: ${tabPad(contextDepth)} ${node.type}`)
+    } else {
+      console.log(`enter: ${tabPad(contextDepth)} ${node.type}`)
+    }
+    previousNode = node
+    contextDepth++
+  }
+
+  function leave (node, parentNode, parentKey, parentIndex) {
+    deepestDepth = Math.max(deepestDepth, contextDepth)
+    contextDepth--
+    if (currentAction !== 'leave') {
+      currentAction = 'leave'
+      ejections.push(previousNode)
+      console.log(`Eject: ${tabPad(contextDepth)} ${node.type}`)
+    } else {
+      console.log(`eject: ${tabPad(contextDepth)} ${node.type}`)
+    }
+    previousNode = node
+
+    // A Full Walk will always conculde with the Leaving of the program.
+    // As a side note, it also starts with entering the program.
+    if (node.type === 'Program') {
+      resolve({
+        ejections,
+        deepestDepth
+      })
+    }
+  }
+  walk(ast, { enter, leave })
+})

@@ -1,47 +1,94 @@
-const { walk } = require('estree-walker')
-const padMaker = padValue => count => {
-  let output = ''
-  for (let x = 0; x < count; x++) {
-    output = `${output}${padValue}`
-  }
-  return output
-}
-const tabPad = padMaker('\t')
-export const TexasRanger = ast => new Promise((resolve, reject) => {
-  let contextDepth = 0
-  let currentAction = ''
+import { walk } from 'estree-walker'
+export const TexasRanger = ast => new Promise(resolve => {
+  let contextDepth = -1
+  let previousDirection = ''
+  let deepestDepth = 0
   let previousNode = null
-  const ejections = []
-  function enter (node, parentNode, parentKey, parentIndex) {
-    if (currentAction !== 'enter') {
-      currentAction = 'enter'
-      console.log(`Enter: ${tabPad(contextDepth)} ${node.type}`)
-    } else {
-      console.log(`enter: ${tabPad(contextDepth)} ${node.type}`)
+  const rawRecords = []
+  const rawParents = []
+  function addRecord (record) {
+    const { parentIndex, parentKey } = record
+    const isWithinArray = typeof parentIndex === 'number'
+    const isWithinObject = isWithinArray ? false : typeof parentKey === 'string'
+    const compiledRecord = {
+      ...record,
+      isWithinArray,
+      isWithinObject
     }
-    previousNode = node
-    contextDepth++
+    const id = rawParents.map(({ parentNode, parentParentNode, index, key }) => {
+      if (parentParentNode) {
+        if (typeof index === 'number') {
+          return `.${key}[${index}]=${parentNode.type}`
+        } else {
+          return `.${key}=${parentNode.type}`
+        }
+      } else {
+        return `${parentNode.type}`
+      }
+    }).join('')
+    rawRecords.push({
+      ...compiledRecord,
+      id
+    })
   }
-  function leave (node, parentNode, parentKey, parentIndex) {
-    if (currentAction !== 'leave') {
-      currentAction = 'leave'
-      ejections.push({
-        ...previousNode
+  function eventEmitted (node, parentNode, parentKey, parentIndex, currentDirection) {
+    const changedDirection = currentDirection !== previousDirection
+    if (currentDirection === 'enter') {
+      contextDepth++
+      addRecord({
+        node,
+        parentNode,
+        parentKey,
+        parentIndex,
+        currentDirection,
+        contextDepth,
+        previousDirection,
+        changedDirection,
+        previousNode
       })
-      console.log(`Eject: ${tabPad(contextDepth)} ${node.type}`)
-    } else {
-      console.log(`eject: ${tabPad(contextDepth)} ${node.type}`)
+    } else if (currentDirection === 'leave') {
+      deepestDepth = Math.max(deepestDepth, contextDepth)
+      addRecord({
+        node,
+        parentNode,
+        parentKey,
+        parentIndex,
+        currentDirection,
+        contextDepth,
+        previousDirection,
+        changedDirection,
+        previousNode
+      })
+      contextDepth--
+      if (node.type === 'Program') {
+        const records = rawRecords.filter(item => item.currentDirection === 'enter').map(item => {
+          const { changedDirection, currentDirection, previousDirection, previousNode, ...importantParts } = item
+          return {
+            ...importantParts
+          }
+        })
+        resolve({
+          records,
+          deepestDepth
+        })
+      }
     }
+    previousDirection = currentDirection
     previousNode = node
-    contextDepth--
-    if (node.type === 'Program') {
-      resolve({
-        ejections
-      })
-    }
   }
   walk(ast, {
-    enter,
-    leave
+    enter (node, parentNode, parentKey, parentIndex) {
+      rawParents.push({
+        parentNode: node,
+        parentParentNode: parentNode,
+        key: parentKey,
+        index: parentIndex
+      })
+      eventEmitted(node, parentNode, parentKey, parentIndex, 'enter')
+    },
+    leave (node, parentNode, parentKey, parentIndex) {
+      rawParents.pop()
+      eventEmitted(node, parentNode, parentKey, parentIndex, 'leave')
+    }
   })
 })

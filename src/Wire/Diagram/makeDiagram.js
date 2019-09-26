@@ -5,6 +5,8 @@ import standard from 'standard'
 
 import { TexasRanger } from './texas-ranger.js'
 
+import { makeText } from '../Parts/makeText.js'
+
 const acorn = require('acorn')
 const astring = require('astring')
 
@@ -101,16 +103,39 @@ export const makeDiagram = ({ directoryPath }) => {
     })
   }
 
+  function makeVisualRepresentation (record, index) {
+    let outputElement = null
+    if (record.node.type === 'Identifier') {
+      outputElement = makeText(`${record.id} (${record.node.name})`)
+    } else if (record.node.type === 'Literal') {
+      outputElement = makeText(`${record.id} (${record.node.raw})`)
+    } else {
+      outputElement = makeText(record.id)
+    }
+    if (outputElement) {
+      outputElement.interactive = false
+    }
+    return outputElement
+  }
+
   function visualize (filePath, ast) {
     const groupLabel = '--- Raw AST ---'
     console.groupCollapsed(groupLabel)
     console.log(JSON.stringify(ast, null, '  '))
     console.groupEnd(groupLabel)
     TexasRanger(ast).then(output => {
+      universalToolbox.clearChildren()
       const groupLabel = '--- Texas Ranger Output ---'
-      console.groupCollapsed(groupLabel)
-      console.log(output)
-      console.groupEnd(groupLabel)
+      const { records, deepestDepth } = output
+      let yitem = 0
+      records.forEach((record, index) => {
+        const item = makeVisualRepresentation(record, index)
+        if (item) {
+          item.y = yitem
+          yitem += item.height
+          universalToolbox.addChild(item)
+        }
+      })
     })
     universalToolbox.clearChildren()
   }

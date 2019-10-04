@@ -1,4 +1,6 @@
 // This little baby creates an array of calculated node data given an AST
+// for when a simple walker is not enough
+
 import { walk } from 'estree-walker'
 
 export const TexasRanger = ast => new Promise((resolve) => {

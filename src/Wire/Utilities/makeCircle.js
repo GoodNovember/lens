@@ -1,10 +1,12 @@
-import {
+import { PIXI } from './localPIXI.js'
+
+const {
   Graphics,
   Texture,
   Circle,
   Sprite,
   RenderTexture
-} from 'pixi.js-legacy'
+} = PIXI
 
 const textureArchive = new Map()
 
@@ -14,8 +16,12 @@ const makeCircleTexture = ({x,y,radius, innerRadius= 0}) => {
   cvs.width = radius * 2
   cvs.height = radius * 2
   ctx.beginPath()
-  ctx.fillStyle = 'white'
+  ctx.fillStyle = '#444'
   ctx.arc(radius,radius,radius,0,Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.fillStyle = 'white'
+  ctx.arc(radius,radius,radius - 1,0,Math.PI * 2)
   ctx.fill()
   if(innerRadius > 0){
     ctx.beginPath()

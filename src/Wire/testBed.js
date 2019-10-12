@@ -7,25 +7,46 @@ import { makeToolbox } from './Parts/makeToolbox.js'
 
 const directoryPath = path.resolve('src/Wire/Diagram/targetDirectory/')
 
-export const testBed = () => {
+export const testBed = (rootUniverse) => {
   // return makeDiagram({ directoryPath })
-  const toolbox = makeToolbox({
-    width: 200,
-    height: 150,
+  const rgbToolbox = makeToolbox({
+    width: 150,
+    height: 90,
     hideBox: true,
     x: 10,
     y: 15
   })
 
-  const greenJack = makeJack({x:30, y:20, tint:0x00ff00})
-  const redJack = makeJack({x:80, y:20, tint:0xff0000})
-  const blueJack = makeJack({x:30, y:20, tint:0x0000ff})
-  const cyanJack = makeJack({x:80, y:20, tint:0x00ffff})
-  const magentaJack = makeJack({x: 30, y: 20, tint:0xff00ff})
-  const yellowJack = makeJack({x: 30, y: 20, tint:0xffff00})
+  const cymToolbox = makeToolbox({
+    width: 150,
+    height: 90,
+    hideBox: true,
+    x: 200,
+    y: 15
+  })
 
-  toolbox.addChild(greenJack.container)
-  toolbox.addChild(redJack.container)
+  const top = 20
+  const left = 20
+  const space = 30
 
-  return toolbox
+  const redJack = makeJack({x:left, y:top, tint:0xff0000})
+  const greenJack = makeJack({x:left + space, y:top, tint:0x00ff00})
+  const blueJack = makeJack({x:left + (space * 2), y:top, tint:0x0000ff})
+
+  const cyanJack = makeJack({x:left, y:top, tint:0x00ffff})
+  const yellowJack = makeJack({x: left + space, y: top, tint:0xffff00})
+  const magentaJack = makeJack({x: left + (space * 2), y: top, tint:0xff00ff})
+
+  rgbToolbox.addChild(redJack.container)
+  rgbToolbox.addChild(greenJack.container)
+  rgbToolbox.addChild(blueJack.container)
+
+  cymToolbox.addChild(cyanJack.container)
+  cymToolbox.addChild(yellowJack.container)
+  cymToolbox.addChild(magentaJack.container)
+
+  rootUniverse.addChild(rgbToolbox.container)
+  rootUniverse.addChild(cymToolbox.container)
+
+  // return toolbox
 }

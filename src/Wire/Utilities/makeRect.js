@@ -1,6 +1,6 @@
 // import { Sprite, Texture } from 'pixi.js'
-import { Sprite, Texture } from 'pixi.js-legacy'
-const { WHITE } = Texture
+import {PIXI} from './localPIXI.js'
+const { Sprite, Texture:{ WHITE } } = PIXI
 
 export const makeRect = ({
   x,

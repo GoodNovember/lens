@@ -16,7 +16,7 @@ const {
 
 export const makeJack = ({ name, tint = 0xffffffff, kind, x, y }) => {
   const container = new Stage()
-  const circle = makeCircle({ radius:8, innerRadius:6, x, y })
+  const circle = makeCircle({ radius:8, innerRadius:4, x, y })
   circle.tint = tint
   container.x = x
   container.y = y

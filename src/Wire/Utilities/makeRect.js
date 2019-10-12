@@ -9,9 +9,10 @@ export const makeRect = ({
   width,
   height,
   cursor,
-  interactive
+  interactive,
+  texture = WHITE
 }) => {
-  const rect = new Sprite(WHITE)
+  const rect = new Sprite(texture)
   rect.x = x
   rect.y = y
   rect.tint = (tint) || (0xFFFFFF)

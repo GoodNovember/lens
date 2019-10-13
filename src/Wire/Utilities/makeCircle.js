@@ -1,60 +1,63 @@
 import { PIXI } from './localPIXI.js'
 
 const {
-  Graphics,
   Texture,
-  Circle,
   Sprite,
-  RenderTexture
 } = PIXI
 
-const textureArchive = new Map()
-
-const makeCircleTexture = ({x,y,radius, innerRadius= 0}) => {
+const makeCircleTexture = ({
+  radius, 
+  innerRadius = 0, 
+  borderThickness = 0,
+  borderFillStyle = 'black',
+  innerFillStyle = 'white'
+}) => {
   const cvs = document.createElement('canvas')
-  const ctx = cvs.getContext('2d')
+  
   cvs.width = radius * 2
   cvs.height = radius * 2
+  
+  const ctx = cvs.getContext('2d')
+
   ctx.beginPath()
-  ctx.fillStyle = '#444'
-  ctx.arc(radius,radius,radius,0,Math.PI * 2)
+  ctx.fillStyle = `${borderFillStyle}`
+  ctx.arc(radius, radius, radius, 0, Math.PI * 2)
   ctx.fill()
   ctx.beginPath()
-  ctx.fillStyle = 'white'
-  ctx.arc(radius,radius,radius - 1,0,Math.PI * 2)
+  ctx.fillStyle = `${innerFillStyle}`
+  ctx.arc(radius, radius, radius - borderThickness, 0, Math.PI * 2)
   ctx.fill()
+  
   if(innerRadius > 0){
     ctx.beginPath()
     ctx.fillStyle = 'black'
-    ctx.arc(radius,radius,innerRadius,0,Math.PI * 2)
+    ctx.arc(radius, radius, innerRadius, 0, Math.PI * 2)
     ctx.fill()
   }
+  
   return Texture.from(cvs)
 }
 
 export const makeCircle = ({ 
   x, 
   y,
-  innerRadius, 
-  radius 
+  radius,
+  innerRadius = 0, 
+  borderThickness = 0,
+  borderFillStyle = 'black',
+  innerFillStyle = 'white'
 }) => {
-  const id = `circle ${x} ${y} ${radius}`
-  // let tex = null
-  // if(textureArchive.has(id) == false){
-  const tex = makeCircleTexture({ x, y, radius, innerRadius })
-  //   textureArchive.set(id, tex)
-  // }else{
-  //   tex = textureArchive.get(id)
-  // }
-  if(tex){
-    const circleSprite = new Sprite(tex)
-    // circleSprite.x = x
-    // circleSprite.y = y
-    // circleSprite.hitArea = new Circle(radius, x, y)
-    circleSprite.interactive = true
-    circleSprite.anchor.set(0.5)
-    return circleSprite
-  }else{
-    return null
-  }
+  const tex = makeCircleTexture({ 
+    radius, 
+    innerRadius,
+    borderThickness,
+    borderFillStyle,
+    innerFillStyle
+  })
+  const circleSprite = new Sprite(tex)
+  circleSprite.x = x
+  circleSprite.y = y
+  circleSprite.interactive = true
+  circleSprite.anchor.set(0.5)
+  return circleSprite
 }

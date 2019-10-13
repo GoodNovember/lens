@@ -1,14 +1,10 @@
 // Yes, edit this file to test somethintg new.
 
-import path from 'path'
-import { makeDiagram } from './Diagram/makeDiagram.js'
 import { makeJack } from './Anatomy/makeJack.js'
 import { makeToolbox } from './Parts/makeToolbox.js'
 
-const directoryPath = path.resolve('src/Wire/Diagram/targetDirectory/')
+export const testBed = rootUniverse => {
 
-export const testBed = (rootUniverse) => {
-  // return makeDiagram({ directoryPath })
   const rgbToolbox = makeToolbox({
     width: 150,
     height: 90,
@@ -29,13 +25,13 @@ export const testBed = (rootUniverse) => {
   const left = 20
   const space = 30
 
-  const redJack = makeJack({x:left, y:top, tint:0xff0000})
-  const greenJack = makeJack({x:left + space, y:top, tint:0x00ff00})
-  const blueJack = makeJack({x:left + (space * 2), y:top, tint:0x0000ff})
+  const redJack = makeJack({x: left, y: top, tint: 0xff0000})
+  const greenJack = makeJack({x: left + space, y: top, tint: 0x00ff00})
+  const blueJack = makeJack({x: left + (space * 2), y: top, tint: 0x0000ff})
 
-  const cyanJack = makeJack({x:left, y:top, tint:0x00ffff})
-  const yellowJack = makeJack({x: left + space, y: top, tint:0xffff00})
-  const magentaJack = makeJack({x: left + (space * 2), y: top, tint:0xff00ff})
+  const cyanJack = makeJack({x: left, y: top, tint: 0x00ffff})
+  const yellowJack = makeJack({x: left + space, y: top, tint: 0xffff00})
+  const magentaJack = makeJack({x: left + (space * 2), y: top, tint: 0xff00ff})
 
   rgbToolbox.addChild(redJack.container)
   rgbToolbox.addChild(greenJack.container)
@@ -48,5 +44,4 @@ export const testBed = (rootUniverse) => {
   rootUniverse.addChild(rgbToolbox.container)
   rootUniverse.addChild(cymToolbox.container)
 
-  // return toolbox
 }

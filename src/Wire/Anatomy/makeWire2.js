@@ -2,7 +2,10 @@ import { PIXI } from '../Utilities/localPIXI.js'
 
 const {
   display,
-  Graphics
+  Graphics,
+  SimpleRope,
+  Texture,
+  Point
 } = PIXI
 
 const {
@@ -13,13 +16,31 @@ export const makeWire = ({ jackA, jackB }) => {
   const container = new Stage()
   const prettyGraphics = new Graphics()
 
-  const draw = () => {
-    prettyGraphics.clear()
-    prettyGraphics.zIndex = 1000
-    prettyGraphics.lineStyle(6, 0xffffff, 1, 0.5, false)
-    prettyGraphics.moveTo(jackA.x, jackA.y)
-    prettyGraphics.lineTo(jackB.x, jackB.y)
+  const calculatePoints = () => {
+    const startPoint = new Point(jackA.x, jackA.y)
+    const endPoint = new Point(jackB.x, jackB.y)
+
+    return [
+      startPoint,
+      endPoint
+    ]
   }
+
+  const pointArray = calculatePoints()
+
+  const rope = new SimpleRope(Texture.WHITE, pointArray)
+  rope.interactive = true
+
+  const updatePoints = () => {
+    const newPoints = calculatePoints()
+    rope.geometry.points = newPoints
+  }
+
+  const draw = () => {
+    updatePoints()
+  }
+
+  prettyGraphics.tint = jackA.tint
 
   draw()
 
@@ -35,7 +56,9 @@ export const makeWire = ({ jackA, jackB }) => {
 
   console.log('Making Wire', { jackA, jackB, prettyGraphics })
 
-  container.addChild(prettyGraphics)
+  // container.addChild(prettyGraphics)
+
+  container.addChild(rope)
 
   return {
     container

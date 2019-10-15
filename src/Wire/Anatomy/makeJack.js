@@ -31,6 +31,12 @@ export const makeJack = ({ name, universe, tint = 0xffffffff, kind, x, y }) => {
       return container.toGlobal(universe.wireLayer.position).y - universe.wireLayer.y * 2
     },
     name,
+    get tint () {
+      return circle.tint
+    },
+    set tint (tintValue) {
+      circle.tint = tintValue
+    },
     container,
     kind
   }

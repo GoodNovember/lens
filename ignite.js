@@ -4,7 +4,7 @@ const path = require('path')
 
 const PORT = 3000
 
-const entryFile = path.join(__dirname, `./index.html`)
+const entryFile = path.join(__dirname, './index.html')
 
 const options = {
   port: PORT,

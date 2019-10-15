@@ -1,10 +1,9 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
 import { removeAllChildrenFromContainer } from './utilities.js'
-// import * as PIXI from 'pixi.js'
-import * as PIXI from 'pixi.js-legacy'
-global.PIXI = PIXI
-require('pixi-layers')
+import { PIXI } from '../Wire/Utilities/localPIXI.js'
+
+import { getRootWireLayer } from '../Wire/Utilities/universalJackConnectionNetwork.js'
 
 const {
   display,
@@ -46,6 +45,9 @@ export const makeRootUniverse = ({
   const internalContainer = new Layer()
   container.addChild(internalContainer)
 
+  const wireLayer = getRootWireLayer({ pointerMoveTarget: gridTexture })
+  container.addChild(wireLayer)
+
   const emit = makeEventForwarder(internalContainer)
 
   const on = (eventName, callback) => {
@@ -64,23 +66,27 @@ export const makeRootUniverse = ({
       if (internalContainer.position.x !== x) {
         internalContainer.position.x = x
         gridTexture.tileTransform.position.x = x
+        wireLayer.position.x = x
         changeOccured = true
       }
       if (internalContainer.position.y !== y) {
         internalContainer.position.y = y
         gridTexture.tileTransform.position.y = y
+        wireLayer.position.y = y
         changeOccured = true
       }
     } else if (mode === 'X-ONLY') {
       if (internalContainer.position.x !== x) {
         internalContainer.position.x = x
         gridTexture.tileTransform.position.x = x
+        wireLayer.position.x = x
         changeOccured = true
       }
     } else if (mode === 'Y-ONLY') {
       if (internalContainer.position.y !== y) {
         internalContainer.position.y = y
         gridTexture.tileTransform.position.y = y
+        wireLayer.position.y = y
         changeOccured = true
       }
     }

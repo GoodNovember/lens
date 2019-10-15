@@ -3,7 +3,15 @@
 import { makeJack } from './Anatomy/makeJack.js'
 import { makeToolbox } from './Parts/makeToolbox.js'
 
+import { makeWire } from './Anatomy/makeWire.js'
+
 export const testBed = rootUniverse => {
+
+  const top = 20
+  const left = 20
+  const space = 30
+
+  const secondTop = top + 50
 
   const rgbToolbox = makeToolbox({
     width: 150,
@@ -18,20 +26,51 @@ export const testBed = rootUniverse => {
     height: 90,
     hideBox: true,
     x: 200,
-    y: 15
+    y: secondTop
   })
 
-  const top = 20
-  const left = 20
-  const space = 30
+  const redJack = makeJack({
+    name: 'red',
+    x: left,
+    y: top,
+    tint: 0xff0000
+  })
+  const greenJack = makeJack({
+    name: 'green',
+    x: left + space,
+    y: top,
+    tint: 0x00ff00
+  })
+  const blueJack = makeJack({
+    name: 'blue',
+    x: left + (space * 2),
+    y: top,
+    tint: 0x0000ff
+  })
 
-  const redJack = makeJack({x: left, y: top, tint: 0xff0000})
-  const greenJack = makeJack({x: left + space, y: top, tint: 0x00ff00})
-  const blueJack = makeJack({x: left + (space * 2), y: top, tint: 0x0000ff})
+  const cyanJack = makeJack({
+    name: 'cyan',
+    x: left,
+    y: top,
+    tint: 0x00ffff
+  })
+  const yellowJack = makeJack({
+    name: 'yellow',
+    x: left + space,
+    y: top,
+    tint: 0xffff00
+  })
+  const magentaJack = makeJack({
+    name: 'magenta',
+    x: left + (space * 2),
+    y: top,
+    tint: 0xff00ff
+  })
 
-  const cyanJack = makeJack({x: left, y: top, tint: 0x00ffff})
-  const yellowJack = makeJack({x: left + space, y: top, tint: 0xffff00})
-  const magentaJack = makeJack({x: left + (space * 2), y: top, tint: 0xff00ff})
+  const disconnectRedToCyanWire = makeWire({
+    jackA: redJack,
+    jackB: cyanJack,
+  })
 
   rgbToolbox.addChild(redJack.container)
   rgbToolbox.addChild(greenJack.container)

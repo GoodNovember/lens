@@ -11,8 +11,7 @@ const {
   Stage
 } = display
 
-export const makeJack = ({ name, tint = 0xffffffff, kind, x, y }) => {
-  console.log({ jack: { name, tint, kind, x, y } })
+export const makeJack = ({ name, universe, tint = 0xffffffff, kind, x, y }) => {
   const container = new Stage()
   const circle = makeCircle({
     radius: 8,
@@ -25,35 +24,21 @@ export const makeJack = ({ name, tint = 0xffffffff, kind, x, y }) => {
   container.x = x
   container.y = y
   container.addChild(circle)
-  const getGlobalBounds = () => {
-    const { x, y } = container.getGlobalPosition()
-    return {
-      x, y
-    }
-  }
 
-  const moveTo = (x, y) => {
-    container.x = x
-    container.y = y
-  }
-
-  const outputJack = {
+  return {
     get x() {
-      return container.x
-    },
-    set x(newX) {
-      container.x = newX
+      return container.toGlobal(universe.wireLayer.position).x - universe.wireLayer.x * 2
     },
     get y() {
-      return container.y
+      return container.toGlobal(universe.wireLayer.position).y - universe.wireLayer.y * 2
     },
-    set y(newY) {
-      container.y = newY
-    },
-    moveTo,
-    getGlobalBounds,
     name,
-    circle,
+    get tint() {
+      return circle.tint
+    },
+    set tint(tintValue) {
+      circle.tint = tintValue
+    },
     container,
     kind
   }

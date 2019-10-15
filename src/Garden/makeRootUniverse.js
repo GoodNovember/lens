@@ -22,6 +22,7 @@ export const makeRootUniverse = ({
 }) => {
   const container = new Stage()
   const backgroundLayer = new Layer()
+  const wireLayer = new Layer()
   const GRID_TEXTURE_SIZE = Math.max(width, height, 1000)
   const cvs = document.createElement('canvas')
   const ctx = cvs.getContext('2d')
@@ -46,6 +47,8 @@ export const makeRootUniverse = ({
   const internalContainer = new Layer()
   container.addChild(internalContainer)
 
+  container.addChild(wireLayer)
+
   const emit = makeEventForwarder(internalContainer)
 
   const on = (eventName, callback) => {
@@ -63,23 +66,27 @@ export const makeRootUniverse = ({
     if (mode === 'BOTH') {
       if (internalContainer.position.x !== x) {
         internalContainer.position.x = x
+        wireLayer.x = x
         gridTexture.tileTransform.position.x = x
         changeOccured = true
       }
       if (internalContainer.position.y !== y) {
         internalContainer.position.y = y
+        wireLayer.y = y
         gridTexture.tileTransform.position.y = y
         changeOccured = true
       }
     } else if (mode === 'X-ONLY') {
       if (internalContainer.position.x !== x) {
         internalContainer.position.x = x
+        wireLayer.x = x
         gridTexture.tileTransform.position.x = x
         changeOccured = true
       }
     } else if (mode === 'Y-ONLY') {
       if (internalContainer.position.y !== y) {
         internalContainer.position.y = y
+        wireLayer.y = y
         gridTexture.tileTransform.position.y = y
         changeOccured = true
       }
@@ -105,6 +112,7 @@ export const makeRootUniverse = ({
 
   return {
     internalContainer,
+    wireLayer,
     container,
     setSize,
     addChild,

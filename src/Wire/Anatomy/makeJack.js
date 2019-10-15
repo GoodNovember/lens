@@ -9,20 +9,27 @@ const {
   Stage
 } = display
 
-export const makeJack = ({ name, tint = 0xffffffff, kind, x, y }) => {
+export const makeJack = ({ name, universe, tint = 0xffffffff, kind, x, y }) => {
   const container = new Stage()
-  const circle = makeCircle({ 
-    radius:8, 
-    innerRadius:4,
+  const circle = makeCircle({
+    radius: 8,
+    innerRadius: 4,
     borderThickness: 1,
-    x:0, 
-    y:0
+    x: 0,
+    y: 0
   })
   circle.tint = tint
   container.x = x
   container.y = y
   container.addChild(circle)
+
   return {
+    get x () {
+      return container.toGlobal(universe.wireLayer.position).x - universe.wireLayer.x * 2
+    },
+    get y () {
+      return container.toGlobal(universe.wireLayer.position).y - universe.wireLayer.y * 2
+    },
     name,
     container,
     kind

@@ -20,6 +20,7 @@ export const makeUniverse = ({
   hideGrid = false
 }) => {
   const container = new Stage()
+  const wireLayer = new Layer()
 
   const cvs = document.createElement('canvas')
   const ctx = cvs.getContext('2d')
@@ -46,6 +47,8 @@ export const makeUniverse = ({
   internalContainer.group.enableSort = true
   container.addChild(internalContainer)
 
+  container.addChild(wireLayer)
+
   const emit = makeEventForwarder(internalContainer)
 
   const on = (eventName, callback) => {
@@ -58,14 +61,14 @@ export const makeUniverse = ({
     emit('parent resize', { width, height })
   }
 
-  function addChild (...args) {
+  function addChild(...args) {
     internalContainer.addChild(...args)
     return () => {
       removeChild(...args)
     }
   }
 
-  function removeChild (...args) {
+  function removeChild(...args) {
     internalContainer.removeChild(...args)
   }
 
@@ -132,6 +135,7 @@ export const makeUniverse = ({
   return {
     moveTo,
     container,
+    wireLayer,
     addChild,
     removeChild,
     clearChildren,

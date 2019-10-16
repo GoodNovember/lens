@@ -3,8 +3,6 @@ import { makeEventForwarder } from './makeEventForwarder.js'
 import { removeAllChildrenFromContainer } from './utilities.js'
 import { PIXI } from '../Wire/Utilities/localPIXI.js'
 
-import { getRootWireLayer } from '../Wire/Utilities/universalJackConnectionNetwork.js'
-
 const {
   display,
   TilingSprite
@@ -22,6 +20,8 @@ export const makeRootUniverse = ({
   const container = new Stage()
   const backgroundLayer = new Layer()
   const wireLayer = new Layer()
+
+  // let us create the beautiful grid.
   const GRID_TEXTURE_SIZE = Math.max(width, height, 1000)
   const cvs = document.createElement('canvas')
   const ctx = cvs.getContext('2d')
@@ -38,14 +38,17 @@ export const makeRootUniverse = ({
   ctx.lineTo(0, GRID_SIZE)
   ctx.stroke()
 
+  // here we surround our grid texture tile with a close and sensitive skin
+  // in a house of mirrors that will move along with us.
+
   const gridTexture = enableDragEvents(TilingSprite.from(cvs, GRID_TEXTURE_SIZE, GRID_TEXTURE_SIZE))
   gridTexture.anchor.set(0, 0)
   backgroundLayer.addChild(gridTexture)
   container.addChild(backgroundLayer)
-
+  // here we are attaching the main userland workspace
   const internalContainer = new Layer()
   container.addChild(internalContainer)
-
+  // anything below here is above the user workspace
   container.addChild(wireLayer)
 
   const emit = makeEventForwarder(internalContainer)

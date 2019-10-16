@@ -37,6 +37,9 @@ export const testBed = rootUniverse => {
     name: 'redJack',
     x: left,
     y: top,
+    connectionValidator({ jack }) {
+      return true //debug
+    },
     tint: 0xff0000,
     universe
   })
@@ -66,6 +69,9 @@ export const testBed = rootUniverse => {
     name: 'yellowJack',
     x: left + space,
     y: top,
+    connectionValidator({ }) {
+      return false // debug
+    },
     tint: 0xffff00,
     universe
   })

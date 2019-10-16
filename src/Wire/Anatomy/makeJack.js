@@ -58,7 +58,9 @@ export const makeJack = ({
         let result = null
         try {
           result = connectionValidator({ jack, selfJack, ...others })
+          console.log('result', result)
         } catch (error) {
+          console.log('error', error)
           reject(error)
         }
         resolve(!!result)
@@ -68,20 +70,33 @@ export const makeJack = ({
     })
   }
 
-  function connectTo({ jack }) {
+  function connectTo({ jack, ...others }) {
     let isAlive = true
     let disconnect = () => { }
-    jack.receiveConnectionRequest({ jack: selfJack }).then((isSuccessful) => {
-      if (isAlive === true) {
-        if (isSuccessful) {
-          disconnect = makeConnectionBetweenJacks({ jackA: selfJack, jackB: jack, universe })
-        } else {
-          console.error('Jack Connection Request Denied.', selfJack, jack)
-        }
+    let personalVerdict = null
+    if (typeof connectionValidator === 'function') {
+      try {
+        personalVerdict = connectionValidator({ jack, selfJack, ...others })
+      } catch (error) {
+        console.error(error)
       }
-    }).catch(error => {
-      console.error('Jack Connection Request Error.', error)
-    })
+    }
+    if (personalVerdict) {
+      jack.receiveConnectionRequest({ jack: selfJack, ...others }).then((isSuccessful) => {
+        if (isAlive === true) {
+          if (isSuccessful) {
+            disconnect = makeConnectionBetweenJacks({ jackA: selfJack, jackB: jack, universe })
+          } else {
+            console.error('Jack Connection Request Denied.', { selfJack, jack })
+          }
+        }
+      }).catch(error => {
+        console.error('Jack Connection Request Error.', error)
+      })
+    } else {
+      console.error('Jack Connection Request Refused.', { jack, selfJack })
+    }
+
     return () => {
       isAlive = false
       if (disconnect === 'function') {

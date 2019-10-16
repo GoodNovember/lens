@@ -31,17 +31,17 @@ export const makeJack = ({
   container.addChild(circle)
 
   const selfJack = {
-    get x() { // surely the real math is much prettier.
+    get x () { // surely the real math is much prettier.
       return container.toGlobal(universe.wireLayer.position).x - universe.wireLayer.x * 2
     },
-    get y() {
+    get y () {
       return container.toGlobal(universe.wireLayer.position).y - universe.wireLayer.y * 2
     },
     name,
-    get tint() {
+    get tint () {
       return circle.tint
     },
-    set tint(tintValue) {
+    set tint (tintValue) {
       circle.tint = tintValue
     },
     circle,
@@ -52,7 +52,7 @@ export const makeJack = ({
     kind
   }
 
-  function receiveConnectionRequest({ jack, ...others }) {
+  function receiveConnectionRequest ({ jack, ...others }) {
     return new Promise((resolve, reject) => {
       if (typeof connectionValidator === 'function') {
         let result = null
@@ -70,7 +70,7 @@ export const makeJack = ({
     })
   }
 
-  function connectTo({ jack, ...others }) {
+  function connectTo ({ jack, ...others }) {
     let isAlive = true
     let disconnect = () => { }
     let personalVerdict = null

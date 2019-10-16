@@ -2,7 +2,6 @@
 
 import { makeJack } from './Anatomy/makeJack.js'
 import { makeToolbox } from './Parts/makeToolbox.js'
-import { makeWire as makeConnectionBetweenJacks } from './Anatomy/makeConnectionBetweenJacks.js'
 
 export const testBed = rootUniverse => {
   const universe = rootUniverse
@@ -11,7 +10,7 @@ export const testBed = rootUniverse => {
   const left = 20
   const space = 30
 
-  const secondTop = top + 50
+  const lowerTop = top + 150
 
   const rgbToolbox = makeToolbox({
     name: 'RGB Toolbox!',
@@ -30,16 +29,13 @@ export const testBed = rootUniverse => {
     height: 90,
     hideBox: true,
     x: 200,
-    y: 115
+    y: lowerTop
   })
 
   const redJack = makeJack({
     name: 'redJack',
     x: left,
     y: top,
-    connectionValidator({ jack }) {
-      return true //debug
-    },
     tint: 0xff0000,
     universe
   })
@@ -69,9 +65,6 @@ export const testBed = rootUniverse => {
     name: 'yellowJack',
     x: left + space,
     y: top,
-    connectionValidator({ }) {
-      return false // debug
-    },
     tint: 0xffff00,
     universe
   })
@@ -94,11 +87,5 @@ export const testBed = rootUniverse => {
   rootUniverse.addChild(rgbToolbox.container)
   rootUniverse.addChild(cymToolbox.container)
 
-  // makeConnectionBetweenJacks({
-  //   jackA: redJack,
-  //   jackB: yellowJack
-  // })
-
   redJack.connectTo({ jack: yellowJack })
-
 }

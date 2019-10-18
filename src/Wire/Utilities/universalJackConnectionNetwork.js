@@ -2,12 +2,23 @@ import { PIXI } from './localPIXI.js'
 
 import { makeAvenue } from '../Utilities/makeAvenue.js'
 
+import StateMachine from 'javascript-state-machine'
+
 const {
   Texture,
   Sprite,
   display,
   SimpleRope
 } = PIXI
+
+// states
+/**
+ * initial (I exist)
+ * idle (I await something, I am not connected)
+ * clicked (Oh, I was clicked!)
+ * draged (Ah, I am part of a drag)
+ * 
+ */
 
 const { Layer, Stage } = display
 let registeredJacks = new Map()

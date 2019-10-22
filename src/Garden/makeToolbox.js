@@ -1,14 +1,10 @@
 import { enableDragEvents } from './enableDragEvents.js'
 import { makeRect } from './makeRect'
 import * as cursors from './cursors.js'
-// import * as PIXI from 'pixi.js'
-import * as PIXI from 'pixi.js-legacy'
 import { makeEventForwarder } from './makeEventForwarder.js'
 import { removeAllChildrenFromContainer } from './utilities.js'
-import { list } from 'postcss'
 
-global.PIXI = PIXI
-require('pixi-layers')
+import { PIXI } from '../Wire/Utilities/localPIXI.js'
 
 const {
   display,

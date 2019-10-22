@@ -2,11 +2,9 @@
 import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import Impetus from '../Foreign/Impetus.js'
-// import * as PIXI from 'pixi.js' // No support for older systems (and electron)
-import * as PIXI from 'pixi.js-legacy' // added canvas 2d support.
-// import { app } from 'electron'
-global.PIXI = PIXI
-require('pixi-layers')
+import { PIXI } from '../Wire/Utilities/localPIXI.js'
+
+import Verlet from 'verlet'
 
 const getDPR = () => window.devicePixelRatio || 1.0
 
@@ -93,6 +91,7 @@ export const PixiScene = ({ onBoot, appOptions }) => {
         }
       })
       const { current: view } = canvasRef
+      const physicsSim = new Verlet(view.width, view.height, view)
       const App = new Application({ view, ...appOptions })
       App.stage = new PIXI.display.Stage()
       App.stage.sortableChildren = true
@@ -104,12 +103,15 @@ export const PixiScene = ({ onBoot, appOptions }) => {
             App.renderer.resize(targetWidth, targetHeight)
             resizeListeners.forEach(listener => listener({ width: targetWidth, height: targetHeight }))
           }
+          physicsSim.frame(16)
+          physicsSim.draw()
         }
       })
       if (typeof onBoot === 'function') {
         onBoot({
           App,
           view,
+          physicsSim,
           subscribeToResize,
           subscribeToImpetus
         })

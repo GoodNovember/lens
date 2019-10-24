@@ -87,5 +87,8 @@ export const testBed = rootUniverse => {
   rootUniverse.addChild(rgbToolbox.container)
   rootUniverse.addChild(cymToolbox.container)
 
-  redJack.connectTo({ jack: yellowJack })
+  // redJack.connectTo({ jack: yellowJack })
+  yellowJack.connectTo({ jack: redJack })
+  cyanJack.connectTo({ jack: greenJack })
+  magentaJack.connectTo({ jack: blueJack })
 }

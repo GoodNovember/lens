@@ -14,10 +14,15 @@ const {
 // states
 /**
  * initial (I exist)
- * idle (I await something, I am not connected)
- * clicked (Oh, I was clicked!)
- * draged (Ah, I am part of a drag)
- * 
+ * disconnected (I await something, I am not connected)
+ * connected (I am connected to another jack)
+ * connected-clicked (while I am connected, I was also clicked)
+ * disconnected-clicked (Oh, I was clicked!)
+ * connected/disconnected-(clicked)-drag (Ah, I am part of a drag)
+ * draged-enter (The pointer is dragging and I have been entered)
+ * drag-released-on-disconnected-jack
+ * drag-released-on-connected-jack
+ * drag-released-on-nothing
  */
 
 const { Layer, Stage } = display

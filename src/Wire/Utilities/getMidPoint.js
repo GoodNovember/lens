@@ -1,4 +1,4 @@
-import PIXI from '../Utilities/localPIXI.js'
+import { PIXI } from './localPIXI.js'
 
 const {
   Point

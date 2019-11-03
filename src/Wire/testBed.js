@@ -9,133 +9,84 @@ import { distanceBetweenPoints } from '../Wire/Verlet/utilities.js'
 
 export const testBed = rootUniverse => {
   const universe = rootUniverse
-  // const top = 20
-  // const left = 20
-  // const space = 30
 
-  // const lowerTop = top + 150
+  //parable: 
+  //  A stick requires two points and a length
+  //  A point requires a horizontal location (x) and a vertical location (y)
+  //    The locations can be anywhere between Negative infinity and positive infinity.
+  //      ... -Infinity < location > Infinity
+  //      ... -9999999999999(...) < location > 9999999999999(...)
+  //      ... zero is the middle, but there is no middle in the concept of universes.
+  //      ... middle is a concept aggred upon, and an agreement requires at least two parties.
+  //      ... a stick has a middle, because it is an agreement between two points.
 
-  const connectPointsWithLine = ({ pointA, pointB, ...rest }) => {
+  const globalLeftOffset = 200
+  const globalTopOffset = -500
+
+  const worldX = value => value - globalLeftOffset
+  const worldY = value => value - globalTopOffset
+
+  const makeSimpleStick = ({ pointA, pointB, ...rest }) => {
     const length = distanceBetweenPoints({ pointA, pointB })
     const stick = makeVerletStick({ pointA, pointB, length, ...rest })
-    universe.addChild(stick.line)
+    return stick
   }
 
-  const vp0 = makeVerletPoint({ x: 590, y: -400, isPinned: true })
-  const vpA = makeVerletPoint({ x: 50, y: 50, })
-  const vpB = makeVerletPoint({ x: 200, y: 50 })
-  const vpC = makeVerletPoint({ x: 50, y: 200 })
-  const vpD = makeVerletPoint({ x: 200, y: 200 })
+  const verletPointA = makeVerletPoint({ x: worldX(590), y: worldY(-400), isPinned: true })
+  const verletPointB = makeVerletPoint({ x: worldX(50), y: worldY(50), })
+  const verletPointC = makeVerletPoint({ x: worldX(200), y: worldY(50) })
+  const verletPointD = makeVerletPoint({ x: worldX(50), y: worldY(200) })
+  const verletPointE = makeVerletPoint({ x: worldX(200), y: worldY(200) })
 
-  connectPointsWithLine({
-    pointA: vp0,
-    pointB: vpB
+  const points = [
+    verletPointA,
+    verletPointB,
+    verletPointC,
+    verletPointD,
+    verletPointE
+  ]
+
+  const longStick = makeSimpleStick({
+    pointA: verletPointA,
+    pointB: verletPointC
   })
-  connectPointsWithLine({
-    pointA: vpA,
-    pointB: vpB
+  const verletStickBC = makeSimpleStick({
+    pointA: verletPointB,
+    pointB: verletPointC
   })
-  connectPointsWithLine({
-    pointA: vpB,
-    pointB: vpD,
+  const verletStickCE = makeSimpleStick({
+    pointA: verletPointC,
+    pointB: verletPointE,
   })
-  connectPointsWithLine({
-    pointA: vpD,
-    pointB: vpC
+  const verletStickED = makeSimpleStick({
+    pointA: verletPointE,
+    pointB: verletPointD
   })
-  connectPointsWithLine({
-    pointA: vpC,
-    pointB: vpA
+  const verletStickDB = makeSimpleStick({
+    pointA: verletPointD,
+    pointB: verletPointB
   })
-  connectPointsWithLine({
-    pointA: vpA,
-    pointB: vpD,
+  const centerBrace = makeSimpleStick({
+    pointA: verletPointB,
+    pointB: verletPointE,
     hidden: true
   })
-  universe.addChild(vp0.circle)
-  universe.addChild(vpA.circle)
-  universe.addChild(vpB.circle)
-  universe.addChild(vpC.circle)
-  universe.addChild(vpD.circle)
-  // universe.addChild(stick.line)
 
-  // const rgbToolbox = makeToolbox({
-  //   name: 'RGB Toolbox!',
-  //   universe,
-  //   width: 150,
-  //   height: 90,
-  //   hideBox: true,
-  //   x: 10,
-  //   y: 15
-  // })
+  const sticks = [
+    longStick,
+    verletStickBC,
+    verletStickCE,
+    verletStickED,
+    verletStickDB,
+    centerBrace
+  ]
 
-  // const cymToolbox = makeToolbox({
-  //   name: 'CYM Toolbox!!',
-  //   universe,
-  //   width: 150,
-  //   height: 90,
-  //   hideBox: true,
-  //   x: 200,
-  //   y: lowerTop
-  // })
+  sticks.forEach(stick => {
+    universe.addChild(stick.line)
+  })
 
-  // const redJack = makeJack({
-  //   name: 'redJack',
-  //   x: left,
-  //   y: top,
-  //   tint: 0xff0000,
-  //   universe
-  // })
-  // const greenJack = makeJack({
-  //   name: 'greenJack',
-  //   x: left + space,
-  //   y: top,
-  //   tint: 0x00ff00,
-  //   universe
-  // })
-  // const blueJack = makeJack({
-  //   name: 'blueJack',
-  //   x: left + (space * 2),
-  //   y: top,
-  //   tint: 0x0000ff,
-  //   universe
-  // })
+  points.forEach(point => {
+    universe.addChild(point.circle)
+  })
 
-  // const cyanJack = makeJack({
-  //   name: 'cyanJack',
-  //   x: left,
-  //   y: top,
-  //   tint: 0x00ffff,
-  //   universe
-  // })
-  // const yellowJack = makeJack({
-  //   name: 'yellowJack',
-  //   x: left + space,
-  //   y: top,
-  //   tint: 0xffff00,
-  //   universe
-  // })
-  // const magentaJack = makeJack({
-  //   name: 'magentaJack',
-  //   x: left + (space * 2),
-  //   y: top,
-  //   tint: 0xff00ff,
-  //   universe
-  // })
-
-  // rgbToolbox.addChild(redJack.container)
-  // rgbToolbox.addChild(greenJack.container)
-  // rgbToolbox.addChild(blueJack.container)
-
-  // cymToolbox.addChild(cyanJack.container)
-  // cymToolbox.addChild(yellowJack.container)
-  // cymToolbox.addChild(magentaJack.container)
-
-  // rootUniverse.addChild(rgbToolbox.container)
-  // rootUniverse.addChild(cymToolbox.container)
-
-  // redJack.connectTo({ jack: yellowJack })
-  // yellowJack.connectTo({ jack: redJack })
-  // cyanJack.connectTo({ jack: greenJack })
-  // magentaJack.connectTo({ jack: blueJack })
 }

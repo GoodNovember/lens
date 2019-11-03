@@ -1,6 +1,6 @@
 import { makeCircle } from '../Utilities/makeCircle.js'
 import { hookupPointPhysics } from './engine.js'
-
+import { enableDragEvents } from '../Utilities/enableDragEvents.js'
 export const makeVerletPoint = ({
   x,
   y,
@@ -8,6 +8,7 @@ export const makeVerletPoint = ({
   iVY = 0,
   isPinned = false,
   hidden = false,
+  isDraggable = true
 }) => {
   let internalX = x
   let internalY = y
@@ -15,7 +16,15 @@ export const makeVerletPoint = ({
   let internalOldY = y - iVY
   let internalIsPinned = !!isPinned || false
 
-  const circle = makeCircle({ x, y, radius: 16, hidden })
+  let circle = makeCircle({ x, y, radius: 16, hidden })
+
+  if (isDraggable) {
+    circle = enableDragEvents(circle)
+  }
+
+  circle.on('dragstart', (event) => {
+    console.log(event)
+  })
 
   const output = {
     circle,

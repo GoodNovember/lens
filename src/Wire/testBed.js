@@ -15,9 +15,9 @@ export const testBed = rootUniverse => {
 
   // const lowerTop = top + 150
 
-  const connectPointsWithLine = ({ pointA, pointB }) => {
+  const connectPointsWithLine = ({ pointA, pointB, ...rest }) => {
     const length = distanceBetweenPoints({ pointA, pointB })
-    const stick = makeVerletStick({ pointA, pointB, length })
+    const stick = makeVerletStick({ pointA, pointB, length, ...rest })
     universe.addChild(stick.line)
   }
 
@@ -29,9 +29,8 @@ export const testBed = rootUniverse => {
 
   connectPointsWithLine({
     pointA: vp0,
-    pointB: vpA
+    pointB: vpB
   })
-
   connectPointsWithLine({
     pointA: vpA,
     pointB: vpB
@@ -50,7 +49,8 @@ export const testBed = rootUniverse => {
   })
   connectPointsWithLine({
     pointA: vpA,
-    pointB: vpD
+    pointB: vpD,
+    hidden: true
   })
   universe.addChild(vp0.circle)
   universe.addChild(vpA.circle)

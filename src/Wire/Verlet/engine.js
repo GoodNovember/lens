@@ -11,7 +11,7 @@ const fictionalHeight = Infinity
 const pointBounce = 0.9
 
 const gravity = 0.5
-const friction = 1.001
+const friction = 0.99999 // (0.99999 = slick) (1.0 = no friction) (0.9 = stiff)
 const loopCount = 10
 
 const updatePoints = ({ deltaTime }) => {

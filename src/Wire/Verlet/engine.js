@@ -5,22 +5,30 @@ const globalSticks = new Set()
 
 const fictionalTop = -Infinity
 const fictionalLeft = -Infinity
-const fictionalWidth = Infinity
-const fictionalHeight = Infinity
+const fictionalRight = Infinity
+const fictionalBottom = Infinity
 
 const pointBounce = 0.9
 
-const gravity = 0.5
-const friction = 0.99999 // (0.99999 = slick) (1.0 = no friction) (0.9 = stiff)
+const gravity = 0.25
+const friction = .99 // (0.99999 = slick) (1.0 = no friction) (0.9 = stiff)
 const loopCount = 10
+
+const minThreshhold = 0.001
 
 const updatePoints = ({ deltaTime }) => {
   for (const point of globalPoints.values()) {
     if (point.isPinned) {
       continue
     }
-    const vx = (point.x - point.oldX) * friction
-    const vy = (point.y - point.oldY) * friction
+    let vx = (point.x - point.oldX) * friction
+    let vy = (point.y - point.oldY) * friction
+    if (Math.abs(vx) < minThreshhold) {
+      vx = 0
+    }
+    if (Math.abs(vy) < minThreshhold) {
+      vy = 0
+    }
     point.oldX = point.x
     point.oldY = point.y
     point.x += vx
@@ -37,8 +45,14 @@ const updateSticks = ({ deltaTime }) => {
     const distance = distanceBetweenPoints({ pointA, pointB })
     const difference = length - distance
     const percent = difference / distance / 2
-    const offsetX = dx * percent
-    const offsetY = dy * percent
+    let offsetX = dx * percent
+    let offsetY = dy * percent
+    if (Math.abs(offsetX) < minThreshhold) {
+      offsetX = 0
+    }
+    if (Math.abs(offsetY) < minThreshhold) {
+      offsetY = 0
+    }
     if (pointA.isPinned === false) {
       stick.pointA.x -= offsetX
       stick.pointA.y -= offsetY
@@ -59,16 +73,16 @@ const constrainPoints = () => {
     const vx = (point.x - point.oldX) * friction
     const vy = (point.y - point.oldY) * friction
 
-    if (point.x > fictionalWidth) {
-      point.x = fictionalWidth
+    if (point.x > fictionalRight) {
+      point.x = fictionalRight
       point.oldX = point.x + (vx * pointBounce)
     } else if (point.x < fictionalLeft) {
       point.x = fictionalLeft
       point.oldX = point.x + (vx * pointBounce)
     }
 
-    if (point.y > fictionalHeight) {
-      point.y = fictionalHeight
+    if (point.y > fictionalBottom) {
+      point.y = fictionalBottom
       point.oldY = point.y + (vy * pointBounce)
     } else if (point.y < fictionalTop) {
       point.y = fictionalTop

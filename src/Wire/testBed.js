@@ -3,92 +3,139 @@
 import { makeJack } from './Anatomy/makeJack.js'
 import { makeToolbox } from './Parts/makeToolbox.js'
 
+import { makeVerletPoint } from '../Wire/Verlet/makeVerletPoint.js'
+import { makeVerletStick } from '../Wire/Verlet/makeVerletStick.js'
+import { distanceBetweenPoints } from '../Wire/Verlet/utilities.js'
+
 export const testBed = rootUniverse => {
   const universe = rootUniverse
+  // const top = 20
+  // const left = 20
+  // const space = 30
 
-  const top = 20
-  const left = 20
-  const space = 30
+  // const lowerTop = top + 150
 
-  const lowerTop = top + 150
+  const connectPointsWithLine = ({ pointA, pointB }) => {
+    const length = distanceBetweenPoints({ pointA, pointB })
+    const stick = makeVerletStick({ pointA, pointB, length })
+    universe.addChild(stick.line)
+  }
 
-  const rgbToolbox = makeToolbox({
-    name: 'RGB Toolbox!',
-    universe,
-    width: 150,
-    height: 90,
-    hideBox: true,
-    x: 10,
-    y: 15
+  const vp0 = makeVerletPoint({ x: 590, y: -400, isPinned: true })
+  const vpA = makeVerletPoint({ x: 50, y: 50, })
+  const vpB = makeVerletPoint({ x: 200, y: 50 })
+  const vpC = makeVerletPoint({ x: 50, y: 200 })
+  const vpD = makeVerletPoint({ x: 200, y: 200 })
+
+  connectPointsWithLine({
+    pointA: vp0,
+    pointB: vpA
   })
 
-  const cymToolbox = makeToolbox({
-    name: 'CYM Toolbox!!',
-    universe,
-    width: 150,
-    height: 90,
-    hideBox: true,
-    x: 200,
-    y: lowerTop
+  connectPointsWithLine({
+    pointA: vpA,
+    pointB: vpB
   })
+  connectPointsWithLine({
+    pointA: vpB,
+    pointB: vpD,
+  })
+  connectPointsWithLine({
+    pointA: vpD,
+    pointB: vpC
+  })
+  connectPointsWithLine({
+    pointA: vpC,
+    pointB: vpA
+  })
+  connectPointsWithLine({
+    pointA: vpA,
+    pointB: vpD
+  })
+  universe.addChild(vp0.circle)
+  universe.addChild(vpA.circle)
+  universe.addChild(vpB.circle)
+  universe.addChild(vpC.circle)
+  universe.addChild(vpD.circle)
+  // universe.addChild(stick.line)
 
-  const redJack = makeJack({
-    name: 'redJack',
-    x: left,
-    y: top,
-    tint: 0xff0000,
-    universe
-  })
-  const greenJack = makeJack({
-    name: 'greenJack',
-    x: left + space,
-    y: top,
-    tint: 0x00ff00,
-    universe
-  })
-  const blueJack = makeJack({
-    name: 'blueJack',
-    x: left + (space * 2),
-    y: top,
-    tint: 0x0000ff,
-    universe
-  })
+  // const rgbToolbox = makeToolbox({
+  //   name: 'RGB Toolbox!',
+  //   universe,
+  //   width: 150,
+  //   height: 90,
+  //   hideBox: true,
+  //   x: 10,
+  //   y: 15
+  // })
 
-  const cyanJack = makeJack({
-    name: 'cyanJack',
-    x: left,
-    y: top,
-    tint: 0x00ffff,
-    universe
-  })
-  const yellowJack = makeJack({
-    name: 'yellowJack',
-    x: left + space,
-    y: top,
-    tint: 0xffff00,
-    universe
-  })
-  const magentaJack = makeJack({
-    name: 'magentaJack',
-    x: left + (space * 2),
-    y: top,
-    tint: 0xff00ff,
-    universe
-  })
+  // const cymToolbox = makeToolbox({
+  //   name: 'CYM Toolbox!!',
+  //   universe,
+  //   width: 150,
+  //   height: 90,
+  //   hideBox: true,
+  //   x: 200,
+  //   y: lowerTop
+  // })
 
-  rgbToolbox.addChild(redJack.container)
-  rgbToolbox.addChild(greenJack.container)
-  rgbToolbox.addChild(blueJack.container)
+  // const redJack = makeJack({
+  //   name: 'redJack',
+  //   x: left,
+  //   y: top,
+  //   tint: 0xff0000,
+  //   universe
+  // })
+  // const greenJack = makeJack({
+  //   name: 'greenJack',
+  //   x: left + space,
+  //   y: top,
+  //   tint: 0x00ff00,
+  //   universe
+  // })
+  // const blueJack = makeJack({
+  //   name: 'blueJack',
+  //   x: left + (space * 2),
+  //   y: top,
+  //   tint: 0x0000ff,
+  //   universe
+  // })
 
-  cymToolbox.addChild(cyanJack.container)
-  cymToolbox.addChild(yellowJack.container)
-  cymToolbox.addChild(magentaJack.container)
+  // const cyanJack = makeJack({
+  //   name: 'cyanJack',
+  //   x: left,
+  //   y: top,
+  //   tint: 0x00ffff,
+  //   universe
+  // })
+  // const yellowJack = makeJack({
+  //   name: 'yellowJack',
+  //   x: left + space,
+  //   y: top,
+  //   tint: 0xffff00,
+  //   universe
+  // })
+  // const magentaJack = makeJack({
+  //   name: 'magentaJack',
+  //   x: left + (space * 2),
+  //   y: top,
+  //   tint: 0xff00ff,
+  //   universe
+  // })
 
-  rootUniverse.addChild(rgbToolbox.container)
-  rootUniverse.addChild(cymToolbox.container)
+  // rgbToolbox.addChild(redJack.container)
+  // rgbToolbox.addChild(greenJack.container)
+  // rgbToolbox.addChild(blueJack.container)
+
+  // cymToolbox.addChild(cyanJack.container)
+  // cymToolbox.addChild(yellowJack.container)
+  // cymToolbox.addChild(magentaJack.container)
+
+  // rootUniverse.addChild(rgbToolbox.container)
+  // rootUniverse.addChild(cymToolbox.container)
 
   // redJack.connectTo({ jack: yellowJack })
-  yellowJack.connectTo({ jack: redJack })
-  cyanJack.connectTo({ jack: greenJack })
-  magentaJack.connectTo({ jack: blueJack })
+  // yellowJack.connectTo({ jack: redJack })
+  // cyanJack.connectTo({ jack: greenJack })
+  // magentaJack.connectTo({ jack: blueJack })
 }

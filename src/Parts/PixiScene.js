@@ -8,6 +8,8 @@ import * as PIXI from 'pixi.js-legacy' // added canvas 2d support.
 global.PIXI = PIXI
 require('pixi-layers')
 
+import { updatePhysics } from '../Wire/Verlet/engine.js'
+
 const getDPR = () => window.devicePixelRatio || 1.0
 
 const StylishCanvas = styled.canvas`
@@ -96,7 +98,7 @@ export const PixiScene = ({ onBoot, appOptions }) => {
       const App = new Application({ view, ...appOptions })
       App.stage = new PIXI.display.Stage()
       App.stage.sortableChildren = true
-      App.ticker.add(() => {
+      App.ticker.add((deltaTime) => {
         if (canvasRef.current) {
           const targetWidth = view.clientWidth * getDPR()
           const targetHeight = view.clientHeight * getDPR()
@@ -104,6 +106,9 @@ export const PixiScene = ({ onBoot, appOptions }) => {
             App.renderer.resize(targetWidth, targetHeight)
             resizeListeners.forEach(listener => listener({ width: targetWidth, height: targetHeight }))
           }
+          updatePhysics({
+            deltaTime
+          })
         }
       })
       if (typeof onBoot === 'function') {

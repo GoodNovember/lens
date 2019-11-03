@@ -6,17 +6,17 @@ const {
 } = PIXI
 
 const makeCircleTexture = ({
-  radius, 
-  innerRadius = 0, 
+  radius,
+  innerRadius = 0,
   borderThickness = 0,
   borderFillStyle = 'black',
   innerFillStyle = 'white'
 }) => {
   const cvs = document.createElement('canvas')
-  
+
   cvs.width = radius * 2
   cvs.height = radius * 2
-  
+
   const ctx = cvs.getContext('2d')
 
   ctx.beginPath()
@@ -27,28 +27,29 @@ const makeCircleTexture = ({
   ctx.fillStyle = `${innerFillStyle}`
   ctx.arc(radius, radius, radius - borderThickness, 0, Math.PI * 2)
   ctx.fill()
-  
-  if(innerRadius > 0){
+
+  if (innerRadius > 0) {
     ctx.beginPath()
     ctx.fillStyle = 'black'
     ctx.arc(radius, radius, innerRadius, 0, Math.PI * 2)
     ctx.fill()
   }
-  
+
   return Texture.from(cvs)
 }
 
-export const makeCircle = ({ 
-  x, 
+export const makeCircle = ({
+  x,
   y,
   radius,
-  innerRadius = 0, 
+  innerRadius = 0,
   borderThickness = 0,
   borderFillStyle = 'black',
-  innerFillStyle = 'white'
+  innerFillStyle = 'white',
+  hidden = false,
 }) => {
-  const tex = makeCircleTexture({ 
-    radius, 
+  const tex = makeCircleTexture({
+    radius,
     innerRadius,
     borderThickness,
     borderFillStyle,
@@ -59,5 +60,8 @@ export const makeCircle = ({
   circleSprite.y = y
   circleSprite.interactive = true
   circleSprite.anchor.set(0.5)
+  if (hidden) {
+    circleSprite.alpha = false
+  }
   return circleSprite
 }

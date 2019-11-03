@@ -6,7 +6,8 @@ export const makeVerletPoint = ({
   y,
   iVX = 0,
   iVY = 0,
-  isPinned = false
+  isPinned = false,
+  hidden = false,
 }) => {
   let internalX = x
   let internalY = y
@@ -14,7 +15,7 @@ export const makeVerletPoint = ({
   let internalOldY = y - iVY
   let internalIsPinned = !!isPinned || false
 
-  const circle = makeCircle({ x, y, radius: 16 })
+  const circle = makeCircle({ x, y, radius: 16, hidden })
 
   const output = {
     circle,

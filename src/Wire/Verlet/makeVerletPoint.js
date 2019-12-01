@@ -1,6 +1,11 @@
 import { makeCircle } from '../Utilities/makeCircle.js'
 import { hookupPointPhysics } from './engine.js'
 import { enableDragEvents } from '../Utilities/enableDragEvents.js'
+import { makeVector } from '../Utilities/makeVector.js'
+import { PIXI } from '../Utilities/localPIXI.js'
+
+const { Point } = PIXI
+
 export const makeVerletPoint = ({
   x,
   y,
@@ -22,9 +27,10 @@ export const makeVerletPoint = ({
     circle = enableDragEvents(circle)
   }
 
-  circle.on('dragstart', (event) => {
-    console.log(event)
-  })
+  const updateWithVector = vector => {
+    internalOldX += vector.x
+    internalOldY += vector.y
+  }
 
   const output = {
     circle,
@@ -59,8 +65,35 @@ export const makeVerletPoint = ({
     },
     set oldY(newOldY) {
       internalOldY = newOldY
-    }
+    },
+    get vector() {
+      const x = internalX - internalOldX
+      const y = internalY - internalOldY
+      return makeVector({ x, y })
+    },
+    get point() {
+      const x = internalX
+      const y = internalX
+      return new Point(x, y)
+    },
+    updateWithVector
   }
+
+  circle.on('dragstart', ({ pointerState }) => {
+    const { current } = pointerState
+    const { x, y } = current
+    internalOldX = x
+    internalOldY = y
+    output.x = x
+    output.y = y
+  })
+
+  circle.on('dragging', ({ dx, dy, my, pointerState }) => {
+    const { current } = pointerState
+    const { x, y } = current
+    output.x = x
+    output.y = y
+  })
 
   hookupPointPhysics(output)
 

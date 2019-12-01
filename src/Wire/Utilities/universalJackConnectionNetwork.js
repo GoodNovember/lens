@@ -1,7 +1,5 @@
 import { PIXI } from './localPIXI.js'
 
-import { makeAvenue } from '../Utilities/makeAvenue.js'
-
 import StateMachine from 'javascript-state-machine'
 
 const {
@@ -33,22 +31,13 @@ RootWireLayer.interactive = true
 
 const pointerDownJacks = new Map()
 
-const handleJackPointerDown = ({ event, jack }) => {
-
-}
-
-const handleJackPointerUp = ({ event, jack }) => {
-
-}
+const globalConnectionMap = new Map()
 
 const handleJackPointerMove = ({ event, jack }) => {
 
 }
 
-export const getRootWireLayer = ({
-  pointerMoveTarget
-}) => {
-
+export const getRootWireLayer = ({ pointerMoveTarget }) => {
   if (pointerMoveTarget) {
     pointerMoveTarget.on('pointermove', event => {
       if (pointerDownJacks.size > 0) {
@@ -62,50 +51,102 @@ export const getRootWireLayer = ({
   return RootWireLayer
 }
 
-const masterEventCallback = ({ jack, event, eventType }) => {
-  console.log({ jack, event, eventType })
+const draggingJacks = new Set()
+const draggingPointers = new Set()
+let currentDragTarget = null
 
+const connectJacks = ({ sourceJack, targetJack }) => {
+  const normalizedCoupleName = () => {
+    if (sourceJack.kind === 'input' && targetJack.kind === 'output') {
+      return (`${targetJack.name} -> ${sourceJack.name}`).toLowerCase()
+    }
+    if (sourceJack.kind === 'output' && targetJack.kind === 'input') {
+      return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
+    } else {
+      return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
+    }
+  }
+
+  const connectionID = normalizedCoupleName()
+
+  if (globalConnectionMap.has(connectionID)) {
+    const { disconnect } = globalConnectionMap.get(connectionID)
+    console.log('disconnect', connectionID)
+    disconnect()
+    globalConnectionMap.delete(connectionID)
+  } else {
+    if (sourceJack.isConnectedTo({ jack: targetJack }) === false) {
+      const disconnect = sourceJack.connectTo({ jack: targetJack })
+      console.log('connect', connectionID)
+      globalConnectionMap.set(connectionID, { disconnect, sourceJack, targetJack })
+    }
+  }
 }
 
 export const registerJackOnNetwork = ({ jack }) => {
-  const { name, circle } = jack
+  const { name, sprite, container, stateMachine } = jack
+
+  container.on('jack-awaken', ({ event }) => {
+    const { data: { identifier } } = event
+    if (draggingPointers.has(identifier)) {
+      currentDragTarget = jack
+    }
+  })
+  container.on('jack-nap', ({ event }) => {
+    const { data: { identifier } } = event
+    // console.log('NAP', { event })
+    if (draggingPointers.has(identifier)) {
+      currentDragTarget = null
+    }
+  })
+  container.on('jack-drag-start', ({ event }) => {
+    const { data: { identifier } } = event
+    // console.log('DRAG-START', { event })
+    if (draggingJacks.has(jack) === false) {
+      draggingJacks.add(jack)
+      draggingPointers.add(identifier)
+    }
+  })
+  container.on('jack-drag-end', ({ event }) => {
+    const { data: { identifier } } = event
+    // console.log('DRAG-END', { event })
+    if (draggingJacks.has(jack)) {
+      draggingJacks.delete(jack)
+      draggingPointers.delete(identifier)
+    }
+    if (currentDragTarget) {
+      // console.log('DRAG COMPLETE!')
+      connectJacks({
+        sourceJack: jack,
+        targetJack: currentDragTarget
+      })
+      currentDragTarget = null
+    }
+  })
+  container.on('jack-drag-cancel', ({ event }) => {
+    const { data: { identifier } } = event
+    // console.log('DRAG-CANCEL', { event })
+    if (draggingJacks.has(jack)) {
+      draggingJacks.delete(jack)
+      draggingPointers.delete(identifier)
+    }
+    if (currentDragTarget) {
+      currentDragTarget = null
+    }
+  })
+
+
   if (registeredJacks.has(name) === true) {
     console.error('Already Registered Jack with Name:', name)
   } else {
     registeredJacks.set(name, jack)
-    circle.on('pointerdown', event => {
-      if (pointerDownJacks.has(event.data.identifier) === false) {
-        handleJackPointerDown({ event, jack })
-        pointerDownJacks.set(event.data.identifier, jack)
-      }
-      masterEventCallback({ eventType: 'pointerdown', jack, event })
-    })
-    circle.on('pointerup', event => {
-      if (pointerDownJacks.has(event.data.identifier)) {
-        handleJackPointerUp({ event })
-        pointerDownJacks.delete(event.data.identifier)
-      }
-      masterEventCallback({ eventType: 'pointerup', jack, event })
-    })
-    circle.on('pointerupoutside', event => {
-      if (pointerDownJacks.has(event.data.identifier)) {
-        pointerDownJacks.delete(event.data.identifier)
-      }
-      masterEventCallback({ eventType: 'pointerupoutside', jack, event })
-    })
-    circle.on('pointerover', event => {
-      masterEventCallback({ eventType: 'pointerover', jack, event })
-    })
-    circle.on('pointerout', event => {
-      masterEventCallback({ eventType: 'pointerout', jack, event })
-    })
   }
   return () => {
     const { name } = jack
     if (registeredJacks.has(name) === true) {
       registeredJacks.delete(name)
     } else {
-      console.error('Cannnot remove a jack that is not in the registry.')
+      console.error('Cannot remove a jack that is not in the registry.')
     }
   }
 }

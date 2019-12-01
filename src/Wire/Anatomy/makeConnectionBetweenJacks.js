@@ -100,7 +100,6 @@ export const makeConnectionBetweenJacks = ({ jackA, jackB }) => {
     console.log('Different Universe Jacks Connected')
     console.error('not Implemented.')
   }
-
   return () => {
     console.log('Disconnecting wire', { jackA, jackB })
     if (typeof disconnector === 'function') {

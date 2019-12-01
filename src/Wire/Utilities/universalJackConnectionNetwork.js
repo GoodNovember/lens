@@ -64,7 +64,11 @@ const connectJacks = ({ sourceJack, targetJack }) => {
     if (test === is) {
       return true
     } else {
-      return test.startsWith(startsWith)
+      if (typeof test === 'string') {
+        return test.startsWith(startsWith)
+      } else {
+        return false
+      }
     }
   }
 

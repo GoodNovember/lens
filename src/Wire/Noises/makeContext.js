@@ -1,0 +1,1 @@
+export const makeContext = (...args) => new AudioContext(...args)

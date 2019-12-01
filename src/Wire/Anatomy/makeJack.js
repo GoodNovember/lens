@@ -12,10 +12,14 @@ export const makeJack = async ({
   name,
   universe,
   tint = 0xffffffff,
+  themeImage = 'frameEmpty',
   kind,
   connectionValidator = ({ jack, selfJack, ...others }) => true, // we trust, for now.
   x,
-  y
+  y,
+  node = null,
+  onConnect = () => { },
+  onDisconnect = () => { }
 }) => {
 
   const internalConnections = new Set()
@@ -27,7 +31,8 @@ export const makeJack = async ({
 
   const container = new Stage()
   const textures = await theme.getTextures()
-  const sprite = textures.frameFull.makeSprite()
+  const chosenSprite = textures[themeImage] || textures.frameFull
+  const sprite = chosenSprite.makeSprite()
   sprite.tint = napTint
   sprite.interactive = true
   sprite.anchor.set(0.5)
@@ -171,6 +176,9 @@ export const makeJack = async ({
     get y() {
       return container.toGlobal(universe.wireLayer.position).y - universe.wireLayer.y * 2
     },
+    get node() {
+      return node || null
+    },
     name,
     get connections() {
       return internalConnections
@@ -190,7 +198,14 @@ export const makeJack = async ({
     connectTo,
     container,
     universe,
+    reconnect,
     kind
+  }
+
+  function reconnect() {
+    for (const jack of internalConnections.values()) {
+      onConnect({ jack, selfJack })
+    }
   }
 
   function isConnectedTo({ jack }) {
@@ -203,12 +218,12 @@ export const makeJack = async ({
     }
   }
 
-  function receiveConnectionRequest({ jack, ...others }) {
+  function receiveConnectionRequest({ jack, target, source, ...others }) {
     return new Promise((resolve, reject) => {
       if (typeof connectionValidator === 'function') {
         let result = null
         try {
-          result = connectionValidator({ jack, selfJack, ...others })
+          result = connectionValidator({ jack, selfJack, target, source, ...others })
           console.log('result', result)
         } catch (error) {
           console.log('error', error)
@@ -225,17 +240,20 @@ export const makeJack = async ({
     let isAlive = true
     let disconnect = () => { }
     let personalVerdict = null
+    const target = jack
+    const source = selfJack
     if (typeof connectionValidator === 'function') {
       try {
-        personalVerdict = connectionValidator({ jack, selfJack, ...others })
+        personalVerdict = connectionValidator({ jack, selfJack, target, source, ...others })
       } catch (error) {
         console.error(error)
       }
     }
     if (personalVerdict) {
-      jack.receiveConnectionRequest({ jack: selfJack, ...others }).then((isSuccessful) => {
+      jack.receiveConnectionRequest({ jack: selfJack, target, source, ...others }).then((isSuccessful) => {
         if (isAlive === true) {
           if (isSuccessful) {
+            onConnect({ jack, selfJack })
             disconnect = makeConnectionBetweenJacks({ jackA: selfJack, jackB: jack, universe })
             internalConnections.add(jack)
             jack.connections.add(selfJack)
@@ -252,6 +270,7 @@ export const makeJack = async ({
 
     return () => {
       isAlive = false
+      onDisconnect({ jack, selfJack })
       if (internalConnections.has(jack)) {
         internalConnections.delete(jack)
       }

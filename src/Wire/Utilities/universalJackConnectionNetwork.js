@@ -56,11 +56,34 @@ const draggingPointers = new Set()
 let currentDragTarget = null
 
 const connectJacks = ({ sourceJack, targetJack }) => {
+
+  const isOrStartsWith = ({
+    is,
+    startsWith
+  }) => test => {
+    if (test === is) {
+      return true
+    } else {
+      return test.startsWith(startsWith)
+    }
+  }
+
   const normalizedCoupleName = () => {
-    if (sourceJack.kind === 'input' && targetJack.kind === 'output') {
+
+    const isInput = isOrStartsWith({
+      is: 'input',
+      startsWith: 'input-'
+    })
+
+    const isOutput = isOrStartsWith({
+      is: 'output',
+      startsWith: 'output-'
+    })
+
+    if (isInput(sourceJack.kind) && isOutput(targetJack.kind)) {
       return (`${targetJack.name} -> ${sourceJack.name}`).toLowerCase()
     }
-    if (sourceJack.kind === 'output' && targetJack.kind === 'input') {
+    if (isOutput(sourceJack.kind) && isInput(targetJack.kind)) {
       return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
     } else {
       return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()

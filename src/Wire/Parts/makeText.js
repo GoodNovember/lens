@@ -31,14 +31,15 @@ const makeTextWithStyle = ({ regularStyle, hoverStyle, activeStyle }) => string 
 const fontFamily = `fira code`
 const fontSize = 12
 
+const WHITE = 0xFFFFFF
 const BLACK = 0x000000
 // const RED = 0xff0000
 // const GREEN = 0x00ff00
 // const BLUE = 0x0000ff
 // const DARK_GREEN = 0x003300
 
-const normalText = makeTextWithStyle({
-  regularStyle: makeStyle({ fill: BLACK, fontFamily, fontSize })
+const makeNormalText = makeTextWithStyle({
+  regularStyle: makeStyle({ fill: WHITE, fontFamily, fontSize })
 })
 
 // const fileText = makeTextWithStyle({
@@ -54,5 +55,5 @@ const normalText = makeTextWithStyle({
 // })
 
 export const makeText = string => {
-  return normalText(string)
+  return makeNormalText(string)
 }

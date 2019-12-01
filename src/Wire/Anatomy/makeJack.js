@@ -223,7 +223,7 @@ export const makeJack = async ({
 
   function connectTo({ jack, ...others }) {
     let isAlive = true
-    let disconnect = () => { console.log('Default Disconnect Called') }
+    let disconnect = () => { }
     let personalVerdict = null
     if (typeof connectionValidator === 'function') {
       try {

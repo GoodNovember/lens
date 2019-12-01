@@ -18,9 +18,13 @@ export const makeJack = async ({
   x,
   y,
   node = null,
+  initialValue = null,
   onConnect = () => { },
   onDisconnect = () => { }
 }) => {
+
+  let lastPayloadSent = initialValue
+  let lastPayloadRecieved = initialValue
 
   const internalConnections = new Set()
 
@@ -160,12 +164,14 @@ export const makeJack = async ({
   sprite.on('pointerout', handlePointerOut)
 
   const broadcastToConnections = payload => {
+    lastPayloadSent = payload
     for (const otherJack of internalConnections) {
       otherJack.receiveBroadcast({ jack: selfJack, payload })
     }
   }
 
   const receiveBroadcast = ({ jack, payload }) => {
+    lastPayloadRecieved = payload
     container.emit('broadcast', { jack, payload })
   }
 
@@ -178,6 +184,12 @@ export const makeJack = async ({
     },
     get node() {
       return node || null
+    },
+    get lastPayloadSent() {
+      return lastPayloadSent
+    },
+    get lastPayloadRecieved() {
+      return lastPayloadRecieved
     },
     name,
     get connections() {

@@ -1,6 +1,6 @@
 import { PIXI } from '../Utilities/localPIXI.js'
 import theme from '../Theme/imperfection/theme.js'
-import { registerJackOnNetwork } from '../Utilities/universalJackConnectionNetwork.js'
+import { registerJackOnNetwork, networkEject } from '../Utilities/universalJackConnectionNetwork.js'
 import { makeConnectionBetweenJacks } from './makeConnectionBetweenJacks.js'
 import StateMachine from 'javascript-state-machine'
 
@@ -211,7 +211,21 @@ export const makeJack = async ({
     container,
     universe,
     reconnect,
+    eject,
     kind
+  }
+
+  function eject(otherJack) {
+    console.log(`EJECT me:${name} them:${otherJack.name} `)
+    if (internalConnections.has(otherJack)) {
+      internalConnections.delete(otherJack)
+      onDisconnect({ jack: otherJack, selfJack })
+      networkEject({ sourceJack: selfJack, targetJack: otherJack })
+    }
+    if (otherJack.connections.has(selfJack)) {
+      otherJack.eject(selfJack)
+      otherJack.connections.delete(otherJack)
+    }
   }
 
   function reconnect() {
@@ -262,33 +276,28 @@ export const makeJack = async ({
       }
     }
     if (personalVerdict) {
-      jack.receiveConnectionRequest({ jack: selfJack, target, source, ...others }).then((isSuccessful) => {
+      jack.receiveConnectionRequest({ jack: selfJack, target, source, ...others }).then(async (isSuccessful) => {
         if (isAlive === true) {
           if (isSuccessful) {
             onConnect({ jack, selfJack })
-            disconnect = makeConnectionBetweenJacks({ jackA: selfJack, jackB: jack, universe })
+            disconnect = await makeConnectionBetweenJacks({ jackA: selfJack, jackB: jack, universe })
             internalConnections.add(jack)
             jack.connections.add(selfJack)
           } else {
-            console.error('Jack Connection Request Denied.', { selfJack, jack })
+            console.info(`jack [${name}] -- Jack Connection Request Denied. I got rejected.`, { selfJack, jack })
           }
         }
       }).catch(error => {
-        console.error('Jack Connection Request Error.', error)
+        console.error(`jack [${name}] -- Jack Connection Request Error. Something weird happened.`, error)
       })
     } else {
-      console.error('Jack Connection Request Refused.', { jack, selfJack })
+      console.error(`jack [${name}] -- Jack Connection Request Refused. I don't like it.`, { jack, selfJack })
     }
 
     return () => {
       isAlive = false
       onDisconnect({ jack, selfJack })
-      if (internalConnections.has(jack)) {
-        internalConnections.delete(jack)
-      }
-      if (jack.connections.has(selfJack)) {
-        jack.connections.delete(selfJack)
-      }
+      eject(jack)
       if (typeof disconnect === 'function') {
         disconnect()
       }

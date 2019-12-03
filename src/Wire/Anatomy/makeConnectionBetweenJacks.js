@@ -2,6 +2,8 @@ import { PIXI } from '../Utilities/localPIXI.js'
 
 import { getMidPoint } from '../Utilities/getMidPoint.js'
 
+import { getTextures } from '../Theme/imperfection/theme.js'
+
 const {
   display,
   SimpleRope,
@@ -13,43 +15,8 @@ const {
   Stage
 } = display
 
-export const makeConnectionBetweenJacks = ({ jackA, jackB }) => {
+export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
   const container = new Stage()
-
-  // const classifyJackPositions = () => {
-  //   let left = null
-  //   let right = null
-  //   let top = null
-  //   let bottom = null
-  //   let sameY = false
-  //   let sameX = false
-  //   if (jackA.x < jackB.x) {
-  //     left = jackA
-  //     right = jackB
-  //   } else if (jackA.x === jackB.x) {
-  //     sameX = true
-  //   } else {
-  //     left = jackB
-  //     right = jackA
-  //   }
-  //   if (jackA.y < jackB.y) {
-  //     top = jackA
-  //     bottom = jackB
-  //   } else if (jackA.y === jackB.y) {
-  //     sameY = true
-  //   } else {
-  //     top = jackB
-  //     bottom = jackA
-  //   }
-  //   return {
-  //     left,
-  //     right,
-  //     top,
-  //     bottom,
-  //     sameY,
-  //     sameX
-  //   }
-  // }
 
   const calculatePoints = () => {
     const startPoint = new Point(jackA.x, jackA.y)
@@ -67,8 +34,10 @@ export const makeConnectionBetweenJacks = ({ jackA, jackB }) => {
     ]
   }
 
+  const textures = await getTextures()
+
   const ropePointArray = calculatePoints()
-  const rope = new SimpleRope(Texture.WHITE, ropePointArray)
+  const rope = new SimpleRope(textures.rope.texture, ropePointArray)
   rope.interactive = true
 
   const calculateRopeFromJackLocations = () => {
@@ -87,6 +56,14 @@ export const makeConnectionBetweenJacks = ({ jackA, jackB }) => {
   })
 
   console.log('Making Wire', { jackA, jackB })
+
+  rope.on('pointerup', () => {
+    jackA.eject(jackB)
+    console.log('Disconnecting wire', { jackA, jackB })
+    if (typeof disconnector === 'function') {
+      disconnector()
+    }
+  })
 
   container.addChild(rope)
 

@@ -55,52 +55,57 @@ const draggingJacks = new Set()
 const draggingPointers = new Set()
 let currentDragTarget = null
 
-const connectJacks = ({ sourceJack, targetJack }) => {
-
-  const isOrStartsWith = ({
-    is,
-    startsWith
-  }) => test => {
-    if (test === is) {
-      return true
+const isOrStartsWith = ({
+  is,
+  startsWith
+}) => test => {
+  if (test === is) {
+    return true
+  } else {
+    if (typeof test === 'string') {
+      return test.startsWith(startsWith)
     } else {
-      if (typeof test === 'string') {
-        return test.startsWith(startsWith)
-      } else {
-        return false
-      }
+      return false
     }
   }
+}
 
-  const normalizedCoupleName = () => {
+const normalizedCoupleName = ({ sourceJack, targetJack }) => {
 
-    const isInput = isOrStartsWith({
-      is: 'input',
-      startsWith: 'input-'
-    })
+  const isInput = isOrStartsWith({
+    is: 'input',
+    startsWith: 'input-'
+  })
 
-    const isOutput = isOrStartsWith({
-      is: 'output',
-      startsWith: 'output-'
-    })
+  const isOutput = isOrStartsWith({
+    is: 'output',
+    startsWith: 'output-'
+  })
 
-    if (isInput(sourceJack.kind) && isOutput(targetJack.kind)) {
-      return (`${targetJack.name} -> ${sourceJack.name}`).toLowerCase()
-    }
-    if (isOutput(sourceJack.kind) && isInput(targetJack.kind)) {
-      return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
-    } else {
-      return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
-    }
+  if (isInput(sourceJack.kind) && isOutput(targetJack.kind)) {
+    return (`${targetJack.name} -> ${sourceJack.name}`).toLowerCase()
   }
+  if (isOutput(sourceJack.kind) && isInput(targetJack.kind)) {
+    return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
+  } else {
+    return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
+  }
+}
 
-  const connectionID = normalizedCoupleName()
-
+const disconnectJacks = ({ sourceJack, targetJack }) => {
+  const connectionID = normalizedCoupleName({ sourceJack, targetJack })
   if (globalConnectionMap.has(connectionID)) {
     const { disconnect } = globalConnectionMap.get(connectionID)
     console.log('disconnect', connectionID)
     disconnect()
     globalConnectionMap.delete(connectionID)
+  }
+}
+
+const connectJacks = ({ sourceJack, targetJack }) => {
+  const connectionID = normalizedCoupleName({ sourceJack, targetJack })
+  if (globalConnectionMap.has(connectionID)) {
+    disconnectJacks({ sourceJack, targetJack })
   } else {
     if (sourceJack.isConnectedTo({ jack: targetJack }) === false) {
       const disconnect = sourceJack.connectTo({ jack: targetJack })
@@ -176,4 +181,8 @@ export const registerJackOnNetwork = ({ jack }) => {
       console.error('Cannot remove a jack that is not in the registry.')
     }
   }
+}
+
+export const networkEject = ({ sourceJack, targetJack }) => {
+  disconnectJacks({ sourceJack, targetJack })
 }

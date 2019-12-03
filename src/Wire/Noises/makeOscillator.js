@@ -1,8 +1,7 @@
 import { makeJack } from '../Anatomy/makeJack.js'
-import { PIXI } from '../Utilities/localPIXI.js'
 import { connectorValidator } from './validators/connectorValidator.js'
+import { makeToolbox } from '../Parts/makeToolbox.js'
 
-const { Container } = PIXI
 export const makeOscillator = async ({
   x,
   y,
@@ -10,7 +9,16 @@ export const makeOscillator = async ({
   context,
   universe
 }) => {
-  const container = new Container()
+  const toolbox = makeToolbox({
+    x, y,
+    name: `[${name}]'s toolbox`,
+    width: 200,
+    height: 200,
+  })
+  const container = toolbox.container
+  const internalConnections = new Set()
+  let canPlay = false
+  let canStop = false
   let oscillator = context.createOscillator()
   setupOscilator()
   container.x = x
@@ -64,13 +72,24 @@ export const makeOscillator = async ({
       },
       onConnect({ jack, selfJack }) {
         console.log('CONNECT to oscilator')
-        if (jack.node) {
-          oscillator.connect(jack.node)
+        if (jack.node && internalConnections.has(jack.node) === false) {
+          try {
+            oscillator.connect(jack.node)
+            internalConnections.add(jack.node)
+          } catch (e) {
+            console.error('hmm. connect.', e)
+          }
         }
       },
       onDisconnect({ jack, selfJack }) {
-        if (jack.node) {
-          oscillator.disconnect(jack.node)
+        if (jack.node && internalConnections.has(jack.node)) {
+          try {
+            internalConnections.delete(jack.node)
+            console.log('DISCONNECTING OSCILATOR FROM OTHER NODE')
+            oscillator.disconnect(jack.node)
+          } catch (e) {
+            console.error('hmm. disconnect.', e)
+          }
         }
       },
       connectionValidator({ jack, selfJack, ...rest }) {
@@ -92,7 +111,7 @@ export const makeOscillator = async ({
     )
   )
 
-  container.addChild(
+  toolbox.addChild(
     detune.container,
     frequency.container,
     type.container,
@@ -138,34 +157,54 @@ export const makeOscillator = async ({
   })
 
   start.container.on('broadcast', ({ jack, payload }) => {
-    console.log(`OSC ${name} Playing`)
-    oscillator.start(payload)
+    if (canPlay) {
+      console.log(`OSC ${name} Playing`)
+      canPlay = false
+      oscillator.start(payload)
+      canStop = true
+    } else {
+      console.log(`OSC ${name} is already playing.`)
+    }
   })
 
   stop.container.on('broadcast', ({ jack, payload }) => {
-    console.log(`OSC ${name} Stopped`)
-    oscillator.stop(payload)
+    if (canStop) {
+      console.log(`OSC ${name} Stopped`)
+      oscillator.stop(payload)
+      canStop = false
+    } else {
+      console.log(`OSC ${name} is already stopped.`)
+    }
   })
 
   connector.container.on('broadcast', ({ jack, payload }) => {
-    oscillator.connect(payload)
+    try {
+      oscillator.connect(payload)
+    } catch (e) {
+      console.error('hmm.', e)
+    }
   })
 
   function setupOscilator() {
+    canPlay = false
     oscillator = null
     oscillator = context.createOscillator()
     oscillator.onended = () => {
       console.log('Oscilator ended.')
-      setupOscilator()
-      for (const jack of connector.connections) {
-        if (jack.node) {
-          oscillator.connect(jack.node)
+      setTimeout(() => {
+        setupOscilator()
+        for (const jack of connector.connections) {
+          if (jack.node) {
+            oscillator.connect(jack.node)
+          }
         }
-      }
+      }, 0) // just in case, we don't want any stack overflows.
     }
+    canPlay = true
   }
 
   return {
+    toolbox,
     container,
     oscillator,
     universe,

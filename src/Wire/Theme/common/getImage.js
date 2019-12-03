@@ -1,7 +1,7 @@
 export const getImage = src => new Promise((resolve, reject) => {
   const image = new Image()
   image.onload = _event => {
-    console.log(`[image] loaded "${src}"`)
+    // console.log(`[image] loaded "${src}"`)
     resolve(image)
   }
   image.onerror = event => {

@@ -12,7 +12,7 @@ export const connectorValidator = ({ target, source }) => {
         return false
       }
     } else {
-      console.error(`Connection Error: No 'nodes' in connectorJack constructor`, { target: { node: target.node }, source: { node: source.node } })
+      console.info(`Connection rejected: No 'nodes' in connectorJack constructor`, { target: { node: target.node }, source: { node: source.node } })
       return false
     }
   } else {

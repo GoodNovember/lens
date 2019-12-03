@@ -1,16 +1,21 @@
 import { makeRect } from '../Utilities/makeRect.js'
 import { makeJack } from '../Anatomy/makeJack.js'
-import { PIXI } from '../Utilities/localPIXI.js'
+import { makeToolbox } from '../Parts/makeToolbox.js'
 
-const { Container } = PIXI
 export const makeTrigger = async ({
   x,
   y,
   name = `[unnamed trigger]`,
-  context,
   universe
 }) => {
-  const container = new Container()
+  const toolbox = makeToolbox({
+    x,
+    y,
+    name: `[${name}]'s toolbox`,
+    width: 120,
+    height: 100,
+  })
+  const container = toolbox.container
 
   const buttonElement = makeRect({
     x: 0,
@@ -20,10 +25,7 @@ export const makeTrigger = async ({
     interactive: true
   })
 
-  container.addChild(buttonElement)
-
-  container.x = x
-  container.y = y
+  toolbox.addChild(buttonElement)
 
   const jackIngredients = [
     {
@@ -43,7 +45,7 @@ export const makeTrigger = async ({
     )
   )
 
-  container.addChild(
+  toolbox.addChild(
     trigger.container
   )
 
@@ -52,6 +54,7 @@ export const makeTrigger = async ({
   })
 
   return {
+    toolbox,
     container,
     universe,
     jacks: {

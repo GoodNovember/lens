@@ -228,7 +228,7 @@ export const makeToolbox = ({
   })
 
   const parts = {
-    get leftParts() {
+    get leftParts () {
       return [
         chromeLeftSizer,
         chromeTopLeftCornerLeft,
@@ -237,7 +237,7 @@ export const makeToolbox = ({
         chromeBottomLeftCornerBottomLeft
       ]
     },
-    get rightParts() {
+    get rightParts () {
       return [
         chromeRightSizer,
         chromeTopRightCornerRight,
@@ -246,7 +246,7 @@ export const makeToolbox = ({
         chromeBottomRightCornerBottomRight
       ]
     },
-    get bottomParts() {
+    get bottomParts () {
       return [
         chromeBottomSizer,
         chromeBottomLeftCornerBottom,
@@ -255,7 +255,7 @@ export const makeToolbox = ({
         chromeBottomRightCornerBottomRight
       ]
     },
-    get topParts() {
+    get topParts () {
       return [
         chromeTopSizer,
         chromeTopLeftCornerTop,
@@ -267,55 +267,77 @@ export const makeToolbox = ({
   }
 
   const bounds = {
-    get innerMargin() { return INNER_MARGIN },
-    get marginSize() { return MARGIN_SIZE },
-    get globalTop() {
+    get innerMargin () { return INNER_MARGIN },
+    get marginSize () { return MARGIN_SIZE },
+    get globalTop () {
       return chromeTopSizer.getGlobalPosition().y + chromeTopSizer.height
     },
-    get globalLeft() {
+    get globalLeft () {
       return chromeLeftSizer.getGlobalPosition().x + chromeLeftSizer.width
     },
-    get globalRight() {
+    get globalRight () {
       return chromeRightSizer.getGlobalPosition().x
     },
-    get globalBottom() {
+    get globalBottom () {
       return chromeBottomSizer.getGlobalPosition().y
     },
-    get top() {
+    get rawTop () {
+      return chromeTopSizer.y
+    },
+    get top () {
       return chromeTopSizer.y + MARGIN_SIZE
     },
-    get left() {
+    get rawLeft () {
+      return chromeLeftSizer.x
+    },
+    get left () {
       return chromeLeftSizer.x + MARGIN_SIZE
     },
-    get right() {
+    get right () {
       return chromeRightSizer.x
     },
-    get bottom() {
+    get bottom () {
       return chromeBottomSizer.y
     },
-    get height() {
+    get height () {
       const { bottom, top } = this
       const min = Math.min(bottom, top)
       const max = Math.max(bottom, top)
       return max - min
     },
-    get width() {
+    get width () {
       const { right, left } = this
       const min = Math.min(right, left)
       const max = Math.max(right, left)
       return max - min
     },
-    get innerWidth() {
+    get innerWidth () {
       const { width } = this
       return width
     },
-    get mask() {
+    get mask () {
       const { globalTop, globalLeft, globalRight, globalBottom } = this
       const x = globalLeft + INNER_MARGIN
       const y = globalTop + INNER_MARGIN
       const height = (globalBottom - globalTop) - (INNER_MARGIN * 2)
       const width = (globalRight - globalLeft) - (INNER_MARGIN * 2)
       return { height, width, x, y }
+    },
+    get maxX () {
+      const { width } = this
+      return (chromeLeftSizer.x + width) - (INNER_MARGIN * 2)
+    },
+    get maxY () {
+      const { height } = this
+      return (chromeTopSizer.y + height) - (INNER_MARGIN * 2)
+    },
+    get centerX () {
+      const { maxX } = this
+      return maxX / 2
+    },
+    get centerY () {
+      const { maxY } = this
+      return maxY / 2
     }
   }
 
@@ -369,13 +391,13 @@ export const makeToolbox = ({
     reorderZIndexes()
   }
 
-  function notifyMoveListeners() {
+  function notifyMoveListeners () {
     moveListeners.forEach(listener => listener({ ...bounds }))
     emit('parent move', bounds)
     drawMask()
   }
 
-  function drawMask() {
+  function drawMask () {
     const { innerMargin, top, left } = bounds
     const { x, y, width, height } = bounds.mask
     const mask = new Graphics()
@@ -394,7 +416,7 @@ export const makeToolbox = ({
     }
   }
 
-  function notifyResizeListeners() {
+  function notifyResizeListeners () {
     const { width, height } = bounds
     resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
     // emit('parent resize', bounds)
@@ -523,44 +545,44 @@ export const makeToolbox = ({
       moveLeftEdgeTo(x)
       notifyResizeListeners()
     })(
-      [
-        chromeTopLeftCornerTop,
-        chromeTopLeftCornerLeft,
-        chromeTopLeftCornerTopLeft
-      ])
+    [
+      chromeTopLeftCornerTop,
+      chromeTopLeftCornerLeft,
+      chromeTopLeftCornerTopLeft
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveTopEdgeTo(y)
       notifyResizeListeners()
     })(
-      [
-        chromeTopRightCornerTop,
-        chromeTopRightCornerRight,
-        chromeTopRightCornerTopRight
-      ])
+    [
+      chromeTopRightCornerTop,
+      chromeTopRightCornerRight,
+      chromeTopRightCornerTopRight
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveLeftEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })(
-      [
-        chromeBottomLeftCornerLeft,
-        chromeBottomLeftCornerBottom,
-        chromeBottomLeftCornerBottomLeft
-      ])
+    [
+      chromeBottomLeftCornerLeft,
+      chromeBottomLeftCornerBottom,
+      chromeBottomLeftCornerBottomLeft
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })(
-      [
-        chromeBottomRightCornerRight,
-        chromeBottomRightCornerBottom,
-        chromeBottomRightCornerBottomRight
-      ])
+    [
+      chromeBottomRightCornerRight,
+      chromeBottomRightCornerBottom,
+      chromeBottomRightCornerBottomRight
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { startDelta: { x, y } } }) => {
       moveBy(x, y)
@@ -582,22 +604,20 @@ export const makeToolbox = ({
   container.on('parent move', bounds => {
     emit('parent move', bounds)
     notifyMoveListeners()
-    drawMask()
   })
   container.on('parent resize', bounds => {
     emit('parent resize', bounds)
     notifyResizeListeners()
-    drawMask()
   })
 
-  function addChild(...args) {
+  function addChild (...args) {
     internalContainer.addChild(...args)
     return () => {
       removeChild(...args)
     }
   }
 
-  function removeChild(...args) {
+  function removeChild (...args) {
     internalContainer.removeChild(...args)
   }
 
@@ -609,7 +629,6 @@ export const makeToolbox = ({
     if (resizeListeners.has(callback) === false) {
       resizeListeners.add(callback)
       callback(bounds)
-      // drawMask()
     }
     return () => {
       if (resizeListeners.has(callback)) {
@@ -622,7 +641,6 @@ export const makeToolbox = ({
     if (moveListeners.has(callback) === false) {
       moveListeners.add(callback)
       callback(bounds)
-      // drawMask()
     }
     return () => {
       if (moveListeners.has(callback)) {
@@ -634,13 +652,13 @@ export const makeToolbox = ({
   drawMask()
 
   return {
-    get bounds() { return bounds },
-    get width() { return bounds.width },
-    set width(newWidth) {
+    get bounds () { return bounds },
+    get width () { return bounds.width },
+    set width (newWidth) {
       moveRightEdgeTo(newWidth)
     },
-    get height() { return bounds.height },
-    set height(newHeight) {
+    get height () { return bounds.height },
+    set height (newHeight) {
       moveBottomEdgeTo(newHeight)
     },
     moveTo,

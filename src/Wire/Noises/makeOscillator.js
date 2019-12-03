@@ -5,15 +5,16 @@ import { makeToolbox } from '../Parts/makeToolbox.js'
 export const makeOscillator = async ({
   x,
   y,
-  name = `[unnamed oscillator]`,
+  name = '[unnamed oscillator]',
   context,
   universe
 }) => {
   const toolbox = makeToolbox({
-    x, y,
+    x,
+    y,
     name: `[${name}]'s toolbox`,
     width: 200,
-    height: 200,
+    height: 200
   })
   const container = toolbox.container
   const internalConnections = new Set()
@@ -67,10 +68,10 @@ export const makeOscillator = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return oscillator
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         console.log('CONNECT to oscilator')
         if (jack.node && internalConnections.has(jack.node) === false) {
           try {
@@ -81,7 +82,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           try {
             internalConnections.delete(jack.node)
@@ -92,7 +93,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
@@ -104,7 +105,7 @@ export const makeOscillator = async ({
     type,
     start,
     stop,
-    connector,
+    connector
   ] = await Promise.all(
     jackIngredients.map(
       ingredients => makeJack(ingredients)
@@ -185,12 +186,12 @@ export const makeOscillator = async ({
     }
   })
 
-  function setupOscilator() {
+  function setupOscilator () {
     canPlay = false
     oscillator = null
     oscillator = context.createOscillator()
     oscillator.onended = () => {
-      console.log('Oscilator ended.')
+      // console.log('Oscilator ended.')
       setTimeout(() => {
         setupOscilator()
         for (const jack of connector.connections) {

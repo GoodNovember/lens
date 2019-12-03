@@ -1,14 +1,19 @@
 import { makeJack } from '../Anatomy/makeJack.js'
 import { makeToolbox } from '../Parts/makeToolbox.js'
 import { makeRect } from '../Utilities/makeRect.js'
+import { enableDragEvents } from '../Utilities/enableDragEvents.js'
+
+const makeDraggableRect = ({ ...rest }) => enableDragEvents(makeRect({ ...rest }))
 
 export const makeRange = async ({
   x,
   y,
   name = '[unnamed range]',
   initialValue = 0,
-  universe,
+  universe
 }) => {
+  let internalPlacementX = 0.5
+
   let internalMinValue = -Infinity
   let internalValue = initialValue
   let internalMaxValue = Infinity
@@ -23,39 +28,62 @@ export const makeRange = async ({
 
   const leftEdge = makeRect({ x: 0, y: 0, width: 8, height: 32, interactive: true })
   const rightEdge = makeRect({ x: 200 - 8, y: 0, width: 8, height: 32, interactive: true })
-  const currentEdge = makeRect({ x: 0, y: 0, width: 16, height: 32, interactive: true })
+  const currentEdge = makeDraggableRect({ x: 0, y: 0, width: 16, height: 32, interactive: true })
+
+  const debugLine = makeRect({ x: 0, y: 0, width: 1, height: 100, tint: 0xff00ff })
 
   currentEdge.anchor.set(0.5, 0)
+  debugLine.anchor.set(0.5)
 
-  toolbox.subscribeToResize(() => {
+  currentEdge.on('dragging', ({ pointerState: { startDelta: { x, y }, current } }) => {
     const { bounds } = toolbox
+
     const {
-      left,
-      marginSize,
-      right,
-      top,
-      height,
-      width,
+      maxX
     } = bounds
 
-    const centerX = left + (width / 2) - (marginSize * 3)
-    const centerY = top + (height / 2) - (marginSize * 3)
+    internalPlacementX = (current.x / maxX)
+    currentEdge.x = internalPlacementX * maxX
+    updateVisuals()
+  })
 
-    middle.x = centerX
+  const updateVisuals = () => {
+    const { bounds } = toolbox
+
+    const {
+      rawLeft,
+      rawTop,
+      top,
+      height,
+      centerX,
+      centerY,
+      innerMargin,
+      maxX
+    } = bounds
+
+    const currentX = (maxX * internalPlacementX)
+
+    middle.x = currentX
     middle.y = centerY
 
-    leftEdge.x = left - marginSize
-    leftEdge.y = top - marginSize
+    leftEdge.x = rawLeft
+    leftEdge.y = rawTop
     leftEdge.height = height
 
-    rightEdge.x = right - 48
-    rightEdge.y = top - (marginSize * 2)
+    rightEdge.x = maxX - 8
+    rightEdge.y = top - innerMargin
     rightEdge.height = height
 
-    currentEdge.x = centerX
-    currentEdge.y = top - (marginSize * 2)
+    currentEdge.x = currentX
+    currentEdge.y = top - innerMargin
     currentEdge.height = height
 
+    debugLine.x = centerX
+    debugLine.y = centerY
+  }
+
+  toolbox.subscribeToResize(() => {
+    updateVisuals()
   })
 
   const { container } = toolbox
@@ -65,6 +93,7 @@ export const makeRange = async ({
     rightEdge,
     currentEdge,
     middle,
+    debugLine
   )
 
   const jacks = await Promise.all([
@@ -72,19 +101,19 @@ export const makeRange = async ({
       x: 0,
       y: 0,
       name: `[${name}]'s minJack`,
-      universe,
+      universe
     }),
     makeJack({
       x: 32,
       y: 32,
       name: `[${name}]'s maxJack`,
-      universe,
+      universe
     }),
     makeJack({
       x: 10,
       y: 10,
       name: `[${name}]'s valueJack`,
-      universe,
+      universe
     })
   ])
 
@@ -93,7 +122,7 @@ export const makeRange = async ({
   const [
     minJack,
     maxJack,
-    valueJack,
+    valueJack
   ] = jacks
 
   minJack.container.on('broadcast', ({ payload }) => {

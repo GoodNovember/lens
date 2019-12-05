@@ -18,7 +18,7 @@ const options = {
 
 const bundler = new Bundler(entryFile, options)
 bundler.serve(PORT).then(server => {
-  concurrently(['electron .']).then(() => {
+  concurrently(['electron . --remote-debugging-port=9223']).then(() => {
     server.close()
     process.exit(0)
   }).catch(error => {

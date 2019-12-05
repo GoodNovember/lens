@@ -228,7 +228,7 @@ export const makeToolbox = ({
   })
 
   const parts = {
-    get leftParts () {
+    get leftParts() {
       return [
         chromeLeftSizer,
         chromeTopLeftCornerLeft,
@@ -237,7 +237,7 @@ export const makeToolbox = ({
         chromeBottomLeftCornerBottomLeft
       ]
     },
-    get rightParts () {
+    get rightParts() {
       return [
         chromeRightSizer,
         chromeTopRightCornerRight,
@@ -246,7 +246,7 @@ export const makeToolbox = ({
         chromeBottomRightCornerBottomRight
       ]
     },
-    get bottomParts () {
+    get bottomParts() {
       return [
         chromeBottomSizer,
         chromeBottomLeftCornerBottom,
@@ -255,7 +255,7 @@ export const makeToolbox = ({
         chromeBottomRightCornerBottomRight
       ]
     },
-    get topParts () {
+    get topParts() {
       return [
         chromeTopSizer,
         chromeTopLeftCornerTop,
@@ -267,77 +267,82 @@ export const makeToolbox = ({
   }
 
   const bounds = {
-    get innerMargin () { return INNER_MARGIN },
-    get marginSize () { return MARGIN_SIZE },
-    get globalTop () {
+    get cornerSize() { return CORNER_SIZE },
+    get innerMargin() { return INNER_MARGIN },
+    get marginSize() { return MARGIN_SIZE },
+    get globalTop() {
       return chromeTopSizer.getGlobalPosition().y + chromeTopSizer.height
     },
-    get globalLeft () {
+    get globalLeft() {
       return chromeLeftSizer.getGlobalPosition().x + chromeLeftSizer.width
     },
-    get globalRight () {
+    get globalRight() {
       return chromeRightSizer.getGlobalPosition().x
     },
-    get globalBottom () {
+    get globalBottom() {
       return chromeBottomSizer.getGlobalPosition().y
     },
-    get rawTop () {
-      return chromeTopSizer.y
+    get rawTop() {
+      return Math.min(chromeTopSizer.y, chromeBottomSizer.y)
     },
-    get top () {
-      return chromeTopSizer.y + MARGIN_SIZE
+    get top() {
+      const { rawTop } = this
+      return rawTop
     },
-    get rawLeft () {
-      return chromeLeftSizer.x
+    get rawLeft() {
+      return Math.min(chromeLeftSizer.x, chromeRightSizer.x)
     },
-    get left () {
-      return chromeLeftSizer.x + MARGIN_SIZE
+    get left() {
+      const { rawLeft } = this
+      return rawLeft
     },
-    get right () {
-      return chromeRightSizer.x
+    get right() {
+      return Math.max(chromeLeftSizer.x, chromeRightSizer.x)
     },
-    get bottom () {
-      return chromeBottomSizer.y
+    get bottom() {
+      return Math.max(chromeTopSizer.y, chromeBottomSizer.y)
     },
-    get height () {
+    get height() {
       const { bottom, top } = this
-      const min = Math.min(bottom, top)
-      const max = Math.max(bottom, top)
-      return max - min
+      return bottom - top
     },
-    get width () {
+    get width() {
       const { right, left } = this
-      const min = Math.min(right, left)
-      const max = Math.max(right, left)
-      return max - min
+      return right - left
     },
-    get innerWidth () {
+    get innerWidth() {
       const { width } = this
       return width
     },
-    get mask () {
-      const { globalTop, globalLeft, globalRight, globalBottom } = this
-      const x = globalLeft + INNER_MARGIN
-      const y = globalTop + INNER_MARGIN
-      const height = (globalBottom - globalTop) - (INNER_MARGIN * 2)
-      const width = (globalRight - globalLeft) - (INNER_MARGIN * 2)
+    get mask() {
+      const { globalTop, globalLeft, globalRight, globalBottom, marginSize, innerMargin } = this
+      const x = globalLeft + innerMargin
+      const y = globalTop + innerMargin
+      const height = (globalBottom - globalTop) - (innerMargin * 2)
+      const width = (globalRight - globalLeft) - (innerMargin * 2)
       return { height, width, x, y }
     },
-    get maxX () {
-      const { width } = this
-      return (chromeLeftSizer.x + width) - (INNER_MARGIN * 2)
+    get minX() {
+      return this.left
     },
-    get maxY () {
-      const { height } = this
-      return (chromeTopSizer.y + height) - (INNER_MARGIN * 2)
+    get maxX() {
+      const { width, left, innerMargin, marginSize } = this
+      return (left + width) - (innerMargin * 2) - marginSize
     },
-    get centerX () {
-      const { maxX } = this
-      return maxX / 2
+    get minY() {
+      return this.top
     },
-    get centerY () {
-      const { maxY } = this
-      return maxY / 2
+    get maxY() {
+      const { height, top, innerMargin, marginSize } = this
+      return (top + height) - (innerMargin * 2) - marginSize
+    },
+    get centerX() {
+      const { minX, maxX } = this
+      return (minX + maxX) / 2
+    },
+    get centerY() {
+      const { minY, maxY } = this
+      return (minY + maxY) / 2
     }
   }
 
@@ -391,14 +396,14 @@ export const makeToolbox = ({
     reorderZIndexes()
   }
 
-  function notifyMoveListeners () {
+  function notifyMoveListeners() {
     moveListeners.forEach(listener => listener({ ...bounds }))
     emit('parent move', bounds)
     drawMask()
   }
 
-  function drawMask () {
-    const { innerMargin, top, left } = bounds
+  function drawMask() {
+    const { innerMargin, top, left, marginSize } = bounds
     const { x, y, width, height } = bounds.mask
     const mask = new Graphics()
     mask.beginFill()
@@ -411,12 +416,12 @@ export const makeToolbox = ({
       chromeBoxGraphics.clear()
       if (boxHeight > 0 && boxWidth > 0) {
         chromeBoxGraphics.lineStyle(1, BOX_COLOR, 1.0, 0, true)
-        chromeBoxGraphics.drawRect(left + innerMargin, top + innerMargin, Math.max(width, 0), Math.max(height, 0))
+        chromeBoxGraphics.drawRect(left + innerMargin + marginSize, top + innerMargin + marginSize, boxWidth, boxHeight)
       }
     }
   }
 
-  function notifyResizeListeners () {
+  function notifyResizeListeners() {
     const { width, height } = bounds
     resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
     // emit('parent resize', bounds)
@@ -424,6 +429,7 @@ export const makeToolbox = ({
   }
 
   const moveTo = (x, y) => {
+    ght
     container.x = x
     container.y = y
     notifyMoveListeners()
@@ -434,89 +440,89 @@ export const makeToolbox = ({
     notifyMoveListeners()
   }
   const moveTopEdgeTo = y => {
-    const { bottom } = bounds
-    const moveValue = y - HALF_MARGIN_SIZE
-    const fixedValue = bottom - MARGIN_SIZE - TOOLBOX_MIN_HEIGHT + (MARGIN_SIZE * 2)
+    const { bottom, innerMargin, marginSize, cornerSize } = bounds
+    const moveValue = y - (marginSize / 2)
+    const fixedValue = bottom - marginSize - TOOLBOX_MIN_HEIGHT + innerMargin
 
     const newY = Math.min(moveValue, fixedValue)
 
     parts.topParts.map(part => { part.y = newY })
 
-    chromeTopLeftCornerLeft.y = newY + (MARGIN_SIZE)
-    chromeTopRightCornerRight.y = newY + (MARGIN_SIZE)
+    chromeTopLeftCornerLeft.y = newY + marginSize
+    chromeTopRightCornerRight.y = newY + marginSize
 
     const { height, top } = bounds
 
-    chromeMover.y = top
-    chromeLeftSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
-    chromeRightSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
+    chromeMover.y = top + marginSize
+    chromeLeftSizer.y = top + cornerSize
+    chromeRightSizer.y = top + cornerSize
 
-    chromeMover.height = height
-    chromeLeftSizer.height = height - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
-    chromeRightSizer.height = height - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
+    chromeMover.height = height - marginSize
+    chromeLeftSizer.height = height - (cornerSize * 2) + marginSize
+    chromeRightSizer.height = height - (cornerSize * 2) + marginSize
   }
   const moveLeftEdgeTo = x => {
-    const { right } = bounds
-    const moveValue = x - HALF_MARGIN_SIZE
-    const fixedValue = right - TOOLBOX_MIN_WIDTH + MARGIN_SIZE
+    const { right, marginSize, cornerSize } = bounds
+    const moveValue = x - (marginSize / 2)
+    const fixedValue = right - TOOLBOX_MIN_WIDTH + marginSize
     const newX = Math.min(moveValue, fixedValue)
 
     parts.leftParts.map(part => { part.x = newX })
-    chromeTopLeftCornerTop.x = newX + MARGIN_SIZE
-    chromeBottomLeftCornerBottom.x = newX + MARGIN_SIZE
+    chromeTopLeftCornerTop.x = newX + marginSize
+    chromeBottomLeftCornerBottom.x = newX + marginSize
 
     const { width, left } = bounds
 
-    chromeMover.x = left
-    chromeTopSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
-    chromeBottomSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
+    chromeMover.x = left + marginSize
+    chromeTopSizer.x = left + cornerSize
+    chromeBottomSizer.x = left + cornerSize
 
-    chromeMover.width = width
-    chromeTopSizer.width = width - CORNER_SIZE
-    chromeBottomSizer.width = width - CORNER_SIZE
+    chromeMover.width = width - marginSize
+    chromeTopSizer.width = width - cornerSize - marginSize
+    chromeBottomSizer.width = width - cornerSize - marginSize
   }
   const moveRightEdgeTo = x => {
-    const { left } = bounds
+    const { left, marginSize, innerMargin, cornerSize } = bounds
 
-    const moveValue = x - HALF_MARGIN_SIZE
-    const fixedValue = left + TOOLBOX_MIN_WIDTH - (MARGIN_SIZE * 2)
+    const moveValue = x - (marginSize / 2)
+    const fixedValue = left + TOOLBOX_MIN_WIDTH - innerMargin
 
     const newX = Math.max(moveValue, fixedValue)
 
     parts.rightParts.map(part => { part.x = newX })
-    chromeTopRightCornerTop.x = newX - (CORNER_SIZE - MARGIN_SIZE)
-    chromeBottomRightCornerBottom.x = newX - (CORNER_SIZE - MARGIN_SIZE)
+    chromeTopRightCornerTop.x = newX - (cornerSize - marginSize)
+    chromeBottomRightCornerBottom.x = newX - (cornerSize - marginSize)
 
     const { width } = bounds
 
-    chromeMover.x = left
-    chromeTopSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
-    chromeBottomSizer.x = left + (CORNER_SIZE - MARGIN_SIZE)
+    chromeMover.x = left + marginSize
+    chromeTopSizer.x = left + cornerSize
+    chromeBottomSizer.x = left + cornerSize
 
-    chromeMover.width = width
-    chromeTopSizer.width = width - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
-    chromeBottomSizer.width = width - (CORNER_SIZE * 2) + (MARGIN_SIZE * 2)
+    chromeMover.width = width - marginSize
+    chromeTopSizer.width = width - (cornerSize * 2) + marginSize
+    chromeBottomSizer.width = width - (cornerSize * 2) + marginSize
   }
   const moveBottomEdgeTo = y => {
-    const { top } = bounds
-    const moveValue = y - HALF_MARGIN_SIZE
-    const fixedValue = top + (TOOLBOX_MIN_HEIGHT - (MARGIN_SIZE * 2))
+    const { top, marginSize, innerMargin, cornerSize } = bounds
+    const moveValue = y - (marginSize / 2)
+    const fixedValue = top + (TOOLBOX_MIN_HEIGHT - innerMargin)
 
     const newY = Math.max(moveValue, fixedValue)
 
     parts.bottomParts.map(part => { part.y = newY })
-    chromeBottomLeftCornerLeft.y = newY - (CORNER_SIZE - MARGIN_SIZE)
-    chromeBottomRightCornerRight.y = newY - (CORNER_SIZE - MARGIN_SIZE)
+    chromeBottomLeftCornerLeft.y = newY - (cornerSize - marginSize)
+    chromeBottomRightCornerRight.y = newY - (cornerSize - marginSize)
 
     const { height } = bounds
 
-    chromeMover.height = height
-    chromeLeftSizer.height = height - CORNER_SIZE
-    chromeRightSizer.height = height - CORNER_SIZE
+    chromeMover.y = top + marginSize
+    chromeLeftSizer.y = top + cornerSize
+    chromeRightSizer.y = top + cornerSize
 
-    chromeMover.y = top
-    chromeLeftSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
-    chromeRightSizer.y = top + (CORNER_SIZE - MARGIN_SIZE)
+    chromeMover.height = height - marginSize
+    chromeLeftSizer.height = height - cornerSize - marginSize
+    chromeRightSizer.height = height - cornerSize - marginSize
   }
 
   makeBatchEventHandler('dragging')(
@@ -545,44 +551,44 @@ export const makeToolbox = ({
       moveLeftEdgeTo(x)
       notifyResizeListeners()
     })(
-    [
-      chromeTopLeftCornerTop,
-      chromeTopLeftCornerLeft,
-      chromeTopLeftCornerTopLeft
-    ])
+      [
+        chromeTopLeftCornerTop,
+        chromeTopLeftCornerLeft,
+        chromeTopLeftCornerTopLeft
+      ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveTopEdgeTo(y)
       notifyResizeListeners()
     })(
-    [
-      chromeTopRightCornerTop,
-      chromeTopRightCornerRight,
-      chromeTopRightCornerTopRight
-    ])
+      [
+        chromeTopRightCornerTop,
+        chromeTopRightCornerRight,
+        chromeTopRightCornerTopRight
+      ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveLeftEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })(
-    [
-      chromeBottomLeftCornerLeft,
-      chromeBottomLeftCornerBottom,
-      chromeBottomLeftCornerBottomLeft
-    ])
+      [
+        chromeBottomLeftCornerLeft,
+        chromeBottomLeftCornerBottom,
+        chromeBottomLeftCornerBottomLeft
+      ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })(
-    [
-      chromeBottomRightCornerRight,
-      chromeBottomRightCornerBottom,
-      chromeBottomRightCornerBottomRight
-    ])
+      [
+        chromeBottomRightCornerRight,
+        chromeBottomRightCornerBottom,
+        chromeBottomRightCornerBottomRight
+      ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { startDelta: { x, y } } }) => {
       moveBy(x, y)
@@ -610,14 +616,14 @@ export const makeToolbox = ({
     notifyResizeListeners()
   })
 
-  function addChild (...args) {
+  function addChild(...args) {
     internalContainer.addChild(...args)
     return () => {
       removeChild(...args)
     }
   }
 
-  function removeChild (...args) {
+  function removeChild(...args) {
     internalContainer.removeChild(...args)
   }
 
@@ -652,13 +658,13 @@ export const makeToolbox = ({
   drawMask()
 
   return {
-    get bounds () { return bounds },
-    get width () { return bounds.width },
-    set width (newWidth) {
+    get bounds() { return bounds },
+    get width() { return bounds.width },
+    set width(newWidth) {
       moveRightEdgeTo(newWidth)
     },
-    get height () { return bounds.height },
-    set height (newHeight) {
+    get height() { return bounds.height },
+    set height(newHeight) {
       moveBottomEdgeTo(newHeight)
     },
     moveTo,

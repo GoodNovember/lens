@@ -36,13 +36,13 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "sane": "^4.1.0",
-    "standard": "^14.2.0",
     "styled-components": "^4.3.2",
     "three": "^0.107.0",
     "tildify": "^2.0.0",
     "untildify": "^4.0.0"
   },
   "devDependencies": {
+    "standard": "^14.3.1",
     "concurrently": "^4.1.1",
     "cross-env": "^5.2.0",
     "electron": "^6.0.0",

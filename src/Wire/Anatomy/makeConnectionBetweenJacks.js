@@ -55,7 +55,7 @@ export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
     calculateRopeFromJackLocations()
   })
 
-  console.log('Making Wire', { jackA, jackB })
+  // console.log('Making Wire', { jackA, jackB })
 
   rope.on('pointerup', () => {
     jackA.eject(jackB)
@@ -70,11 +70,11 @@ export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
   let disconnector = () => { }
 
   if (jackA.universe === jackB.universe) {
-    console.log('Same Universe Jacks Connected')
+    // console.log('Same Universe Jacks Connected')
     jackA.universe.wireLayer.addChild(container)
     disconnector = () => { jackA.universe.wireLayer.removeChild(container) }
   } else {
-    console.log('Different Universe Jacks Connected')
+    console.log('Different Universe Jacks Want To Connect.')
     console.error('not Implemented.')
   }
   return () => {

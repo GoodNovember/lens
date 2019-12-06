@@ -5,7 +5,7 @@ import { makeToolbox } from '../Parts/makeToolbox.js'
 export const makeTrigger = async ({
   x,
   y,
-  name = `[unnamed trigger]`,
+  name = '[unnamed trigger]',
   universe
 }) => {
   const toolbox = makeToolbox({
@@ -13,11 +13,11 @@ export const makeTrigger = async ({
     y,
     name: `[${name}]'s toolbox`,
     width: 120,
-    height: 100,
+    height: 100
   })
   const container = toolbox.container
 
-  const buttonElement = makeRect({
+  const triggerElement = makeRect({
     x: 0,
     y: 0,
     width: 50,
@@ -25,40 +25,45 @@ export const makeTrigger = async ({
     interactive: true
   })
 
-  toolbox.addChild(buttonElement)
+  toolbox.addChild(triggerElement)
 
-  const jackIngredients = [
-    {
-      x: 50 + 8,
-      y: 25,
-      name: `[${name}]'s trigger jack`,
-      themeImage: 'jackTrigger',
-      universe
-    }
-  ]
-
-  const [
-    trigger,
-  ] = await Promise.all(
-    jackIngredients.map(
-      ingredients => makeJack(ingredients)
-    )
-  )
+  const jackTrigger = await makeJack({
+    x: 50 + 8,
+    y: 25,
+    name: `[${name}]'s trigger jack`,
+    themeImage: 'jackTrigger',
+    kind: 'trigger',
+    universe
+  })
 
   toolbox.addChild(
-    trigger.container
+    jackTrigger.container
   )
 
-  buttonElement.on('pointerdown', () => {
-    trigger.broadcastToConnections(0)
-  })
+  const forwardEventToJack = ({
+    eventName
+  }) => {
+    triggerElement.on(eventName, event => {
+      jackTrigger.broadcastToConnections({ event, eventName })
+    })
+  }
+
+  const eventsToForwardToTriggerJack = [
+    'pointerdown',
+    'pointerup',
+    'pointerupoutside'
+  ]
+
+  for (const eventName of eventsToForwardToTriggerJack) {
+    forwardEventToJack({ eventName })
+  }
 
   return {
     toolbox,
     container,
     universe,
     jacks: {
-      trigger
+      jackTrigger
     }
   }
 }

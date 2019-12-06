@@ -20,8 +20,6 @@ export const makeGain = async ({
   const internalConnections = new Set()
   const gainNode = context.createGain()
 
-  console.log({ gainNode })
-
   const jackIngredients = [
     {
       x: 8,

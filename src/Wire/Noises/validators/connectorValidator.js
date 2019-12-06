@@ -1,5 +1,5 @@
 export const connectorValidator = ({ target, source }) => {
-  console.log({ target, source })
+  // console.log({ target, source })
   if (!target && !source) {
     debugger
   }

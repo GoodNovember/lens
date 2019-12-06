@@ -1,6 +1,7 @@
 import { makeJack } from '../Anatomy/makeJack.js'
 import { connectorValidator } from './validators/connectorValidator.js'
 import { makeToolbox } from '../Parts/makeToolbox.js'
+import { lerp } from '../Utilities/lerp.js'
 
 export const makeOscillator = async ({
   x,
@@ -121,26 +122,31 @@ export const makeOscillator = async ({
     connector.container
   )
 
-  console.log('osc', oscillator)
-
+  // when we get something from the Detune Jack...
   detune.container.on('broadcast', ({ jack, payload }) => {
     const { maxValue, minValue, defaultValue, automationRate } = oscillator.detune
-    if (typeof payload === 'number') {
-      oscillator.detune.value = Math.max(minValue, Math.min(payload, maxValue))
-    } else {
-      oscillator.detune.value = defaultValue
+    if (jack.kind === 'zero-to-one') {
+      const { x } = payload
+      const min = minValue
+      const max = maxValue
+      const value = lerp({ norm: x, min, max })
+      oscillator.detune.setValueAtTime(value, context.currentTime)
     }
   })
 
+  // when we get something from the Frequency Jack...
   frequency.container.on('broadcast', ({ jack, payload }) => {
     const { maxValue, minValue, defaultValue, automationRate } = oscillator.frequency
-    if (typeof payload === 'number') {
-      oscillator.frequency.value = Math.max(minValue, Math.min(payload, maxValue))
-    } else {
-      oscillator.frequency.value = defaultValue
+    if (jack.kind === 'zero-to-one') {
+      const { x } = payload // we extract the (0.0 -> 1.0) value for the horizontal.
+      const min = minValue
+      const max = maxValue
+      const value = lerp({ norm: x, min, max })
+      oscillator.frequency.setValueAtTime(value, context.currentTime)
     }
   })
 
+  // when we get something from the Type Jack...
   type.container.on('broadcast', ({ jack, payload }) => {
     const defaultValue = 'sine'
     const validTypes = [
@@ -157,40 +163,54 @@ export const makeOscillator = async ({
     }
   })
 
+  // when we get something from the Start Jack...
   start.container.on('broadcast', ({ jack, payload }) => {
-    if (canPlay) {
-      console.log(`OSC ${name} Playing`)
-      canPlay = false
-      oscillator.start(payload)
-      canStop = true
-    } else {
-      console.log(`OSC ${name} is already playing.`)
+    if (jack.kind === 'trigger') {
+      const { eventName } = payload
+      if (eventName === 'pointerdown') {
+        if (canPlay) {
+          canPlay = false
+          oscillator.start(0) // play right now is 0
+          canStop = true
+        }
+      }
     }
   })
 
+  // when we get something from the Stop Jack...
   stop.container.on('broadcast', ({ jack, payload }) => {
-    if (canStop) {
-      console.log(`OSC ${name} Stopped`)
-      oscillator.stop(payload)
-      canStop = false
-    } else {
-      console.log(`OSC ${name} is already stopped.`)
+    if (jack.kind === 'trigger') {
+      const { eventName } = payload
+      if (eventName === 'pointerdown') {
+        if (canStop) {
+          canStop = false
+          oscillator.stop(0) // stop right now is 0
+        }
+      }
     }
   })
 
+  // here, we recieve connections concerning WebAudio API nodes. yep.
   connector.container.on('broadcast', ({ jack, payload }) => {
     try {
       oscillator.connect(payload)
-    } catch (e) {
-      console.error('hmm.', e)
+    } catch (error) {
+      console.error(`
+[${name}] (you know, the Oscillator) 
+did not want to ".connect()" to the honorable Jack: [${jack.name}]'s payload.
+Payload:
+${payload}
+`, { error })
     }
   })
 
   function setupOscilator () {
     canPlay = false
-    oscillator = null
-    oscillator = context.createOscillator()
-    oscillator.onended = () => {
+    const newOsc = context.createOscillator()
+    newOsc.frequency.value = oscillator.frequency.value
+    newOsc.detune.value = oscillator.detune.value
+    newOsc.type = oscillator.type
+    newOsc.onended = () => {
       // console.log('Oscilator ended.')
       setTimeout(() => {
         setupOscilator()
@@ -201,6 +221,8 @@ export const makeOscillator = async ({
         }
       }, 0) // just in case, we don't want any stack overflows.
     }
+    oscillator = null
+    oscillator = newOsc
     canPlay = true
   }
 

@@ -22,6 +22,7 @@
     "babylonjs-gui": "^4.0.3",
     "electron-fs-extra": "^1.0.0",
     "electron-is-dev": "^1.1.0",
+    "electron-storage": "^1.0.7",
     "esprima": "^4.0.1",
     "estree-walker": "^0.8.1",
     "eventemitter3": "^4.0.0",
@@ -42,12 +43,12 @@
     "untildify": "^4.0.0"
   },
   "devDependencies": {
-    "standard": "^14.3.1",
     "concurrently": "^4.1.1",
     "cross-env": "^5.2.0",
     "electron": "^6.0.0",
     "electron-builder": "^21.2.0",
     "parcel-bundler": "^1.12.3",
+    "standard": "^14.3.1",
     "wait-on": "^3.3.0"
   }
 }

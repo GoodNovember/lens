@@ -1,5 +1,4 @@
 // Yes, edit this file to test somethintg new.
-import { makeJack } from './Anatomy/makeJack.js'
 import { makeDestination } from './Noises/makeDestination.js'
 import { makeContext } from './Noises/makeContext.js'
 import { makeOscillator } from './Noises/makeOscillator.js'
@@ -56,10 +55,9 @@ export const testBed = rootUniverse => {
       x: worldX(500),
       y: worldY(700),
       name: 'handy-range',
-      universe,
+      universe
     })
   ]).then(results => results.map(({ container }) => {
     universe.addChild(container)
   }))
-
 }

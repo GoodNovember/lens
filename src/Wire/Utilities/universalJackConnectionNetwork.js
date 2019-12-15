@@ -24,7 +24,7 @@ const {
  */
 
 const { Layer, Stage } = display
-let registeredJacks = new Map()
+const registeredJacks = new Map()
 
 const RootWireLayer = new Layer()
 RootWireLayer.interactive = true
@@ -71,7 +71,6 @@ const isOrStartsWith = ({
 }
 
 const normalizedCoupleName = ({ sourceJack, targetJack }) => {
-
   const isInput = isOrStartsWith({
     is: 'input',
     startsWith: 'input-'
@@ -166,7 +165,6 @@ export const registerJackOnNetwork = ({ jack }) => {
       currentDragTarget = null
     }
   })
-
 
   if (registeredJacks.has(name) === true) {
     console.error('Already Registered Jack with Name:', name)

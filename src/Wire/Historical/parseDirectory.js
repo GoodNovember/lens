@@ -117,8 +117,8 @@ const representDirectoryItem = fileData => {
   container.addChild(label)
   return {
     container,
-    get height () { return label.height },
-    get width () { return label.width }
+    get height() { return label.height },
+    get width() { return label.width }
   }
 }
 
@@ -127,7 +127,7 @@ const sortFiles = inputArray => {
 }
 
 const groupFilesAndDirectories = inputArray => {
-  const [ files, directories, other ] = inputArray.reduce(([files, directories, other], item) => {
+  const [files, directories, other] = inputArray.reduce(([files, directories, other], item) => {
     const { isFile, isDirectory } = item
     if (isFile) {
       files.push(item)

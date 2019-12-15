@@ -69,10 +69,10 @@ export const makeOscillator = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node () {
+      get node() {
         return oscillator
       },
-      onConnect ({ jack, selfJack }) {
+      onConnect({ jack, selfJack }) {
         console.log('CONNECT to oscilator')
         if (jack.node && internalConnections.has(jack.node) === false) {
           try {
@@ -83,7 +83,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      onDisconnect ({ jack, selfJack }) {
+      onDisconnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           try {
             internalConnections.delete(jack.node)
@@ -94,7 +94,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
@@ -107,11 +107,7 @@ export const makeOscillator = async ({
     start,
     stop,
     connector
-  ] = await Promise.all(
-    jackIngredients.map(
-      ingredients => makeJack(ingredients)
-    )
-  )
+  ] = await Promise.all(jackIngredients.map(ingredients => makeJack(ingredients)))
 
   toolbox.addChild(
     detune.container,
@@ -204,14 +200,13 @@ ${payload}
     }
   })
 
-  function setupOscilator () {
+  function setupOscilator() {
     canPlay = false
     const newOsc = context.createOscillator()
     newOsc.frequency.value = oscillator.frequency.value
     newOsc.detune.value = oscillator.detune.value
     newOsc.type = oscillator.type
     newOsc.onended = () => {
-      // console.log('Oscilator ended.')
       setTimeout(() => {
         setupOscilator()
         for (const jack of connector.connections) {

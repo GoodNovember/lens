@@ -1,5 +1,5 @@
-import * as genericParts from './Parts'
-import * as noiseParts from './Noises'
+import genericParts from './Parts'
+import noiseParts from './Noises'
 
 const partsMaps = [
   genericParts,
@@ -29,10 +29,16 @@ export const make = ({ thing, ingredients }) => {
   const lowKey = thing.toLowerCase()
   if (canMake({ thing })) {
     const maker = masterRegistry.get(`make${lowKey}`)
-    return maker({ ...ingredients })
+    return Promise.resolve(maker(ingredients))
   } else {
-    console.error(`cannot make: ${thing}`)
+    return Promise.reject(new Error(`Cannot Make ${thing}`))
   }
+}
+
+export const batchMake = (arrayOfThingsToMake) => {
+  return Promise.all(arrayOfThingsToMake.map(({ thing, ingredients }) => {
+    return make({ thing, ingredients })
+  }))
 }
 
 export const getMakableThings = () => {

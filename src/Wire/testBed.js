@@ -9,8 +9,13 @@ export const testBed = rootUniverse => {
   const globalLeftOffset = 0
   const globalTopOffset = 0
 
+  const gridSize = 64
+
   const worldX = value => value - globalLeftOffset
   const worldY = value => value - globalTopOffset
+
+  const gridX = value => worldX(value * gridSize)
+  const gridY = value => worldY(value * gridSize)
 
   const context = makeContext()
 
@@ -19,8 +24,8 @@ export const testBed = rootUniverse => {
       thing: 'gain',
       ingredients: {
         name: 'gain',
-        x: worldX(30),
-        y: worldY(300),
+        x: gridX(1),
+        y: gridY(5),
         context,
         universe
       }
@@ -29,8 +34,8 @@ export const testBed = rootUniverse => {
       thing: 'trigger',
       ingredients: {
         name: 'trigger-A',
-        x: worldX(10),
-        y: worldY(10),
+        x: gridX(1),
+        y: gridY(1),
         universe
       }
     },
@@ -38,8 +43,8 @@ export const testBed = rootUniverse => {
       thing: 'trigger',
       ingredients: {
         name: 'trigger-B',
-        x: worldX(10),
-        y: worldY(90),
+        x: gridX(1),
+        y: gridY(3),
         universe
       }
     },
@@ -47,8 +52,8 @@ export const testBed = rootUniverse => {
       thing: 'oscillator',
       ingredients: {
         name: 'osc-A',
-        x: worldX(100),
-        y: worldY(100),
+        x: gridX(4),
+        y: gridY(2),
         context,
         universe
       }
@@ -57,8 +62,8 @@ export const testBed = rootUniverse => {
       thing: 'destination',
       ingredients: {
         name: 'our-destination',
-        x: worldX(100),
-        y: worldY(200),
+        x: gridX(8),
+        y: gridY(3),
         universe,
         context
       }
@@ -67,8 +72,8 @@ export const testBed = rootUniverse => {
       thing: 'range',
       ingredients: {
         name: 'handy-range',
-        x: worldX(500),
-        y: worldY(700),
+        x: gridX(4),
+        y: gridY(0),
         universe
       }
     }

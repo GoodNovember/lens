@@ -1,11 +1,11 @@
 import { makeJack } from '../Anatomy/makeJack.js'
-import { PIXI } from '../Utilities/localPIXI.js'
 import { connectorValidator } from './validators/connectorValidator.js'
 import { makeToolbox } from '../Parts/makeToolbox.js'
+
 export const makeGain = async ({
   x,
   y,
-  name = `[unnamed gain]`,
+  name = '[unnamed gain]',
   context,
   universe
 }) => {
@@ -28,56 +28,61 @@ export const makeGain = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return gainNode
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           gainNode.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
+          gainNode.disconnect(jack.node)
           internalConnections.delete(jack.node)
-          jack.node.disconnect(gainNode) // the destination is always last.
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     },
     {
-      x: 8 + 26,
-      y: 8 + 26,
+      x: 8 + 16,
+      y: 8,
       name: `[${name}]'s gain jack`,
       themeImage: 'jackGain',
       universe,
       kind: 'gain',
-      get node() {
+      get node () {
         return gainNode
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           gainNode.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
-          jack.node.disconnect(gainNode) // the destination is always last.
+          gainNode.disconnect(jack.node)
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
-        return connectorValidator({ jack, selfJack, ...rest })
+      connectionValidator ({ jack, selfJack, ...rest }) {
+        const { kind } = jack
+        if (kind === 'zero-to-one') {
+          return true
+        } else {
+          return false
+        }
       }
     }
   ]
 
   const [
     connector,
-    gain,
+    gain
   ] = await Promise.all(
     jackIngredients.map(
       ingredients => makeJack(ingredients)
@@ -90,7 +95,14 @@ export const makeGain = async ({
   )
 
   connector.container.on('broadcast', ({ jack, payload }) => {
-    destination.connect(payload)
+    gainNode.connect(payload)
+  })
+
+  gain.container.on('broadcast', ({ jack, payload }) => {
+    if (jack.kind === 'zero-to-one') {
+      const { x } = payload
+      gainNode.gain.value = x
+    }
   })
 
   return {

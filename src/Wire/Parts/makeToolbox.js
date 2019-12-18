@@ -22,8 +22,6 @@ const INNER_MARGIN = 16
 const MARGIN_SIZE = 8
 const CORNER_SIZE = 16
 
-const HALF_MARGIN_SIZE = MARGIN_SIZE / 2
-
 const CORNER_COLOR = 0x999999 // 0xaaaaaa
 const EDGE_COLOR = 0x999999 // 0xeeeeee
 const BG_COLOR = 0xbbbbbb // 0x999999
@@ -36,9 +34,11 @@ const makeBatchEventHandler = eventName => callback => itemArray => itemArray.ma
 const makeDragRect = makeRectOptions => enableDragEvents(makeRect(makeRectOptions))
 
 export const makeToolbox = ({
-  width, height, x, y,
-  hideBox = false,
-  mode = 'BOTH'
+  x,
+  y,
+  width,
+  height,
+  hideBox = false
 }) => {
   const container = new Stage()
 
@@ -228,7 +228,7 @@ export const makeToolbox = ({
   })
 
   const parts = {
-    get leftParts() {
+    get leftParts () {
       return [
         chromeLeftSizer,
         chromeTopLeftCornerLeft,
@@ -237,7 +237,7 @@ export const makeToolbox = ({
         chromeBottomLeftCornerBottomLeft
       ]
     },
-    get rightParts() {
+    get rightParts () {
       return [
         chromeRightSizer,
         chromeTopRightCornerRight,
@@ -246,7 +246,7 @@ export const makeToolbox = ({
         chromeBottomRightCornerBottomRight
       ]
     },
-    get bottomParts() {
+    get bottomParts () {
       return [
         chromeBottomSizer,
         chromeBottomLeftCornerBottom,
@@ -255,7 +255,7 @@ export const makeToolbox = ({
         chromeBottomRightCornerBottomRight
       ]
     },
-    get topParts() {
+    get topParts () {
       return [
         chromeTopSizer,
         chromeTopLeftCornerTop,
@@ -267,54 +267,54 @@ export const makeToolbox = ({
   }
 
   const bounds = {
-    get cornerSize() { return CORNER_SIZE },
-    get innerMargin() { return INNER_MARGIN },
-    get marginSize() { return MARGIN_SIZE },
-    get globalTop() {
+    get cornerSize () { return CORNER_SIZE },
+    get innerMargin () { return INNER_MARGIN },
+    get marginSize () { return MARGIN_SIZE },
+    get globalTop () {
       return chromeTopSizer.getGlobalPosition().y + chromeTopSizer.height
     },
-    get globalLeft() {
+    get globalLeft () {
       return chromeLeftSizer.getGlobalPosition().x + chromeLeftSizer.width
     },
-    get globalRight() {
+    get globalRight () {
       return chromeRightSizer.getGlobalPosition().x
     },
-    get globalBottom() {
+    get globalBottom () {
       return chromeBottomSizer.getGlobalPosition().y
     },
-    get rawTop() {
+    get rawTop () {
       return Math.min(chromeTopSizer.y, chromeBottomSizer.y)
     },
-    get top() {
+    get top () {
       const { rawTop } = this
       return rawTop
     },
-    get rawLeft() {
+    get rawLeft () {
       return Math.min(chromeLeftSizer.x, chromeRightSizer.x)
     },
-    get left() {
+    get left () {
       const { rawLeft } = this
       return rawLeft
     },
-    get right() {
+    get right () {
       return Math.max(chromeLeftSizer.x, chromeRightSizer.x)
     },
-    get bottom() {
+    get bottom () {
       return Math.max(chromeTopSizer.y, chromeBottomSizer.y)
     },
-    get height() {
+    get height () {
       const { bottom, top } = this
       return bottom - top
     },
-    get width() {
+    get width () {
       const { right, left } = this
       return right - left
     },
-    get innerWidth() {
+    get innerWidth () {
       const { width } = this
       return width
     },
-    get mask() {
+    get mask () {
       const { globalTop, globalLeft, globalRight, globalBottom, marginSize, innerMargin } = this
       const x = globalLeft + innerMargin
       const y = globalTop + innerMargin
@@ -322,25 +322,25 @@ export const makeToolbox = ({
       const width = (globalRight - globalLeft) - (innerMargin * 2)
       return { height, width, x, y }
     },
-    get minX() {
+    get minX () {
       return this.left
     },
-    get maxX() {
+    get maxX () {
       const { width, left, innerMargin, marginSize } = this
       return (left + width) - (innerMargin * 2) - marginSize
     },
-    get minY() {
+    get minY () {
       return this.top
     },
-    get maxY() {
+    get maxY () {
       const { height, top, innerMargin, marginSize } = this
       return (top + height) - (innerMargin * 2) - marginSize
     },
-    get centerX() {
+    get centerX () {
       const { minX, maxX } = this
       return (minX + maxX) / 2
     },
-    get centerY() {
+    get centerY () {
       const { minY, maxY } = this
       return (minY + maxY) / 2
     }
@@ -396,13 +396,13 @@ export const makeToolbox = ({
     reorderZIndexes()
   }
 
-  function notifyMoveListeners() {
+  function notifyMoveListeners () {
     moveListeners.forEach(listener => listener({ ...bounds }))
     emit('parent move', bounds)
     drawMask()
   }
 
-  function drawMask() {
+  function drawMask () {
     const { innerMargin, top, left, marginSize } = bounds
     const { x, y, width, height } = bounds.mask
     const mask = new Graphics()
@@ -421,7 +421,7 @@ export const makeToolbox = ({
     }
   }
 
-  function notifyResizeListeners() {
+  function notifyResizeListeners () {
     const { width, height } = bounds
     resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
     // emit('parent resize', bounds)
@@ -429,7 +429,6 @@ export const makeToolbox = ({
   }
 
   const moveTo = (x, y) => {
-    ght
     container.x = x
     container.y = y
     notifyMoveListeners()
@@ -551,48 +550,48 @@ export const makeToolbox = ({
       moveLeftEdgeTo(x)
       notifyResizeListeners()
     })(
-      [
-        chromeTopLeftCornerTop,
-        chromeTopLeftCornerLeft,
-        chromeTopLeftCornerTopLeft
-      ])
+    [
+      chromeTopLeftCornerTop,
+      chromeTopLeftCornerLeft,
+      chromeTopLeftCornerTopLeft
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveTopEdgeTo(y)
       notifyResizeListeners()
     })(
-      [
-        chromeTopRightCornerTop,
-        chromeTopRightCornerRight,
-        chromeTopRightCornerTopRight
-      ])
+    [
+      chromeTopRightCornerTop,
+      chromeTopRightCornerRight,
+      chromeTopRightCornerTopRight
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveLeftEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })(
-      [
-        chromeBottomLeftCornerLeft,
-        chromeBottomLeftCornerBottom,
-        chromeBottomLeftCornerBottomLeft
-      ])
+    [
+      chromeBottomLeftCornerLeft,
+      chromeBottomLeftCornerBottom,
+      chromeBottomLeftCornerBottomLeft
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { current: { x, y } } }) => {
       moveRightEdgeTo(x)
       moveBottomEdgeTo(y)
       notifyResizeListeners()
     })(
-      [
-        chromeBottomRightCornerRight,
-        chromeBottomRightCornerBottom,
-        chromeBottomRightCornerBottomRight
-      ])
+    [
+      chromeBottomRightCornerRight,
+      chromeBottomRightCornerBottom,
+      chromeBottomRightCornerBottomRight
+    ])
   makeBatchEventHandler('dragging')(
     ({ pointerState: { startDelta: { x, y } } }) => {
       moveBy(x, y)
-      notifyResizeListeners()
+      notifyMoveListeners()
     })([chromeMover])
 
   chromeMover
@@ -616,14 +615,14 @@ export const makeToolbox = ({
     notifyResizeListeners()
   })
 
-  function addChild(...args) {
+  function addChild (...args) {
     internalContainer.addChild(...args)
     return () => {
       removeChild(...args)
     }
   }
 
-  function removeChild(...args) {
+  function removeChild (...args) {
     internalContainer.removeChild(...args)
   }
 
@@ -658,13 +657,13 @@ export const makeToolbox = ({
   drawMask()
 
   return {
-    get bounds() { return bounds },
-    get width() { return bounds.width },
-    set width(newWidth) {
+    get bounds () { return bounds },
+    get width () { return bounds.width },
+    set width (newWidth) {
       moveRightEdgeTo(newWidth)
     },
-    get height() { return bounds.height },
-    set height(newHeight) {
+    get height () { return bounds.height },
+    set height (newHeight) {
       moveBottomEdgeTo(newHeight)
     },
     moveTo,

@@ -6,6 +6,7 @@ import { makeText } from './makeText.js'
 import { makeToolbox } from './makeToolbox.js'
 import { makeUniversalToolbox } from './makeUniversalToolbox.js'
 import { makeUniverse } from './makeUniverse.js'
+import { makePlate } from './makePlate.js'
 
 export default {
   makeDirectoryLens,
@@ -15,5 +16,6 @@ export default {
   makeText,
   makeToolbox,
   makeUniversalToolbox,
-  makeUniverse
+  makeUniverse,
+  makePlate
 }

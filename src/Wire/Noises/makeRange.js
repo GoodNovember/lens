@@ -21,9 +21,7 @@ export const makeRange = async ({
   let internalValue = initialValue
   const internalMaxValue = Infinity
 
-  const toolbox = makeToolbox({ width: 500, height: 100, x: 64, y: 64, hideBox: true })
-  toolbox.x = x
-  toolbox.y = y
+  const toolbox = makeToolbox({ width: 500, height: 100, x, y, hideBox: true })
 
   const middle = makeRect({ x: 0, y: 0, width: 8, height: 8, interactive: true, tint: 0x0000ff })
   middle.anchor.set(0.5)

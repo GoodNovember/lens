@@ -1,6 +1,11 @@
 import { makeJack } from '../Anatomy/makeJack.js'
 import { connectorValidator } from './validators/connectorValidator.js'
 import { makeToolbox } from '../Parts/makeToolbox.js'
+import { makePlate } from '../Parts/makePlate.js'
+import { makeText } from '../Parts/makeText.js'
+import theme from '../Theme/imperfection/theme'
+
+const { gainColor } = theme
 
 export const makeGain = async ({
   x,
@@ -9,21 +14,21 @@ export const makeGain = async ({
   context,
   universe
 }) => {
-  const toolbox = makeToolbox({
+  const plate = makePlate({
     x,
     y,
-    name: `[${name}]'s toolbox`,
-    width: 100,
-    height: 100
+    width: 32,
+    height: 64,
+    tint: gainColor
   })
-  const container = toolbox.container
+  const container = plate.container
   const internalConnections = new Set()
   const gainNode = context.createGain()
 
   const jackIngredients = [
     {
-      x: 8,
-      y: 8,
+      x: 16,
+      y: 32 + 17,
       name: `[${name}]'s connector jack`,
       themeImage: 'jackConnector',
       universe,
@@ -48,8 +53,8 @@ export const makeGain = async ({
       }
     },
     {
-      x: 8 + 16,
-      y: 8,
+      x: 16,
+      y: 16,
       name: `[${name}]'s gain jack`,
       themeImage: 'jackGain',
       universe,
@@ -89,9 +94,16 @@ export const makeGain = async ({
     )
   )
 
-  toolbox.addChild(
+  const label = makeText('Gain')
+  label.tint = 0x000000
+  label.interactive = false
+  label.x = 2
+  label.y = 26
+
+  plate.addChild(
     connector.container,
-    gain.container
+    gain.container,
+    label
   )
 
   connector.container.on('broadcast', ({ jack, payload }) => {
@@ -106,7 +118,6 @@ export const makeGain = async ({
   })
 
   return {
-    toolbox,
     container,
     gain: gainNode,
     universe,

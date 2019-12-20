@@ -1,69 +1,75 @@
 import { makeJack } from '../Anatomy/makeJack.js'
-import { PIXI } from '../Utilities/localPIXI.js'
 import { connectorValidator } from './validators/connectorValidator.js'
-import { makeToolbox } from '../Parts/makeToolbox.js'
+import { makePlate } from '../Parts/makePlate.js'
+import { makeText } from '../Parts/makeText.js'
+
 export const makeDestination = async ({
   x,
   y,
-  name = `[unnamed destination]`,
+  name = '[unnamed destination]',
   context,
   universe
 }) => {
-  const toolbox = makeToolbox({
+  const plate = makePlate({
     x,
     y,
-    name: `[${name}]'s toolbox`,
-    width: 100,
-    height: 100
+    name: `[${name}]'s plate`,
+    width: 200,
+    height: 32
   })
-  const container = toolbox.container
+  const container = plate.container
   const internalConnections = new Set()
   const { destination } = context
-
-  toolbox
 
   container.x = x
   container.y = y
 
   const jackIngredients = [
     {
-      x: 8,
-      y: 8,
+      x: 16,
+      y: 16,
       name: `[${name}]'s connector jack`,
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return destination
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           destination.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
           jack.node.disconnect(destination) // the destination is always last.
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
   ]
 
   const [
-    connector,
+    connector
   ] = await Promise.all(
     jackIngredients.map(
       ingredients => makeJack(ingredients)
     )
   )
 
-  toolbox.addChild(
-    connector.container
+  const label = makeText('Speakers (destination)')
+  label.tint = 0x000000
+  label.interactive = false
+  label.x = 32
+  label.y = 9
+
+  plate.addChild(
+    connector.container,
+    label
   )
 
   connector.container.on('broadcast', ({ jack, payload }) => {
@@ -71,7 +77,7 @@ export const makeDestination = async ({
   })
 
   return {
-    toolbox,
+    toolbox: plate,
     container,
     destination,
     universe,

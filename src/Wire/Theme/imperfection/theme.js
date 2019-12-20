@@ -42,5 +42,7 @@ export const getTextures = () => new Promise((resolve, reject) => {
 
 export default {
   name: 'Imperfection',
-  getTextures
+  getTextures,
+  oscillatorColor: 0x0fff0f,
+  gainColor: 0xbabaff
 }

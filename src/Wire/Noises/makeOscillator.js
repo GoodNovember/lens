@@ -2,6 +2,12 @@ import { makeJack } from '../Anatomy/makeJack.js'
 import { connectorValidator } from './validators/connectorValidator.js'
 import { makeToolbox } from '../Parts/makeToolbox.js'
 import { lerp } from '../Utilities/lerp.js'
+import { makePlate } from '../Parts/makePlate.js'
+import { makeText } from '../Parts/makeText.js'
+import theme from '../Theme/imperfection/theme'
+
+const { oscillatorColor } = theme
+
 
 export const makeOscillator = async ({
   x,
@@ -10,14 +16,14 @@ export const makeOscillator = async ({
   context,
   universe
 }) => {
-  const toolbox = makeToolbox({
+  const plate = makePlate({
     x,
     y,
-    name: `[${name}]'s toolbox`,
-    width: 200,
-    height: 200
+    width: 86,
+    height: 64,
+    tint: oscillatorColor,
   })
-  const container = toolbox.container
+  const container = plate.container
   const internalConnections = new Set()
   let canPlay = false
   let canStop = false
@@ -28,51 +34,51 @@ export const makeOscillator = async ({
 
   const jackIngredients = [
     {
-      x: 8,
-      y: 8,
+      x: 16,
+      y: 16,
       name: `[${name}]'s detune jack`,
       themeImage: 'jackDetune',
       universe
     },
     {
-      x: 24,
-      y: 8,
+      x: 42,
+      y: 16,
       name: `[${name}]'s frequency jack`,
       themeImage: 'jackFrequency',
       universe
     },
     {
-      x: 40,
-      y: 8,
+      x: 70,
+      y: 16,
       name: `[${name}]'s type jack`,
       themeImage: 'jackType',
       universe
     },
     {
-      x: 8,
-      y: 24,
+      x: 16,
+      y: 48,
       name: `[${name}]'s start jack`,
       themeImage: 'jackStart',
       universe
     },
     {
-      x: 8,
-      y: 40,
+      x: 32,
+      y: 48,
       name: `[${name}]'s stop jack`,
       themeImage: 'jackStop',
       universe
     },
     {
-      x: 8,
-      y: 56,
+      x: 70,
+      y: 48,
       name: `[${name}]'s connector jack`,
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return oscillator
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         console.log('CONNECT to oscilator')
         if (jack.node && internalConnections.has(jack.node) === false) {
           try {
@@ -83,7 +89,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           try {
             internalConnections.delete(jack.node)
@@ -94,7 +100,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
@@ -109,13 +115,20 @@ export const makeOscillator = async ({
     connector
   ] = await Promise.all(jackIngredients.map(ingredients => makeJack(ingredients)))
 
-  toolbox.addChild(
+  const label = makeText('Oscillator')
+  label.tint = 0x000000
+  label.interactive = false
+  label.x = 8
+  label.y = 26
+
+  plate.addChild(
     detune.container,
     frequency.container,
     type.container,
     start.container,
     stop.container,
-    connector.container
+    connector.container,
+    label
   )
 
   // when we get something from the Detune Jack...
@@ -200,7 +213,7 @@ ${payload}
     }
   })
 
-  function setupOscilator() {
+  function setupOscilator () {
     canPlay = false
     const newOsc = context.createOscillator()
     newOsc.frequency.value = oscillator.frequency.value
@@ -222,7 +235,6 @@ ${payload}
   }
 
   return {
-    toolbox,
     container,
     oscillator,
     universe,

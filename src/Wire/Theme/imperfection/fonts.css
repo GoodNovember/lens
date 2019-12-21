@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "LensThemeFont";
+  src:
+    url("./vendor/inconsolata/Inconsolata-Regular.ttf") format("truetype");
+  font-weight: regular;
+}
+
+@font-face {
+  font-family: "LensThemeFontBold";
+  src:
+    url("./vendor/inconsolata/Inconsolata-Bold.ttf") format("truetype");
+  font-weight: bold;
+}

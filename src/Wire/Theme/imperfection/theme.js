@@ -1,23 +1,23 @@
 import { processTexturePathMap } from '../common/processTexturePathMap.js'
-import { PIXI } from '../../Utilities/localPIXI.js'
+
 // thanks Parcel.js!
-import frameEmpty from './frame-empty.png'
-import frameFull from './frame-full.png'
+import frameEmpty from './images/frame-empty.png'
+import frameFull from './images/frame-full.png'
 
-import jackConnector from './jack-connector.png'
-import jackDetune from './jack-detune.png'
-import jackFrequency from './jack-frequency.png'
-import jackType from './jack-type.png'
-import jackStart from './jack-start.png'
-import jackStop from './jack-stop.png'
-import jackGain from './jack-gain.png'
-import jackTrigger from './jack-trigger.png'
-import jackZeroToOne from './jack-0-1.png'
-import jackNumber from './jack-number.png'
-import jackString from './jack-string.png'
-import rope from './rope.png'
+import jackConnector from './images/jack-connector.png'
+import jackDetune from './images/jack-detune.png'
+import jackFrequency from './images/jack-frequency.png'
+import jackType from './images/jack-type.png'
+import jackStart from './images/jack-start.png'
+import jackStop from './images/jack-stop.png'
+import jackGain from './images/jack-gain.png'
+import jackTrigger from './images/jack-trigger.png'
+import jackZeroToOne from './images/jack-0-1.png'
+import jackNumber from './images/jack-number.png'
+import jackString from './images/jack-string.png'
+import rope from './images/rope.png'
 
-const { Texture, Sprite } = PIXI
+import "./fonts.css"
 
 const texturePathMap = {
   frameEmpty,
@@ -36,9 +36,7 @@ const texturePathMap = {
   rope
 }
 
-export const getTextures = () => new Promise((resolve, reject) => {
-  processTexturePathMap(texturePathMap).then(resolve).catch(reject)
-})
+export const getTextures = () => Promise.resolve(processTexturePathMap(texturePathMap))
 
 export default {
   name: 'Imperfection',

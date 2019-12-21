@@ -1,6 +1,8 @@
 import genericParts from './Parts'
 import noiseParts from './Noises'
 
+import { batchConnect as importedBatchConnect } from './Utilities/universalJackConnectionNetwork.js'
+
 const partsMaps = [
   genericParts,
   noiseParts
@@ -35,10 +37,17 @@ export const make = ({ thing, ingredients }) => {
   }
 }
 
-export const batchMake = (arrayOfThingsToMake) => {
-  return Promise.all(arrayOfThingsToMake.map(({ thing, ingredients }) => {
-    return make({ thing, ingredients })
+export const batchMake = ({
+  thingsToMake,
+  universe
+}) => {
+  return Promise.all(thingsToMake.map(({ thing, ingredients }) => {
+    return make({ thing, ingredients: { ...ingredients, universe } })
   }))
+}
+
+export const batchConnect = (arrayOfConnectionIDs) => {
+  return importedBatchConnect(arrayOfConnectionIDs)
 }
 
 export const getMakableThings = () => {

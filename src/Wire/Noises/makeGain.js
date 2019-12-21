@@ -1,9 +1,11 @@
 import { makeJack } from '../Anatomy/makeJack.js'
 import { connectorValidator } from './validators/connectorValidator.js'
-import { makeToolbox } from '../Parts/makeToolbox.js'
 import { makePlate } from '../Parts/makePlate.js'
 import { makeText } from '../Parts/makeText.js'
 import theme from '../Theme/imperfection/theme'
+
+import { getGlobalAudioContext } from './getGlobalAudioContext.js'
+const context = getGlobalAudioContext()
 
 const { gainColor } = theme
 
@@ -11,7 +13,6 @@ export const makeGain = async ({
   x,
   y,
   name = '[unnamed gain]',
-  context,
   universe
 }) => {
   const plate = makePlate({
@@ -33,22 +34,22 @@ export const makeGain = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node () {
+      get node() {
         return gainNode
       },
-      onConnect ({ jack, selfJack }) {
+      onConnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           gainNode.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect ({ jack, selfJack }) {
+      onDisconnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           gainNode.disconnect(jack.node)
           internalConnections.delete(jack.node)
         }
       },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     },
@@ -58,27 +59,37 @@ export const makeGain = async ({
       name: `[${name}]'s gain jack`,
       themeImage: 'jackGain',
       universe,
-      kind: 'gain',
-      get node () {
+      kind: 'audioParam',
+      paramName: 'gain',
+      get audioParam() {
+        return gainNode.gain
+      },
+      get node() {
         return gainNode
       },
-      onConnect ({ jack, selfJack }) {
-        if (jack.node && internalConnections.has(jack.node) === false) {
+      onConnect({ jack, selfJack }) {
+        const { kind } = jack
+        if (kind === 'connector') {
+          console.log('WOW', jack)
+        } else if (jack.node && internalConnections.has(jack.node) === false) {
           gainNode.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect ({ jack, selfJack }) {
+      onDisconnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
           gainNode.disconnect(jack.node)
         }
       },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         const { kind } = jack
         if (kind === 'zero-to-one') {
           return true
+        } else if (kind === 'connector') {
+          return true
         } else {
+          console.log('GAIN REJECT', jack, selfJack)
           return false
         }
       }

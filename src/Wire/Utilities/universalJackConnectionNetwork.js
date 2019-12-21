@@ -82,13 +82,39 @@ const normalizedCoupleName = ({ sourceJack, targetJack }) => {
   })
 
   if (isInput(sourceJack.kind) && isOutput(targetJack.kind)) {
-    return (`${targetJack.name} -> ${sourceJack.name}`).toLowerCase()
+    return (`[${targetJack.name}] -> [${sourceJack.name}]`).toLowerCase()
   }
   if (isOutput(sourceJack.kind) && isInput(targetJack.kind)) {
-    return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
+    return (`[${sourceJack.name}] -> [${targetJack.name}]`).toLowerCase()
   } else {
-    return (`${sourceJack.name} -> ${targetJack.name}`).toLowerCase()
+    return (`[${sourceJack.name}] -> [${targetJack.name}]`).toLowerCase()
   }
+}
+
+const getJacksFromNormalizedCoupleName = ({ connectionID }) => {
+  const wholeRegex = /^(\[.+\])( -> )(\[.+\])$/
+  const partRegex = /^\[(.+)\]$/
+  const result = wholeRegex.exec(connectionID)
+  if (result) {
+    const [_input, jackARaw, direction, jackBRaw] = result
+    const jackAIDRawResults = partRegex.exec(jackARaw)
+    const jackBIDRawResults = partRegex.exec(jackBRaw)
+    if (jackAIDRawResults && jackBIDRawResults) {
+      const [_skipA, jackAIDRaw] = jackAIDRawResults
+      const [_skipB, jackBIDRaw] = jackBIDRawResults
+      const jackAID = normalizeJackName(jackAIDRaw)
+      const jackBID = normalizeJackName(jackBIDRaw)
+      if (registeredJacks.has(jackAID) && registeredJacks.has(jackBID)) {
+        const sourceJack = registeredJacks.get(jackAID)
+        const targetJack = registeredJacks.get(jackBID)
+        return {
+          sourceJack,
+          targetJack
+        }
+      }
+    }
+  }
+  return null
 }
 
 const disconnectJacks = ({ sourceJack, targetJack }) => {
@@ -101,21 +127,37 @@ const disconnectJacks = ({ sourceJack, targetJack }) => {
   }
 }
 
+const connectViaConnectionID = ({ connectionID }) => {
+  const result = getJacksFromNormalizedCoupleName({ connectionID })
+  if (result) {
+    const { sourceJack, targetJack } = result
+    if (sourceJack.isConnectedTo({ jack: targetJack }) === false) {
+      const disconnect = sourceJack.connectTo({ jack: targetJack })
+      console.log('connect', { connectionID })
+      globalConnectionMap.set(connectionID, { disconnect, sourceJack, targetJack })
+    }
+  } else {
+    console.error('Cannot Connect via connectionID:', { connectionID })
+  }
+}
+
 const connectJacks = ({ sourceJack, targetJack }) => {
   const connectionID = normalizedCoupleName({ sourceJack, targetJack })
   if (globalConnectionMap.has(connectionID)) {
     disconnectJacks({ sourceJack, targetJack })
   } else {
-    if (sourceJack.isConnectedTo({ jack: targetJack }) === false) {
-      const disconnect = sourceJack.connectTo({ jack: targetJack })
-      console.log('connect', connectionID)
-      globalConnectionMap.set(connectionID, { disconnect, sourceJack, targetJack })
-    }
+    connectViaConnectionID({ connectionID })
   }
 }
 
+function normalizeJackName(name) {
+  return (`${name}`).toLowerCase()
+}
+
 export const registerJackOnNetwork = ({ jack }) => {
-  const { name, sprite, container, stateMachine } = jack
+  const { name: rawJackName, sprite, container, stateMachine } = jack
+
+  const name = normalizeJackName(rawJackName)
 
   container.on('jack-awaken', ({ event }) => {
     const { data: { identifier } } = event
@@ -169,6 +211,7 @@ export const registerJackOnNetwork = ({ jack }) => {
   if (registeredJacks.has(name) === true) {
     console.error('Already Registered Jack with Name:', name)
   } else {
+    console.log('RegisteredJack', { name })
     registeredJacks.set(name, jack)
   }
   return () => {
@@ -183,4 +226,11 @@ export const registerJackOnNetwork = ({ jack }) => {
 
 export const networkEject = ({ sourceJack, targetJack }) => {
   disconnectJacks({ sourceJack, targetJack })
+}
+
+
+export const batchConnect = connectionIDArray => {
+  for (const connectionID of connectionIDArray) {
+    connectViaConnectionID({ connectionID })
+  }
 }

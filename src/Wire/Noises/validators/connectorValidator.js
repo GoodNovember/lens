@@ -1,3 +1,7 @@
+const implementedConnections = [
+  'audioParam'
+]
+
 export const connectorValidator = ({ target, source }) => {
   // console.log({ target, source })
   if (!target && !source) {
@@ -12,10 +16,10 @@ export const connectorValidator = ({ target, source }) => {
         return false
       }
     } else {
-      console.info(`Connection rejected: No 'nodes' in connectorJack constructor`, { target: { node: target.node }, source: { node: source.node } })
+      console.info('Connection rejected: No \'nodes\' in connectorJack constructor', { target: { node: target.node }, source: { node: source.node } })
       return false
     }
   } else {
-    return false
+    return implementedConnections.indexOf(target.kind) > -1
   }
 }

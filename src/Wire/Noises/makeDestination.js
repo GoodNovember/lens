@@ -3,11 +3,13 @@ import { connectorValidator } from './validators/connectorValidator.js'
 import { makePlate } from '../Parts/makePlate.js'
 import { makeText } from '../Parts/makeText.js'
 
+import { getGlobalAudioContext } from './getGlobalAudioContext.js'
+const context = getGlobalAudioContext()
+
 export const makeDestination = async ({
   x,
   y,
   name = '[unnamed destination]',
-  context,
   universe
 }) => {
   const plate = makePlate({
@@ -32,22 +34,22 @@ export const makeDestination = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node () {
+      get node() {
         return destination
       },
-      onConnect ({ jack, selfJack }) {
+      onConnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           destination.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect ({ jack, selfJack }) {
+      onDisconnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
           jack.node.disconnect(destination) // the destination is always last.
         }
       },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }

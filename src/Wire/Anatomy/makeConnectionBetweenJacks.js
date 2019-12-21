@@ -51,18 +51,28 @@ export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
     calculateRopeFromJackLocations()
   })
 
+  jackA.container.on('parent resize', () => {
+    calculateRopeFromJackLocations()
+  })
+
   jackB.container.on('parent move', () => {
+    calculateRopeFromJackLocations()
+  })
+
+  jackB.container.on('parent resize', () => {
     calculateRopeFromJackLocations()
   })
 
   // console.log('Making Wire', { jackA, jackB })
 
-  rope.on('pointerup', () => {
-    jackA.eject(jackB)
-    console.log('Disconnecting wire', { jackA, jackB })
-    if (typeof disconnector === 'function') {
-      disconnector()
-    }
+  rope.on('pointerdown', () => {
+    rope.on('pointerup', () => {
+      jackA.eject(jackB)
+      // console.log('Disconnecting wire', { jackA, jackB })
+      if (typeof disconnector === 'function') {
+        disconnector()
+      }
+    })
   })
 
   container.addChild(rope)
@@ -78,7 +88,7 @@ export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
     console.error('not Implemented.')
   }
   return () => {
-    console.log('Disconnecting wire', { jackA, jackB })
+    // console.log('Disconnecting wire', { jackA, jackB })
     if (typeof disconnector === 'function') {
       disconnector()
     }

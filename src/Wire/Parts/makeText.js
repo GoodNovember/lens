@@ -28,7 +28,7 @@ const makeTextWithStyle = ({ regularStyle, hoverStyle, activeStyle }) => string 
   return textElement
 }
 
-const fontFamily = `fira code`
+const fontFamily = 'LensThemeFont'
 const fontSize = 12
 
 const WHITE = 0xFFFFFF

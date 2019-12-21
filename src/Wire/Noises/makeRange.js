@@ -46,6 +46,10 @@ export const makeRange = async ({
     updateVisuals()
   })
 
+  toolbox.subscribeToMove(() => {
+    updateVisuals()
+  })
+
   const { container } = toolbox
 
   toolbox.addChild(
@@ -100,7 +104,7 @@ export const makeRange = async ({
     }
   })
 
-  function CalculatePlacements ({ x, y }) {
+  function CalculatePlacements({ x, y }) {
     const { bounds } = toolbox
 
     let newXPlacement = 0
@@ -138,12 +142,12 @@ export const makeRange = async ({
   dragSurface.on('dragstart', handleDragEvents)
   dragSurface.on('dragging', handleDragEvents)
 
-  function handleDragEvents ({ pointerState: { current: { x, y } } }) {
+  function handleDragEvents({ pointerState: { current: { x, y } } }) {
     CalculatePlacements({ x, y })
     updateVisuals()
   }
 
-  function updateVisuals () {
+  function updateVisuals() {
     const { bounds } = toolbox
 
     const {
@@ -185,6 +189,8 @@ export const makeRange = async ({
       valueJack.container.y = height - 64 + 16
     }
   }
+
+  updateVisuals()
 
   return {
     toolbox,

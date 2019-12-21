@@ -5,15 +5,15 @@ import { lerp } from '../Utilities/lerp.js'
 import { makePlate } from '../Parts/makePlate.js'
 import { makeText } from '../Parts/makeText.js'
 import theme from '../Theme/imperfection/theme'
+import { getGlobalAudioContext } from './getGlobalAudioContext.js'
+const context = getGlobalAudioContext()
 
 const { oscillatorColor } = theme
-
 
 export const makeOscillator = async ({
   x,
   y,
   name = '[unnamed oscillator]',
-  context,
   universe
 }) => {
   const plate = makePlate({
@@ -21,7 +21,7 @@ export const makeOscillator = async ({
     y,
     width: 86,
     height: 64,
-    tint: oscillatorColor,
+    tint: oscillatorColor
   })
   const container = plate.container
   const internalConnections = new Set()
@@ -38,6 +38,12 @@ export const makeOscillator = async ({
       y: 16,
       name: `[${name}]'s detune jack`,
       themeImage: 'jackDetune',
+      kind: 'audioParam',
+      paramName: 'detune',
+      get audioParam() {
+        return oscillator.detune
+      },
+      node: oscillator,
       universe
     },
     {
@@ -45,6 +51,11 @@ export const makeOscillator = async ({
       y: 16,
       name: `[${name}]'s frequency jack`,
       themeImage: 'jackFrequency',
+      kind: 'audioParam',
+      node: oscillator,
+      get audioParam() {
+        return oscillator.frequency
+      },
       universe
     },
     {
@@ -52,6 +63,7 @@ export const makeOscillator = async ({
       y: 16,
       name: `[${name}]'s type jack`,
       themeImage: 'jackType',
+      kind: 'string',
       universe
     },
     {
@@ -59,6 +71,7 @@ export const makeOscillator = async ({
       y: 48,
       name: `[${name}]'s start jack`,
       themeImage: 'jackStart',
+      kind: 'impulse',
       universe
     },
     {
@@ -66,6 +79,7 @@ export const makeOscillator = async ({
       y: 48,
       name: `[${name}]'s stop jack`,
       themeImage: 'jackStop',
+      kind: 'impulse',
       universe
     },
     {
@@ -75,32 +89,66 @@ export const makeOscillator = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node () {
+      get node() {
         return oscillator
       },
-      onConnect ({ jack, selfJack }) {
-        console.log('CONNECT to oscilator')
-        if (jack.node && internalConnections.has(jack.node) === false) {
-          try {
-            oscillator.connect(jack.node)
-            internalConnections.add(jack.node)
-          } catch (e) {
-            console.error('hmm. connect.', e)
+      onConnect({ jack, selfJack }) {
+        console.log('CONNECT to oscillator')
+        const { kind, node } = jack
+        if (kind === 'audioParam') {
+          const { audioParam } = jack
+          console.assert(audioParam, 'jack.audioParam exists')
+          console.assert(internalConnections.has(audioParam) === false, 'i am not connected to AudioParam')
+          if (audioParam && internalConnections.has(audioParam) === false) {
+            console.log(`OSC ${name} will now control ${jack.name}`)
+            oscillator.connect(audioParam)
+            internalConnections.add(audioParam)
+            console.assert(internalConnections.has(audioParam), 'audioParam has been added to internal connections')
+          } else {
+            console.error({ audioParam, jack })
+          }
+        } else if (kind === 'connector') {
+          if (node && internalConnections.has(node) === false) {
+            try {
+              oscillator.connect(node)
+              internalConnections.add(node)
+              console.assert(internalConnections.has(node), 'node has been added to internal connections')
+            } catch (e) {
+              console.error('hmm. connect.', e)
+            }
+          }
+        } else {
+          console.error('Unhandled connection Request', { jack })
+        }
+      },
+      onDisconnect({ jack, selfJack }) {
+        const { kind, node } = jack
+        if (kind === 'audioParam') {
+          const { audioParam } = jack
+          console.assert(audioParam, 'jack.audioParam exists')
+          if (audioParam && internalConnections.has(audioParam)) {
+            try {
+              internalConnections.delete(audioParam)
+              oscillator.disconnect(audioParam)
+              console.log(`OSC ${name} will no longer control ${jack.name}`)
+            } catch (e) {
+              console.error('hmm. disconnect param')
+            }
+          }
+        } else if (kind === 'connector') {
+          console.assert(node, 'jack.node exists')
+          if (node && internalConnections.has(node)) {
+            try {
+              internalConnections.delete(node)
+              console.log('DISCONNECTING OSCILATOR FROM OTHER NODE')
+              oscillator.disconnect(node)
+            } catch (e) {
+              console.error('hmm. disconnect.', e)
+            }
           }
         }
       },
-      onDisconnect ({ jack, selfJack }) {
-        if (jack.node && internalConnections.has(jack.node)) {
-          try {
-            internalConnections.delete(jack.node)
-            console.log('DISCONNECTING OSCILATOR FROM OTHER NODE')
-            oscillator.disconnect(jack.node)
-          } catch (e) {
-            console.error('hmm. disconnect.', e)
-          }
-        }
-      },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
@@ -213,7 +261,7 @@ ${payload}
     }
   })
 
-  function setupOscilator () {
+  function setupOscilator() {
     canPlay = false
     const newOsc = context.createOscillator()
     newOsc.frequency.value = oscillator.frequency.value

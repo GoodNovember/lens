@@ -1,7 +1,5 @@
 // Yes, edit this file to test somethintg new.
-import { makeContext } from './Noises/makeContext.js'
-
-import { batchMake } from './registry.js'
+import { batchMake, batchConnect } from './registry.js'
 
 export const testBed = rootUniverse => {
   const universe = rootUniverse
@@ -17,17 +15,13 @@ export const testBed = rootUniverse => {
   const gridX = value => worldX(value * gridSize)
   const gridY = value => worldY(value * gridSize)
 
-  const context = makeContext()
-
   const thingsToMake = [
     {
       thing: 'gain',
       ingredients: {
         name: 'gain',
         x: gridX(1),
-        y: gridY(5),
-        context,
-        universe
+        y: gridY(5)
       }
     },
     {
@@ -35,8 +29,7 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'trigger-A',
         x: gridX(1),
-        y: gridY(1),
-        universe
+        y: gridY(1)
       }
     },
     {
@@ -44,8 +37,7 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'trigger-B',
         x: gridX(1),
-        y: gridY(3),
-        universe
+        y: gridY(3)
       }
     },
     {
@@ -53,9 +45,15 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'osc-A',
         x: gridX(4),
-        y: gridY(2),
-        context,
-        universe
+        y: gridY(2)
+      }
+    },
+    {
+      thing: 'oscillator',
+      ingredients: {
+        name: 'osc-B',
+        x: gridX(6),
+        y: gridY(2)
       }
     },
     {
@@ -63,9 +61,7 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'our-destination',
         x: gridX(8),
-        y: gridY(3),
-        universe,
-        context
+        y: gridY(3)
       }
     },
     {
@@ -73,52 +69,24 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'handy-range',
         x: gridX(4),
-        y: gridY(0),
-        universe
+        y: gridY(0)
       }
     }
   ]
 
-  // const thingsToMake = [
-  //   {
-  //     thing: 'toolbox',
-  //     ingredients: {
-  //       name: 'basicBox',
-  //       x: gridX(1),
-  //       y: gridY(2),
-  //       height: 100,
-  //       width: 100,
-  //       universe
-  //     }
-  //   },
-  //   {
-  //     thing: 'toolbox',
-  //     ingredients: {
-  //       name: 'plainBox',
-  //       x: gridX(3),
-  //       y: gridY(2),
-  //       height: 100,
-  //       width: 100,
-  //       universe
-  //     }
-  //   },
-  //   {
-  //     thing: 'plate',
-  //     ingredients: {
-  //       name: 'plainPlate',
-  //       x: gridX(3),
-  //       y: gridY(5),
-  //       height: 64,
-  //       width: 64,
-  //       tint: 0x00ff00,
-  //       universe
-  //     }
-  //   }
-  // ]
+  const connectionsToConnect = [
+    "[[osc-b]'s connector jack] -> [[our-destination]'s connector jack]",
+    "[[trigger-a]'s trigger jack] -> [[osc-b]'s start jack]",
+    "[[trigger-b]'s trigger jack] -> [[osc-b]'s stop jack]"
+  ]
 
-  batchMake(thingsToMake).then(madeThings => {
+  batchMake({
+    thingsToMake,
+    universe
+  }).then(madeThings => {
     for (const madeThing of madeThings) {
       universe.addChild(madeThing.container)
     }
+    batchConnect(connectionsToConnect)
   })
 }

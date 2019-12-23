@@ -397,8 +397,18 @@ export const makeToolbox = ({
   }
 
   function notifyMoveListeners () {
-    moveListeners.forEach(listener => listener({ ...bounds }))
+    for (const listener of moveListeners) {
+      listener({ ...bounds })
+    }
     emit('parent move', bounds)
+    drawMask()
+  }
+
+  function notifyResizeListeners () {
+    for (const listener of resizeListeners) {
+      listener({ ...bounds })
+    }
+    emit('parent resize', bounds)
     drawMask()
   }
 
@@ -419,13 +429,6 @@ export const makeToolbox = ({
         chromeBoxGraphics.drawRect(left + innerMargin + marginSize, top + innerMargin + marginSize, boxWidth, boxHeight)
       }
     }
-  }
-
-  function notifyResizeListeners () {
-    const { width, height } = bounds
-    resizeListeners.forEach(listener => listener({ width, height, ...bounds }))
-    // emit('parent resize', bounds)
-    drawMask()
   }
 
   const moveTo = (x, y) => {

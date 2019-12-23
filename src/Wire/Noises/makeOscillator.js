@@ -1,6 +1,5 @@
 import { makeJack } from '../Anatomy/makeJack.js'
 import { connectorValidator } from './validators/connectorValidator.js'
-import { makeToolbox } from '../Parts/makeToolbox.js'
 import { lerp } from '../Utilities/lerp.js'
 import { makePlate } from '../Parts/makePlate.js'
 import { makeText } from '../Parts/makeText.js'
@@ -40,7 +39,7 @@ export const makeOscillator = async ({
       themeImage: 'jackDetune',
       kind: 'audioParam',
       paramName: 'detune',
-      get audioParam() {
+      get audioParam () {
         return oscillator.detune
       },
       node: oscillator,
@@ -53,7 +52,7 @@ export const makeOscillator = async ({
       themeImage: 'jackFrequency',
       kind: 'audioParam',
       node: oscillator,
-      get audioParam() {
+      get audioParam () {
         return oscillator.frequency
       },
       universe
@@ -89,10 +88,10 @@ export const makeOscillator = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return oscillator
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         console.log('CONNECT to oscillator')
         const { kind, node } = jack
         if (kind === 'audioParam') {
@@ -121,7 +120,7 @@ export const makeOscillator = async ({
           console.error('Unhandled connection Request', { jack })
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         const { kind, node } = jack
         if (kind === 'audioParam') {
           const { audioParam } = jack
@@ -148,7 +147,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
@@ -261,7 +260,7 @@ ${payload}
     }
   })
 
-  function setupOscilator() {
+  function setupOscilator () {
     canPlay = false
     const newOsc = context.createOscillator()
     newOsc.frequency.value = oscillator.frequency.value
@@ -270,10 +269,8 @@ ${payload}
     newOsc.onended = () => {
       setTimeout(() => {
         setupOscilator()
-        for (const jack of connector.connections) {
-          if (jack.node) {
-            oscillator.connect(jack.node)
-          }
+        for (const node of internalConnections) {
+          oscillator.connect(node)
         }
       }, 0) // just in case, we don't want any stack overflows.
     }

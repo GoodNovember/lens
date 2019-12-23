@@ -17,7 +17,7 @@ import jackNumber from './images/jack-number.png'
 import jackString from './images/jack-string.png'
 import rope from './images/rope.png'
 
-import "./fonts.css"
+import './fonts.css'
 
 const texturePathMap = {
   frameEmpty,
@@ -42,5 +42,7 @@ export default {
   name: 'Imperfection',
   getTextures,
   oscillatorColor: 0x0fff0f,
-  gainColor: 0xbabaff
+  gainColor: 0xbabaff,
+  destinationColor: 0xffff00,
+  analyserColor: 0xeaffff
 }

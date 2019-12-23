@@ -20,8 +20,8 @@ export const testBed = rootUniverse => {
       thing: 'gain',
       ingredients: {
         name: 'gain',
-        x: gridX(1),
-        y: gridY(5)
+        x: gridX(6),
+        y: gridY(4)
       }
     },
     {
@@ -29,7 +29,7 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'trigger-A',
         x: gridX(1),
-        y: gridY(1)
+        y: gridY(3)
       }
     },
     {
@@ -37,7 +37,7 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'trigger-B',
         x: gridX(1),
-        y: gridY(3)
+        y: gridY(5)
       }
     },
     {
@@ -45,39 +45,53 @@ export const testBed = rootUniverse => {
       ingredients: {
         name: 'osc-A',
         x: gridX(4),
-        y: gridY(2)
+        y: gridY(3)
       }
     },
     {
       thing: 'oscillator',
       ingredients: {
         name: 'osc-B',
-        x: gridX(6),
-        y: gridY(2)
+        x: gridX(4),
+        y: gridY(5)
       }
     },
     {
       thing: 'destination',
       ingredients: {
         name: 'our-destination',
-        x: gridX(8),
-        y: gridY(3)
+        x: gridX(7),
+        y: gridY(4.25)
       }
     },
     {
       thing: 'range',
       ingredients: {
         name: 'handy-range',
-        x: gridX(4),
-        y: gridY(0)
+        x: gridX(1),
+        y: gridY(1)
+      }
+    },
+    {
+      thing: 'analyser',
+      ingredients: {
+        name: 'visi-a',
+        x: gridX(7),
+        y: gridY(5)
       }
     }
   ]
 
   const connectionsToConnect = [
-    "[[osc-b]'s connector jack] -> [[our-destination]'s connector jack]",
+    "[[osc-b]'s connector jack] -> [[gain]'s connector jack]",
+    "[[osc-a]'s connector jack] -> [[gain]'s gain jack]",
+    "[[gain]'s connector jack] -> [[our-destination]'s connector jack]",
     "[[trigger-a]'s trigger jack] -> [[osc-b]'s start jack]",
-    "[[trigger-b]'s trigger jack] -> [[osc-b]'s stop jack]"
+    "[[trigger-b]'s trigger jack] -> [[osc-b]'s stop jack]",
+    "[[trigger-a]'s trigger jack] -> [[osc-a]'s start jack]",
+    "[[trigger-b]'s trigger jack] -> [[osc-a]'s stop jack]",
+    "[[handy-range]'s valuejack] -> [[osc-a]'s detune jack]",
+    "[[gain]'s connector jack] -> [[visi-a]'s connector jack]"
   ]
 
   batchMake({

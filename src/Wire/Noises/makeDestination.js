@@ -4,8 +4,11 @@ import { makePlate } from '../Parts/makePlate.js'
 import { makeText } from '../Parts/makeText.js'
 
 import { getGlobalAudioContext } from './getGlobalAudioContext.js'
-const context = getGlobalAudioContext()
 
+import theme from '../Theme/imperfection/theme'
+const { destinationColor } = theme
+
+const context = getGlobalAudioContext()
 export const makeDestination = async ({
   x,
   y,
@@ -17,7 +20,8 @@ export const makeDestination = async ({
     y,
     name: `[${name}]'s plate`,
     width: 200,
-    height: 32
+    height: 32,
+    tint: destinationColor
   })
   const container = plate.container
   const internalConnections = new Set()
@@ -34,22 +38,22 @@ export const makeDestination = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return destination
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           destination.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
           jack.node.disconnect(destination) // the destination is always last.
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }

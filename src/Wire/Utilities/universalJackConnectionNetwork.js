@@ -133,7 +133,7 @@ const connectViaConnectionID = ({ connectionID }) => {
     const { sourceJack, targetJack } = result
     if (sourceJack.isConnectedTo({ jack: targetJack }) === false) {
       const disconnect = sourceJack.connectTo({ jack: targetJack })
-      console.log('connect', { connectionID })
+      // console.log('connect', { connectionID })
       globalConnectionMap.set(connectionID, { disconnect, sourceJack, targetJack })
     }
   } else {
@@ -211,7 +211,7 @@ export const registerJackOnNetwork = ({ jack }) => {
   if (registeredJacks.has(name) === true) {
     console.error('Already Registered Jack with Name:', name)
   } else {
-    console.log('RegisteredJack', { name })
+    // console.log('RegisteredJack', { name })
     registeredJacks.set(name, jack)
   }
   return () => {
@@ -227,7 +227,6 @@ export const registerJackOnNetwork = ({ jack }) => {
 export const networkEject = ({ sourceJack, targetJack }) => {
   disconnectJacks({ sourceJack, targetJack })
 }
-
 
 export const batchConnect = connectionIDArray => {
   for (const connectionID of connectionIDArray) {

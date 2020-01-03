@@ -124,7 +124,7 @@ export const makeGain = async ({
   gain.container.on('broadcast', ({ jack, payload }) => {
     if (jack.kind === 'zero-to-one') {
       const { x } = payload
-      gainNode.gain.value = x
+      gainNode.gain.setValueAtTime(x, context.currentTime)
     }
   })
 

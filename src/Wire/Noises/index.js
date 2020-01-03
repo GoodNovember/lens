@@ -4,6 +4,8 @@ import { makeOscillator } from './makeOscillator.js'
 import { makeRange } from './makeRange.js'
 import { makeTrigger } from './makeTrigger.js'
 import { makeAnalyser } from './makeAnalyser.js'
+import { makeUSBDeviceTray } from './makeUSBDeviceTray.js'
+import { makeUserMediaTray } from './makeUserMediaTray.js'
 
 export default {
   makeDestination,
@@ -11,5 +13,7 @@ export default {
   makeOscillator,
   makeRange,
   makeTrigger,
-  makeAnalyser
+  makeAnalyser,
+  makeUSBDeviceTray,
+  makeUserMediaTray
 }

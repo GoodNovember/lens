@@ -79,6 +79,22 @@ export const testBed = rootUniverse => {
         x: gridX(7),
         y: gridY(5)
       }
+    },
+    {
+      thing: 'USBDeviceTray',
+      ingredients: {
+        name: 'fancy-usb-tray',
+        x: gridX(10),
+        y: gridY(1)
+      }
+    },
+    {
+      thing: 'UserMediaTray',
+      ingredients: {
+        name: 'Special User Media Tray',
+        x: gridX(12),
+        y: gridY(1)
+      }
     }
   ]
 

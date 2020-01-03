@@ -39,7 +39,7 @@ export const makeOscillator = async ({
       themeImage: 'jackDetune',
       kind: 'audioParam',
       paramName: 'detune',
-      get audioParam () {
+      get audioParam() {
         return oscillator.detune
       },
       node: oscillator,
@@ -52,7 +52,7 @@ export const makeOscillator = async ({
       themeImage: 'jackFrequency',
       kind: 'audioParam',
       node: oscillator,
-      get audioParam () {
+      get audioParam() {
         return oscillator.frequency
       },
       universe
@@ -88,10 +88,10 @@ export const makeOscillator = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node () {
+      get node() {
         return oscillator
       },
-      onConnect ({ jack, selfJack }) {
+      onConnect({ jack, selfJack }) {
         console.log('CONNECT to oscillator')
         const { kind, node } = jack
         if (kind === 'audioParam') {
@@ -120,7 +120,7 @@ export const makeOscillator = async ({
           console.error('Unhandled connection Request', { jack })
         }
       },
-      onDisconnect ({ jack, selfJack }) {
+      onDisconnect({ jack, selfJack }) {
         const { kind, node } = jack
         if (kind === 'audioParam') {
           const { audioParam } = jack
@@ -147,7 +147,7 @@ export const makeOscillator = async ({
           }
         }
       },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }
@@ -183,9 +183,10 @@ export const makeOscillator = async ({
     const { maxValue, minValue, defaultValue, automationRate } = oscillator.detune
     if (jack.kind === 'zero-to-one') {
       const { x } = payload
-      const min = minValue
-      const max = maxValue
-      const value = lerp({ norm: x, min, max })
+      // const min = minValue
+      // const min = 0
+      // const max = maxValue
+      const value = lerp({ norm: x, min: minValue, max: maxValue })
       oscillator.detune.setValueAtTime(value, context.currentTime)
     }
   })
@@ -195,9 +196,11 @@ export const makeOscillator = async ({
     const { maxValue, minValue, defaultValue, automationRate } = oscillator.frequency
     if (jack.kind === 'zero-to-one') {
       const { x } = payload // we extract the (0.0 -> 1.0) value for the horizontal.
-      const min = minValue
-      const max = maxValue
-      const value = lerp({ norm: x, min, max })
+      // const min = minValue
+      // const min = 440 / 2
+      // const max = 440
+      // const value = lerp({ norm: x, min, max })
+      const value = lerp({ norm: x, min: minValue, max: maxValue })
       oscillator.frequency.setValueAtTime(value, context.currentTime)
     }
   })
@@ -260,7 +263,7 @@ ${payload}
     }
   })
 
-  function setupOscilator () {
+  function setupOscilator() {
     canPlay = false
     const newOsc = context.createOscillator()
     newOsc.frequency.value = oscillator.frequency.value

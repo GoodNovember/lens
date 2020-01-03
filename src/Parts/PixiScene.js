@@ -2,13 +2,12 @@
 import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import Impetus from '../Foreign/Impetus.js'
-// import * as PIXI from 'pixi.js' // No support for older systems (and electron)
-import * as PIXI from 'pixi.js-legacy' // added canvas 2d support.
-// import { app } from 'electron'
+
+import { PIXI } from '../Wire/Utilities/localPIXI.js'
+
+import { updatePhysics } from '../Wire/Verlet/engine.js' // added canvas 2d support.
 global.PIXI = PIXI
 require('pixi-layers')
-
-import { updatePhysics } from '../Wire/Verlet/engine.js'
 
 const getDPR = () => window.devicePixelRatio || 1.0
 

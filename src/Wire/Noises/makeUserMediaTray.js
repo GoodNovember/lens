@@ -5,6 +5,19 @@ import { makePlate } from '../Parts/makePlate.js'
 import { makeRect } from '../Utilities/makeRect.js'
 import { makeText } from '../Parts/makeText.js'
 
+const iterate = ({ collection, fn, ...rest }) => {
+  let index = 0
+  let previousValue = null
+  const output = []
+  for (const item of collection) {
+    const value = fn({ item, collection, index, previousValue, ...rest })
+    previousValue = value
+    output.push(value)
+    index++
+  }
+  return output
+}
+
 export const makeUserMediaTray = ({
   x,
   y,
@@ -14,7 +27,8 @@ export const makeUserMediaTray = ({
     x,
     y,
     width: 100,
-    height: 300
+    height: 300,
+    tint: 0x005588
   })
 
   const { container } = plate
@@ -42,22 +56,41 @@ export const makeUserMediaTray = ({
   const visualizeDevices = ({ groups }) => {
     eraseExistingItems()
     let groupIndex = 0
-    const renderInput = (input, inputIndex, groupIndex) => {
+    const renderInput = ({ item, collection, index, groupIndex }) => {
+      const { label } = item
       const x = 10
-      const y = (((groupIndex * 5) + inputIndex) * 18) + 50
-      const rect = makeRect({ x, y, width: 16, height: 16 })
-      renderedItems.add(rect)
-      plate.addChild(rect)
+      const y = (((groupIndex * 5) + index) * 18) + 50
+      const rect = makeRect({ x, y, width: 16, height: 16, tint: 0x0000ff })
+      const labelElement = makeText(label)
+      labelElement.tint = 0x00ffff
+      labelElement.x = x + 20
+      labelElement.y = y
+      labelElement.interactive = false
+
+      console.log(item)
+      makeJack({
+        x: x + 8,
+        y: y + 8,
+        themeImage: 'jackConnector',
+        name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`
+      }).then(inputJack => {
+        plate.addChild(labelElement)
+        plate.addChild(rect)
+        plate.addChild(inputJack.container)
+        renderedItems.add(inputJack.container)
+        renderedItems.add(rect)
+        renderedItems.add(labelElement)
+      })
     }
     const renderGroup = (group, groupIndex) => {
       const { groupId, devices } = group
       const { audio, video } = devices
-      const { inputs, outputs } = audio
-      let inputIndex = 0
-      for (const input of inputs) {
-        renderInput(input, inputIndex, groupIndex)
-        inputIndex++
-      }
+      const { inputs: audioInputs, outputs } = audio
+      iterate({
+        collection: audioInputs,
+        groupIndex,
+        fn: renderInput
+      })
     }
     for (const group of groups) {
       renderGroup(group, groupIndex)

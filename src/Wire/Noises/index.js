@@ -6,6 +6,7 @@ import { makeTrigger } from './makeTrigger.js'
 import { makeAnalyser } from './makeAnalyser.js'
 import { makeUSBDeviceTray } from './makeUSBDeviceTray.js'
 import { makeUserMediaTray } from './makeUserMediaTray.js'
+import { makeMIDIDeviceTray } from './makeMIDIDeviceTray.js'
 
 export default {
   makeDestination,
@@ -15,5 +16,6 @@ export default {
   makeTrigger,
   makeAnalyser,
   makeUSBDeviceTray,
-  makeUserMediaTray
+  makeUserMediaTray,
+  makeMIDIDeviceTray
 }

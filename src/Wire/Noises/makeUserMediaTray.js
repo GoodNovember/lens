@@ -21,7 +21,8 @@ const iterate = ({ collection, fn, ...rest }) => {
 export const makeUserMediaTray = ({
   x,
   y,
-  name = 'unnamed User Media Tray'
+  name = 'unnamed User Media Tray',
+  universe
 }) => {
   const plate = makePlate({
     x,
@@ -72,7 +73,8 @@ export const makeUserMediaTray = ({
         x: x + 8,
         y: y + 8,
         themeImage: 'jackConnector',
-        name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`
+        name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`,
+        universe
       }).then(inputJack => {
         plate.addChild(labelElement)
         plate.addChild(rect)

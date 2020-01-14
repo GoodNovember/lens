@@ -119,7 +119,7 @@ export const makeMIDIDeviceTray = ({
 
   const clearEverything = () => {
     for (const renderedItem of renderedItems) {
-      container.removeChild(renderedItem)
+      plate.removeChild(renderedItem)
     }
   }
 
@@ -130,17 +130,26 @@ export const makeMIDIDeviceTray = ({
 
       const noteDown = ({ midiNote }) => {
         const osc = context.createOscillator()
+        const oscGain = context.createGain()
         const { frequency } = calculatedNotes[midiNote]
         osc.frequency.setValueAtTime(frequency, context.currentTime)
-        osc.connect(commonGainNode)
+        osc.connect(oscGain)
+        oscGain.connect(commonGainNode)
         osc.start()
-        activeNotes.set(midiNote, osc)
+        activeNotes.set(midiNote, { osc, oscGain })
       }
 
       const noteUp = ({ midiNote }) => {
-        const osc = activeNotes.get(midiNote)
+        const { osc, oscGain } = activeNotes.get(midiNote)
         activeNotes.delete(midiNote)
-        osc.stop()
+        // turns out if you stop a sound immedately, it returns an audible 'click'
+        // because you sliced offas you sliced off part of the smoothness of what the osc
+        // this we we simulate turning down a fader super quick vs, pulling the plug.
+        // is generating for us. Doing all this it makes things sound nicer when it stops.
+        oscGain.gain.setValueAtTime(1.0, context.currentTime)
+        oscGain.gain.linearRampToValueAtTime(0.0001, context.currentTime + 0.03)
+        // oscGain.gain.exponentialRampToValueAtTime(0.00000001, context.currentTime + 0.03)
+        osc.stop(context.currentTime + 0.03)
       }
 
       makeJack({
@@ -149,17 +158,17 @@ export const makeMIDIDeviceTray = ({
         name: `[${name}]'s ${input.id} midiJack`,
         themeImage: 'jackConnector',
         universe,
-        get node () {
+        get node() {
           return commonGainNode
         },
-        connectionValidator ({ jack, selfJack, ...rest }) {
+        connectionValidator({ jack, selfJack, ...rest }) {
           return connectorValidator({ jack, selfJack, ...rest })
         },
-        onConnect ({ jack }) {
+        onConnect({ jack }) {
           console.log('connectJack', jack)
           commonGainNode.connect(jack.node)
         },
-        onDisconnect ({ jack }) {
+        onDisconnect({ jack }) {
           console.log('disconnectJack', jack)
           commonGainNode.disconnect(jack.node)
         }
@@ -187,7 +196,7 @@ export const makeMIDIDeviceTray = ({
         }
 
         renderedItems.add(midiJack.container)
-        container.addChild(midiJack.container)
+        plate.addChild(midiJack.container)
       })
     }
     let index = 0

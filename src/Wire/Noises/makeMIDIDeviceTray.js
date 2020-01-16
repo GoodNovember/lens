@@ -123,29 +123,100 @@ export const makeMIDIDeviceTray = ({
     }
   }
 
+  const playNote = ({
+    frequency = 440,
+    attack = 0,
+    release = 0,
+    start = 0,
+    stop = 0,
+    attackShape = 'linear',
+    releaseShape = 'linear'
+  }) => {
+    const osc = context.createOscillator()
+    const now = context.currentTime
+    osc.frequency.value = frequency
+    const oscGain = context.createGain()
+    osc.connect(oscGain)
+    osc.start(start)
+    if (attack > 0) {
+      oscGain.gain.value = 0
+      if (attackShape === 'linear') {
+        oscGain.gain.linearRampToValueAtTime(1, now + start + attack)
+      }
+      if (attackShape === 'exponential') {
+        oscGain.gain.exponentialRampToValueAtTime(1, now + start + attack)
+      }
+    } else {
+      oscGain.gain.value = 1
+    }
+
+    const stopNote = () => {
+      const now = context.currentTime
+      const stopTime = now + stop + release
+      const stopValue = 0.0000001
+      oscGain.gain.setValueAtTime(1.0, context.currentTime)
+      if (release > 0) {
+        osc.stop(stopTime)
+        if (releaseShape === 'linear') {
+          oscGain.gain.linearRampToValueAtTime(stopValue, stopTime)
+        }
+        if (releaseShape === 'exponential') {
+          oscGain.gain.exponentialRampToValueAtTime(stopValue, stopTime)
+        }
+      }
+    }
+
+    return {
+      oscGain,
+      stopNote
+    }
+  }
+
   const renderInputs = inputs => {
     const renderInput = (input, index) => {
       const commonGainNode = context.createGain()
       const activeNotes = new Map()
 
-      const noteDown = ({ midiNote }) => {
-        const osc = context.createOscillator()
-        const oscGain = context.createGain()
+      const launchpadNoteDown = ({ midiNote }) => {
+
+      }
+
+      const defaultNoteDown = ({ midiNote }) => {
         const { frequency } = calculatedNotes[midiNote]
-        osc.frequency.setValueAtTime(frequency, context.currentTime)
-        osc.connect(oscGain)
+        const { oscGain, stopNote, onStopped } = playNote({
+          frequency,
+          attack: 0.00,
+          release: 5,
+          releaseShape: 'exponential'
+        })
         oscGain.connect(commonGainNode)
-        osc.start()
-        activeNotes.set(midiNote, { osc, oscGain })
+        activeNotes.set(midiNote, { stopNote, oscGain, onStopped })
       }
 
       const noteUp = ({ midiNote }) => {
+        if (activeNotes.has(midiNote)) {
+          const { stopNote } = activeNotes.get(midiNote)
+          stopNote()
+        }
+      }
+
+      const ancient_noteUp = ({ midiNote }) => {
         const { osc, oscGain } = activeNotes.get(midiNote)
         activeNotes.delete(midiNote)
-        // turns out if you stop a sound immedately, it returns an audible 'click'
-        // because you sliced offas you sliced off part of the smoothness of what the osc
-        // this we we simulate turning down a fader super quick vs, pulling the plug.
-        // is generating for us. Doing all this it makes things sound nicer when it stops.
+
+        // SEE: http://alemangui.github.io/blog//2015/12/26/ramp-to-value.html
+
+        // LORE
+        // turns out if you stop a sound immedately, it returns an audible 'click'.
+        // This is because you sliced off part of the smoothness of what the osc generates
+        // It stops(0) as soon as it possibly can without going further.
+
+        // To make it more plesant to listen to, we can fade the oscillator out rather quickly, but not instantly.
+
+        // Perhaps, this simulates turning down a mixer fader super quick vs. pulling the plug on the speaker.
+
+        // TLDR: Doing all this it makes things sound nicer when it stops.
+
         oscGain.gain.setValueAtTime(1.0, context.currentTime)
         oscGain.gain.linearRampToValueAtTime(0.0001, context.currentTime + 0.03)
         // oscGain.gain.exponentialRampToValueAtTime(0.00000001, context.currentTime + 0.03)
@@ -158,17 +229,17 @@ export const makeMIDIDeviceTray = ({
         name: `[${name}]'s ${input.id} midiJack`,
         themeImage: 'jackConnector',
         universe,
-        get node() {
+        get node () {
           return commonGainNode
         },
-        connectionValidator({ jack, selfJack, ...rest }) {
+        connectionValidator ({ jack, selfJack, ...rest }) {
           return connectorValidator({ jack, selfJack, ...rest })
         },
-        onConnect({ jack }) {
+        onConnect ({ jack }) {
           console.log('connectJack', jack)
           commonGainNode.connect(jack.node)
         },
-        onDisconnect({ jack }) {
+        onDisconnect ({ jack }) {
           console.log('disconnectJack', jack)
           commonGainNode.disconnect(jack.node)
         }
@@ -184,8 +255,9 @@ export const makeMIDIDeviceTray = ({
             const midiNote = partA
             const velocity = partB
             if (velocity > 0) {
-              noteDown({ midiNote })
+              defaultNoteDown({ midiNote })
             } else {
+              // ancient_noteUp({ midiNote })
               noteUp({ midiNote })
             }
           } else if (id === 176) {

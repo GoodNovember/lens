@@ -32,28 +32,28 @@ export const makeDestination = async ({
 
   const jackIngredients = [
     {
-      x: 16,
-      y: 16,
+      x: 8,
+      y: 8,
       name: `[${name}]'s connector jack`,
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node () {
+      get node() {
         return destination
       },
-      onConnect ({ jack, selfJack }) {
+      onConnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           destination.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect ({ jack, selfJack }) {
+      onDisconnect({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
           jack.node.disconnect(destination) // the destination is always last.
         }
       },
-      connectionValidator ({ jack, selfJack, ...rest }) {
+      connectionValidator({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     }

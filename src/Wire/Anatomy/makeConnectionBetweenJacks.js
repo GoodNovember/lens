@@ -19,9 +19,9 @@ export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
   const container = new Stage()
 
   const calculatePoints = () => {
-    const startPoint = new Point(jackA.x, jackA.y)
-    const endPoint = new Point(jackB.x, jackB.y)
-    const midPoint = getMidPoint({ pointA: jackA, pointB: jackB })
+    const startPoint = new Point(jackA.centerX, jackA.centerY)
+    const endPoint = new Point(jackB.centerX, jackB.centerY)
+    const midPoint = getMidPoint({ pointA: startPoint, pointB: endPoint })
 
     const middlePoints = [
       midPoint

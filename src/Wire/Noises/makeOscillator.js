@@ -33,8 +33,8 @@ export const makeOscillator = async ({
 
   const jackIngredients = [
     {
-      x: 16,
-      y: 16,
+      x: 8,
+      y: 8,
       name: `[${name}]'s detune jack`,
       themeImage: 'jackDetune',
       kind: 'audioParam',
@@ -46,8 +46,8 @@ export const makeOscillator = async ({
       universe
     },
     {
-      x: 42,
-      y: 16,
+      x: 32,
+      y: 8,
       name: `[${name}]'s frequency jack`,
       themeImage: 'jackFrequency',
       kind: 'audioParam',
@@ -58,16 +58,16 @@ export const makeOscillator = async ({
       universe
     },
     {
-      x: 70,
-      y: 16,
+      x: 64,
+      y: 8,
       name: `[${name}]'s type jack`,
       themeImage: 'jackType',
       kind: 'string',
       universe
     },
     {
-      x: 16,
-      y: 48,
+      x: 8,
+      y: 40,
       name: `[${name}]'s start jack`,
       themeImage: 'jackStart',
       kind: 'impulse',
@@ -75,15 +75,15 @@ export const makeOscillator = async ({
     },
     {
       x: 32,
-      y: 48,
+      y: 40,
       name: `[${name}]'s stop jack`,
       themeImage: 'jackStop',
       kind: 'impulse',
       universe
     },
     {
-      x: 70,
-      y: 48,
+      x: 64,
+      y: 40,
       name: `[${name}]'s connector jack`,
       themeImage: 'jackConnector',
       universe,

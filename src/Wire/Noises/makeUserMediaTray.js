@@ -70,8 +70,8 @@ export const makeUserMediaTray = ({
 
       console.log(item)
       makeJack({
-        x: x + 8,
-        y: y + 8,
+        x: x,
+        y: y,
         themeImage: 'jackConnector',
         name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`,
         universe

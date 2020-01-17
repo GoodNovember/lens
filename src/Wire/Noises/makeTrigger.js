@@ -28,8 +28,8 @@ export const makeTrigger = async ({
   toolbox.addChild(triggerElement)
 
   const jackTrigger = await makeJack({
-    x: 50 + 8,
-    y: 25,
+    x: 50,
+    y: 18,
     name: `[${name}]'s trigger jack`,
     themeImage: 'jackTrigger',
     kind: 'trigger',

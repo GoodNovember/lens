@@ -173,7 +173,7 @@ export const makeMIDIDeviceTray = ({
   }
 
   const renderInputs = inputs => {
-    const renderInput = (input, index) => {
+    const renderInput = ({ input, index }) => {
       const commonGainNode = context.createGain()
       const activeNotes = new Map()
 
@@ -273,15 +273,33 @@ export const makeMIDIDeviceTray = ({
     }
     let index = 0
     for (const input of inputs) {
-      renderInput(input, index)
+      renderInput({ input, index })
       index++
     }
   }
 
   const renderOutputs = outputs => {
-    for (const output of outputs) {
+    const renderOutput = ({ output, index }) => {
+      if (output.name === 'Launchpad Mini') {
+        // output.send([176, 0, 1]) // switch to 'X-Y Layout (default)'
+        output.send([176, 0, 2]) // switch to 'Drum rack layout'
+
+        // output.send([176, 0, 127]) // full bright test
+        // output.send([176, 0, 126]) // medium bright test
+        // output.send([176, 0, 125]) // low bright test
+      }
       console.log({ output })
     }
+    let index = 0
+    for (const output of outputs) {
+      renderOutput({ output, index })
+      index++
+    }
+  }
+
+  const renderIO = ({ inputs, outputs }) => {
+    renderInputs(inputs)
+    renderOutputs(outputs)
   }
 
   const requestPermissionForMIDIAccess = () => {
@@ -299,8 +317,10 @@ export const makeMIDIDeviceTray = ({
 
           console.log(access)
 
-          renderInputs(inputs)
-          renderOutputs(outputs)
+          renderIO({
+            inputs,
+            outputs
+          })
 
           midiAccessGranted.tint = 0x00ff00
 

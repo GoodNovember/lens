@@ -39,7 +39,7 @@ export const makeJack = async ({
   const sprite = chosenSprite.makeSprite()
   sprite.tint = napTint
   sprite.interactive = true
-  sprite.anchor.set(0.5)
+  // sprite.anchor.set(0.5)
   container.x = x
   container.y = y
   container.addChild(sprite)
@@ -204,6 +204,20 @@ export const makeJack = async ({
     },
     set tint(tintValue) {
       sprite.tint = tintValue
+    },
+    get height() {
+      return sprite.height
+    },
+    get width() {
+      return sprite.width
+    },
+    get centerX() {
+      const { x, width } = this
+      return x + width / 2
+    },
+    get centerY() {
+      const { y, height } = this
+      return y + height / 2
     },
     sprite,
     isConnectedTo,

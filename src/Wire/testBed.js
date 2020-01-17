@@ -100,8 +100,8 @@ export const testBed = rootUniverse => {
       thing: 'MIDIDeviceTray',
       ingredients: {
         name: 'Special User Media Tray',
-        x: gridX(12),
-        y: gridY(8)
+        x: gridX(5),
+        y: gridY(7)
       }
     }
   ]

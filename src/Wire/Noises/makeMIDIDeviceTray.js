@@ -84,7 +84,7 @@ export const makeMIDIDeviceTray = ({
 
   const { container } = plate
 
-  const requestMidiButton = makeRect({
+  const midiRequestButton = makeRect({
     x: 8,
     y: 8,
     width: 32,
@@ -129,6 +129,7 @@ export const makeMIDIDeviceTray = ({
     release = 0,
     start = 0,
     stop = 0,
+    velocity = 1,
     attackShape = 'linear',
     releaseShape = 'linear'
   }) => {
@@ -141,22 +142,23 @@ export const makeMIDIDeviceTray = ({
     if (attack > 0) {
       oscGain.gain.value = 0
       if (attackShape === 'linear') {
-        oscGain.gain.linearRampToValueAtTime(1, now + start + attack)
+        oscGain.gain.linearRampToValueAtTime(1 * velocity, now + start + (attack * velocity))
       }
       if (attackShape === 'exponential') {
-        oscGain.gain.exponentialRampToValueAtTime(1, now + start + attack)
+        oscGain.gain.exponentialRampToValueAtTime(1 * velocity, now + start + (attack * velocity))
       }
     } else {
-      oscGain.gain.value = 1
+      oscGain.gain.value = 0
+      oscGain.gain.value = 1 * velocity
     }
 
     const stopNote = () => {
       const now = context.currentTime
       const stopTime = now + stop + release
       const stopValue = 0.0000001
-      oscGain.gain.setValueAtTime(1.0, context.currentTime)
+      oscGain.gain.setValueAtTime(oscGain.gain.value, context.currentTime)
+      osc.stop(stopTime)
       if (release > 0) {
-        osc.stop(stopTime)
         if (releaseShape === 'linear') {
           oscGain.gain.linearRampToValueAtTime(stopValue, stopTime)
         }
@@ -177,17 +179,15 @@ export const makeMIDIDeviceTray = ({
       const commonGainNode = context.createGain()
       const activeNotes = new Map()
 
-      const launchpadNoteDown = ({ midiNote }) => {
-
-      }
-
-      const defaultNoteDown = ({ midiNote }) => {
+      const defaultNoteDown = ({ midiNote, velocity }) => {
         const { frequency } = calculatedNotes[midiNote]
         const { oscGain, stopNote, onStopped } = playNote({
           frequency,
-          attack: 0.00,
-          release: 5,
-          releaseShape: 'exponential'
+          velocity,
+          // attack: 0.00
+          // release: 5,
+          release: 0.0001
+          // releaseShape: 'exponential'
         })
         oscGain.connect(commonGainNode)
         activeNotes.set(midiNote, { stopNote, oscGain, onStopped })
@@ -241,29 +241,48 @@ export const makeMIDIDeviceTray = ({
         },
         onDisconnect ({ jack }) {
           console.log('disconnectJack', jack)
-          commonGainNode.disconnect(jack.node)
+          try {
+            commonGainNode.disconnect(jack.node)
+          } catch (error) {
+            if (error.code === 15) {
+              console.log('Already Disconnected.')
+            } else {
+              console.error('disconnectJack Error', { jack, error })
+            }
+          }
         }
       }).then(midiJack => {
         console.log({ input })
         input.onmidimessage = event => {
           const { data } = event
           const [id, partA, partB] = data
+          const dataLength = data.length
           if (id === 128) {
-            // console.log('Note Off')
+            console.log('Note Off')
           } else if (id === 144) {
             // console.log('Note On')
             const midiNote = partA
-            const velocity = partB
+            const velocity = partB / 127
+            console.log(data)
             if (velocity > 0) {
-              defaultNoteDown({ midiNote })
+              defaultNoteDown({ midiNote, velocity })
             } else {
               // ancient_noteUp({ midiNote })
               noteUp({ midiNote })
             }
           } else if (id === 176) {
             console.log('Controller')
+          } else if (id === 248) {
+            // console.log('MIDI Beat Clock')
+            // console.count('tick')
+            // console.log({ data })
           } else {
-            console.log({ data })
+            if (dataLength === 1) {
+              // skip the single note things for now. -- <3 Victor
+              // console.log('boop')
+            } else {
+              console.log({ data })
+            }
           }
         }
 
@@ -340,15 +359,15 @@ export const makeMIDIDeviceTray = ({
     }
   }
 
-  requestPermissionForMIDIAccess()
+  requestPermissionForMIDIAccess() // we humbly ask on load.
 
   container.addChild(
-    requestMidiButton,
+    midiRequestButton,
     midiSupportedIndicator,
     midiAccessGranted
   )
 
-  requestMidiButton.on('pointerdown', () => {
+  midiRequestButton.on('pointerdown', () => {
     requestPermissionForMIDIAccess()
   })
 

@@ -12,8 +12,6 @@ const {
 export const makeConnectionBetweenJackAndPointer = async ({ jack, event }) => {
   const { wireLayer } = jack.universe
 
-  console.log({ event, jack })
-
   const textures = await getTextures()
 
   const calculatePoints = ({ event }) => {

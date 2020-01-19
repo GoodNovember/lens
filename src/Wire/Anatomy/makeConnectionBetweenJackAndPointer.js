@@ -35,7 +35,6 @@ export const makeConnectionBetweenJackAndPointer = async ({ jack, event }) => {
   const ropePointArray = calculatePoints({ event })
 
   const rope = new SimpleRope(textures.rope.texture, ropePointArray)
-  rope.interactive = true
 
   wireLayer.addChild(rope)
 

@@ -55,7 +55,7 @@ export const makeJack = async ({
       {
         name: 'release',
         from: 'pressing',
-        to() {
+        to () {
           if (isAwake) {
             return 'awake'
           } else {
@@ -67,7 +67,7 @@ export const makeJack = async ({
       {
         name: 'dragEnd',
         from: 'dragging',
-        to() {
+        to () {
           if (isAwake) {
             return 'awake'
           } else {
@@ -80,41 +80,41 @@ export const makeJack = async ({
       }
     ],
     methods: {
-      onAwaken(state, ...rest) {
+      onAwaken (state, ...rest) {
         // console.log(`!!! Awaken ${name}`)
         sprite.tint = awakeTint
         container.emit('jack-awaken', ...rest)
       },
-      onNap(state, ...rest) {
+      onNap (state, ...rest) {
         // console.log(`!!! Nap ${name}`)
         sprite.tint = napTint
         container.emit('jack-nap', ...rest)
       },
-      onPressing(state, ...rest) {
+      onPressing (state, ...rest) {
         // console.log(`!!! Pressing ${name}`)
         sprite.tint = pressTint
         container.emit('jack-pressing', ...rest)
       },
-      onRelease(state, ...rest) {
+      onRelease (state, ...rest) {
         // console.log(`!!! Release ${name}`)
         sprite.tint = awakeTint
         container.emit('jack-release', ...rest)
       },
-      onDragBegin(state, ...rest) {
+      onDragBegin (state, ...rest) {
         // console.log(`!!! DragBegin ${name}`)
         sprite.tint = dragTint
         container.emit('jack-drag-start', ...rest)
       },
-      onDragCancel(state, ...rest) {
+      onDragCancel (state, ...rest) {
         // console.log(`!!! DragCancel ${name}`)
         sprite.tint = pressTint
         container.emit('jack-drag-cancel', ...rest)
       },
-      onDragging(state, ...rest) {
+      onDragging (state, ...rest) {
         // console.log(`!!! Dragging ${name}`)
         container.emit('jack-dragging', ...rest)
       },
-      onDragEnd(state, ...rest) {
+      onDragEnd (state, ...rest) {
         // console.log(`!!! DragEnd ${name}`)
         if (isAwake) {
           sprite.tint = awakeTint
@@ -180,42 +180,42 @@ export const makeJack = async ({
   }
 
   const selfJack = {
-    get x() { // surely the real math is much prettier.
+    get x () { // surely the real math is much prettier.
       return container.toGlobal(universe.wireLayer.position).x - universe.wireLayer.x * 2
     },
-    get y() {
+    get y () {
       return container.toGlobal(universe.wireLayer.position).y - universe.wireLayer.y * 2
     },
-    get node() {
+    get node () {
       return node || null
     },
-    get lastPayloadSent() {
+    get lastPayloadSent () {
       return lastPayloadSent
     },
-    get lastPayloadRecieved() {
+    get lastPayloadRecieved () {
       return lastPayloadRecieved
     },
     name,
-    get connections() {
+    get connections () {
       return internalConnections
     },
-    get tint() {
+    get tint () {
       return sprite.tint
     },
-    set tint(tintValue) {
+    set tint (tintValue) {
       sprite.tint = tintValue
     },
-    get height() {
+    get height () {
       return sprite.height
     },
-    get width() {
+    get width () {
       return sprite.width
     },
-    get centerX() {
+    get centerX () {
       const { x, width } = this
       return x + width / 2
     },
-    get centerY() {
+    get centerY () {
       const { y, height } = this
       return y + height / 2
     },
@@ -234,7 +234,7 @@ export const makeJack = async ({
     ...rest
   }
 
-  function eject(otherJack) {
+  function eject (otherJack) {
     // console.log(`EJECT me:${name} them:${otherJack.name} `)
     if (internalConnections.has(otherJack)) {
       internalConnections.delete(otherJack)
@@ -247,13 +247,13 @@ export const makeJack = async ({
     }
   }
 
-  function reconnect() {
+  function reconnect () {
     for (const jack of internalConnections.values()) {
       onConnect({ jack, selfJack })
     }
   }
 
-  function isConnectedTo({ jack }) {
+  function isConnectedTo ({ jack }) {
     if (internalConnections.has(jack)) {
       return true
     } else if (jack.connections.has(selfJack)) {
@@ -263,7 +263,7 @@ export const makeJack = async ({
     }
   }
 
-  function receiveConnectionRequest({ jack, target, source, ...others }) {
+  function receiveConnectionRequest ({ jack, target, source, ...others }) {
     return new Promise((resolve, reject) => {
       if (typeof connectionValidator === 'function') {
         let result = null
@@ -280,7 +280,7 @@ export const makeJack = async ({
     })
   }
 
-  function connectTo({ jack, ...others }) {
+  function connectTo ({ jack, ...others }) {
     let isAlive = true
     let disconnect = () => { }
     let personalVerdict = null

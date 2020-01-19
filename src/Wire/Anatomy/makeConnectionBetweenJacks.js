@@ -66,7 +66,7 @@ export const makeConnectionBetweenJacks = async ({ jackA, jackB }) => {
   // console.log('Making Wire', { jackA, jackB })
 
   rope.on('pointerdown', () => {
-    rope.on('pointerup', () => {
+    rope.once('pointerup', () => {
       jackA.eject(jackB)
       // console.log('Disconnecting wire', { jackA, jackB })
       if (typeof disconnector === 'function') {

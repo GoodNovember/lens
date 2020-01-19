@@ -2,6 +2,7 @@ import { enableDragEvents } from './enableDragEvents.js'
 import { makeEventForwarder } from './makeEventForwarder.js'
 import { removeAllChildrenFromContainer } from './utilities.js'
 import { PIXI } from '../Wire/Utilities/localPIXI.js'
+import { handleRootUniverseMouseMove } from '../Wire/Utilities/universalJackConnectionNetwork.js'
 
 const {
   display,
@@ -103,6 +104,10 @@ export const makeRootUniverse = ({
   }
 
   gridTexture.on('dragging', ({ reference: { x, y } }) => moveTo(x, y))
+
+  gridTexture.on('pointermove', event => {
+    handleRootUniverseMouseMove({ event })
+  })
 
   const addChild = (...props) => {
     internalContainer.addChild(...props)

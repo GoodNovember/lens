@@ -185,9 +185,8 @@ export const makeMIDIDeviceTray = ({
           frequency,
           velocity,
           // attack: 0.00
-          // release: 5,
-          release: 0.0001
-          // releaseShape: 'exponential'
+          release: 0.05,
+          releaseShape: 'exponential'
         })
         oscGain.connect(commonGainNode)
         activeNotes.set(midiNote, { stopNote, oscGain, onStopped })
@@ -263,7 +262,7 @@ export const makeMIDIDeviceTray = ({
             // console.log('Note On')
             const midiNote = partA
             const velocity = partB / 127
-            console.log(data)
+            // console.log(data)
             if (velocity > 0) {
               defaultNoteDown({ midiNote, velocity })
             } else {

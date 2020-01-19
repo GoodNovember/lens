@@ -2,11 +2,13 @@ import { PIXI } from './localPIXI.js'
 
 import StateMachine from 'javascript-state-machine'
 
+import { makeConnectionBetweenJackAndPointer } from '../Anatomy/makeConnectionBetweenJackAndPointer.js'
+
 const {
-  Texture,
-  Sprite,
   display,
-  SimpleRope
+  SimpleRope,
+  Texture,
+  Point
 } = PIXI
 
 // states
@@ -23,32 +25,63 @@ const {
  * drag-released-on-nothing
  */
 
-const { Layer, Stage } = display
+const { Layer } = display
 const registeredJacks = new Map()
 
 const RootWireLayer = new Layer()
 RootWireLayer.interactive = true
 
-const pointerDownJacks = new Map()
-
 const globalConnectionMap = new Map()
+const pointerIDToJackMap = new Map()
 
-const handleJackPointerMove = ({ event, jack }) => {
+const pointerJackConnectionInstances = new Map()
 
+const pointerJackConnectorNormalizer = ({ identifier, name }) => {
+  return `jack[${name}]->pointer[${identifier}]`
 }
 
-export const getRootWireLayer = ({ pointerMoveTarget }) => {
-  if (pointerMoveTarget) {
-    pointerMoveTarget.on('pointermove', event => {
-      if (pointerDownJacks.size > 0) {
-        if (pointerDownJacks.has(event.data.identifier)) {
-          const jack = pointerDownJacks.get(event.data.identifier)
-          handleJackPointerMove({ event, jack })
-        }
-      }
+const handleJackPointerConnect = ({ event, jack }) => {
+  const { name } = jack
+  const { identifier } = event.data
+  pointerIDToJackMap.set(identifier, jack)
+  const connectorID = pointerJackConnectorNormalizer({ name, identifier })
+  if (pointerJackConnectionInstances.has(connectorID) === false) {
+    makeConnectionBetweenJackAndPointer({ jack, event }).then(instance => {
+      pointerJackConnectionInstances.set(connectorID, instance)
     })
   }
-  return RootWireLayer
+}
+
+const handleJackPointerDisconnect = ({ event, jack }) => {
+  const { identifier } = event.data
+  const { name } = jack
+  pointerIDToJackMap.delete(identifier)
+  const connectorID = pointerJackConnectorNormalizer({ name, identifier })
+  if (pointerJackConnectionInstances.has(connectorID)) {
+    const { disconnect } = pointerJackConnectionInstances.get(connectorID)
+    pointerJackConnectionInstances.delete(connectorID)
+    disconnect()
+  }
+}
+
+const handleJackPointerMove = ({ event, jack }) => {
+  const { identifier } = event.data
+  const { name } = jack
+  const connectorID = pointerJackConnectorNormalizer({ name, identifier })
+  if (pointerJackConnectionInstances.has(connectorID)) {
+    const { mouseMove } = pointerJackConnectionInstances.get(connectorID)
+    mouseMove({ event })
+  }
+}
+
+export const handleRootUniverseMouseMove = ({ event }) => {
+  // this is called each time the root universe detectes a mouse move.
+  if (pointerIDToJackMap.size > 0) {
+    if (pointerIDToJackMap.has(event.data.identifier)) {
+      const jack = pointerIDToJackMap.get(event.data.identifier)
+      handleJackPointerMove({ event, jack })
+    }
+  }
 }
 
 const draggingJacks = new Set()
@@ -150,14 +183,22 @@ const connectJacks = ({ sourceJack, targetJack }) => {
   }
 }
 
-function normalizeJackName(name) {
+function normalizeJackName (name) {
   return (`${name}`).toLowerCase()
 }
 
 export const registerJackOnNetwork = ({ jack }) => {
-  const { name: rawJackName, sprite, container, stateMachine } = jack
+  const { name: rawJackName, container } = jack
 
   const name = normalizeJackName(rawJackName)
+
+  container.on('pointerdown', ({ event }) => {
+    console.log('DOWN', { event })
+  })
+
+  container.on('pointerup', ({ event }) => {
+    console.log('UP', { event })
+  })
 
   container.on('jack-awaken', ({ event }) => {
     const { data: { identifier } } = event
@@ -178,6 +219,7 @@ export const registerJackOnNetwork = ({ jack }) => {
     if (draggingJacks.has(jack) === false) {
       draggingJacks.add(jack)
       draggingPointers.add(identifier)
+      handleJackPointerConnect({ event, jack })
     }
   })
   container.on('jack-drag-end', ({ event }) => {
@@ -195,6 +237,7 @@ export const registerJackOnNetwork = ({ jack }) => {
       })
       currentDragTarget = null
     }
+    handleJackPointerDisconnect({ event, jack })
   })
   container.on('jack-drag-cancel', ({ event }) => {
     const { data: { identifier } } = event
@@ -206,6 +249,7 @@ export const registerJackOnNetwork = ({ jack }) => {
     if (currentDragTarget) {
       currentDragTarget = null
     }
+    handleJackPointerDisconnect({ event, jack })
   })
 
   if (registeredJacks.has(name) === true) {

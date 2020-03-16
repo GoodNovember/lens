@@ -4,6 +4,9 @@ import { lerp } from '../Utilities/lerp.js'
 import { makePlate } from '../Parts/makePlate.js'
 import { makeRect } from '../Utilities/makeRect.js'
 import { makeText } from '../Parts/makeText.js'
+import { getGlobalAudioContext } from './getGlobalAudioContext.js'
+
+const context = getGlobalAudioContext()
 
 const iterate = ({ collection, fn, ...rest }) => {
   let index = 0
@@ -17,6 +20,10 @@ const iterate = ({ collection, fn, ...rest }) => {
   }
   return output
 }
+
+const getExactAudioMediaStreamByDeviceId = ({ deviceId: inputDeviceId }) => navigator.mediaDevices.getUserMedia({
+  audio: { deviceId: { exact: inputDeviceId } }
+})
 
 export const makeUserMediaTray = ({
   x,
@@ -68,21 +75,89 @@ export const makeUserMediaTray = ({
       labelElement.y = y
       labelElement.interactive = false
 
-      console.log(item)
-      makeJack({
-        x: x,
-        y: y,
-        themeImage: 'jackConnector',
-        name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`,
-        universe
+      plate.addChild(labelElement)
+      plate.addChild(rect)
+
+      rect.interactive = true
+      renderedItems.add(rect)
+
+      const { deviceId } = item
+      getExactAudioMediaStreamByDeviceId({ deviceId }).then(mediaStream => {
+        const mediaStreamSourceNode = context.createMediaStreamSource(mediaStream)
+        console.log('Success!', mediaStreamSourceNode)
+        return makeJack({
+          x: x,
+          y: y,
+          themeImage: 'jackConnector',
+          name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`,
+          node: mediaStreamSourceNode,
+          onConnect ({ jack, selfJack }) {
+            mediaStreamSourceNode.connect(jack.node)
+          },
+          onDisconnect ({ jack, selfJack }) {
+            try {
+              mediaStreamSourceNode.disconnect(jack.node)
+            } catch (error) {
+              if (error.code === 15) {
+                // console.log('Already Disconnected.')
+              } else {
+                console.log(error)
+              }
+            }
+          },
+          universe
+        })
       }).then(inputJack => {
+        rect.interactive = false
         plate.addChild(labelElement)
-        plate.addChild(rect)
         plate.addChild(inputJack.container)
         renderedItems.add(inputJack.container)
-        renderedItems.add(rect)
         renderedItems.add(labelElement)
+      }).catch(error => {
+        console.error(error)
       })
+
+      // rect.on('pointerdown', () => {
+      //   console.log({ item, action: 'click' })
+      //   const { deviceId } = item
+      //   getExactAudioMediaStreamByDeviceId({ deviceId }).then(mediaStream => {
+      //     const mediaStreamSourceNode = context.createMediaStreamSource(mediaStream)
+      //     console.log('Success!', mediaStreamSourceNode)
+      //     return makeJack({
+      //       x: x,
+      //       y: y,
+      //       themeImage: 'jackConnector',
+      //       name: `[${name}](${item.deviceId + item.groupId})'s ${item.kind} Jack`,
+      //       node: mediaStreamSourceNode,
+      //       onConnect({ jack, selfJack }) {
+      //         mediaStreamSourceNode.connect(jack.node)
+      //       },
+      //       onDisconnect({ jack, selfJack }) {
+      //         try {
+      //           mediaStreamSourceNode.disconnect(jack.node)
+      //         } catch (error) {
+      //           if (error.code === 15) {
+      //             // console.log('Already Disconnected.')
+      //           } else {
+      //             console.log(error)
+      //           }
+      //         }
+      //       },
+      //       universe
+      //     })
+      //   }).then(inputJack => {
+      //     rect.interactive = false
+      //     plate.addChild(labelElement)
+      //     plate.addChild(inputJack.container)
+      //     renderedItems.add(inputJack.container)
+      //     renderedItems.add(labelElement)
+      //   }).catch(error => {
+      //     console.error(error)
+      //   })
+      // })
+
+      renderedItems.add(rect)
+      renderedItems.add(labelElement)
     }
     const renderGroup = (group, groupIndex) => {
       const { groupId, devices } = group

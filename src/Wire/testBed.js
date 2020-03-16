@@ -103,6 +103,14 @@ export const testBed = rootUniverse => {
         x: gridX(5),
         y: gridY(7)
       }
+    },
+    {
+      thing: 'Recorder',
+      ingredients: {
+        name: 'Patient Recorder',
+        x: gridX(6),
+        y: gridY(6)
+      }
     }
   ]
 
@@ -115,7 +123,8 @@ export const testBed = rootUniverse => {
     "[[trigger-a]'s trigger jack] -> [[osc-a]'s start jack]",
     "[[trigger-b]'s trigger jack] -> [[osc-a]'s stop jack]",
     "[[handy-range]'s valuejack] -> [[osc-a]'s detune jack]",
-    "[[gain]'s connector jack] -> [[visi-a]'s connector jack]"
+    "[[gain]'s connector jack] -> [[visi-a]'s connector jack]",
+    "[[gain]'s connector jack] -> [[patient recorder]'s connector jack]"
   ]
 
   batchMake({

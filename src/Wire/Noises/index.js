@@ -8,6 +8,7 @@ import { makeUSBDeviceTray } from './makeUSBDeviceTray.js'
 import { makeUserMediaTray } from './makeUserMediaTray.js'
 import { makeMIDIDeviceTray } from './makeMIDIDeviceTray.js'
 import { makeEnvelope } from './makeEnvelope.js'
+import { makeRecorder } from './makeRecorder.js'
 
 export default {
   makeDestination,
@@ -19,5 +20,6 @@ export default {
   makeUSBDeviceTray,
   makeUserMediaTray,
   makeMIDIDeviceTray,
-  makeEnvelope
+  makeEnvelope,
+  makeRecorder
 }

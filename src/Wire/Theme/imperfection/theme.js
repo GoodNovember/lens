@@ -15,6 +15,7 @@ import jackTrigger from './images/jack-trigger.png'
 import jackZeroToOne from './images/jack-0-1.png'
 import jackNumber from './images/jack-number.png'
 import jackString from './images/jack-string.png'
+import jackRecord from './images/jack-record.png'
 import rope from './images/rope.png'
 
 import './fonts.css'
@@ -33,6 +34,7 @@ const texturePathMap = {
   jackZeroToOne,
   jackNumber,
   jackString,
+  jackRecord,
   rope
 }
 
@@ -44,5 +46,6 @@ export default {
   oscillatorColor: 0x0fff0f,
   gainColor: 0xbabaff,
   destinationColor: 0xffff00,
-  analyserColor: 0xeaffff
+  analyserColor: 0xeaffff,
+  recorderColor: 0xffbbaa
 }

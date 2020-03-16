@@ -34,22 +34,22 @@ export const makeGain = async ({
       themeImage: 'jackConnector',
       universe,
       kind: 'connector',
-      get node() {
+      get node () {
         return gainNode
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node) === false) {
           gainNode.connect(jack.node)
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           gainNode.disconnect(jack.node)
           internalConnections.delete(jack.node)
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         return connectorValidator({ jack, selfJack, ...rest })
       }
     },
@@ -61,13 +61,13 @@ export const makeGain = async ({
       universe,
       kind: 'audioParam',
       paramName: 'gain',
-      get audioParam() {
+      get audioParam () {
         return gainNode.gain
       },
-      get node() {
+      get node () {
         return gainNode
       },
-      onConnect({ jack, selfJack }) {
+      onConnect ({ jack, selfJack }) {
         const { kind } = jack
         if (kind === 'connector') {
           console.log('WOW', jack)
@@ -76,13 +76,17 @@ export const makeGain = async ({
           internalConnections.add(jack.node)
         }
       },
-      onDisconnect({ jack, selfJack }) {
+      onDisconnect ({ jack, selfJack }) {
         if (jack.node && internalConnections.has(jack.node)) {
           internalConnections.delete(jack.node)
-          gainNode.disconnect(jack.node)
+          try {
+            gainNode.disconnect(jack.node)
+          } catch (error) {
+            console.error(error)
+          }
         }
       },
-      connectionValidator({ jack, selfJack, ...rest }) {
+      connectionValidator ({ jack, selfJack, ...rest }) {
         const { kind } = jack
         if (kind === 'zero-to-one') {
           return true

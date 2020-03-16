@@ -228,17 +228,17 @@ export const makeMIDIDeviceTray = ({
         name: `[${name}]'s ${input.id} midiJack`,
         themeImage: 'jackConnector',
         universe,
-        get node () {
+        get node() {
           return commonGainNode
         },
-        connectionValidator ({ jack, selfJack, ...rest }) {
+        connectionValidator({ jack, selfJack, ...rest }) {
           return connectorValidator({ jack, selfJack, ...rest })
         },
-        onConnect ({ jack }) {
+        onConnect({ jack }) {
           console.log('connectJack', jack)
           commonGainNode.connect(jack.node)
         },
-        onDisconnect ({ jack }) {
+        onDisconnect({ jack }) {
           console.log('disconnectJack', jack)
           try {
             commonGainNode.disconnect(jack.node)
